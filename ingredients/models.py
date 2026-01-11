@@ -5,8 +5,16 @@ from django.db import models
 class IngredientDietaryTag(models.Model):
     name = models.CharField(max_length=100)
 
+    def __str__(self):
+        return self.name
+
+
 class IngredientCategory(models.Model):
     name = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.name
+
 
 class BaseIngredient(models.Model):
     class MeasureUnits(models.TextChoices):
@@ -62,6 +70,9 @@ class BaseIngredient(models.Model):
 
 class Ingredient(BaseIngredient):
     quantity = models.FloatField(default=1.0, help_text="Quantity in min_measure_unit")
+
+    def __str__(self):
+        return self.name
 
     def total_nutrient(self, nutrient_name, quantity=None):
         """
