@@ -30,3 +30,4 @@ class IngredientAdmin(admin.ModelAdmin):
     list_filter = ('category', 'dietary_tag')
     search_fields = ('name',)
 
+

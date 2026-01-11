@@ -14,6 +14,10 @@ pip install -r requirements.txt - install dependencies
 python manage.py migrate
 python manage.py runserver
 
+python manage.py populate_ingredients
+run this for dummy data
+
+
 edge cases and ideas:
 
 404 - ops someone ate that if trying to access deleted record?
