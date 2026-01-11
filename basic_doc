@@ -1,0 +1,22 @@
+setup:
+
+create a .env file in root healthy_meals
+since you are running a local db, please use db name, user and password that you have access to.
+example:
+DB_NAME=dbname
+DB_USER=dbuser
+DB_PASSWORD=dbpassword
+DB_HOST=127.0.0.1
+DB_PORT=5432
+
+create db with the same creds
+pip install -r requirements.txt - install dependencies
+python manage.py migrate
+python manage.py runserver
+
+edge cases and ideas:
+
+404 - ops someone ate that if trying to access deleted record?
+when deleting a category i want the ingredients to set null and display as uncategorized + add category from edit ingredients but force users to add category at form
+make the nutrients so that it displays 0 only if the user input 0, otherwise it is info not available
+
