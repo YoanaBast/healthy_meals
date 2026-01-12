@@ -21,6 +21,10 @@ run this for dummy data
 edge cases and ideas:
 
 404 - ops someone ate that if trying to access deleted record?
+
 when deleting a category i want the ingredients to set null and display as uncategorized + add category from edit ingredients but force users to add category at form
+
 make the nutrients so that it displays 0 only if the user input 0, otherwise it is info not available
+
+fix the nav menu for mobile
 

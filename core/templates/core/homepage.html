@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Meal Planner - Organize Your Kitchen{% endblock %}
+
+{% block content %}
+<div class="hero">
+    <div class="hero-bg">
+        <img src="{% static 'images/cucumber_tomato.svg' %}" alt="Tomato" class="tomato-image">
+    </div>
+    <div class="hero-text">
+        <h1>Organize Your Kitchen Life</h1>
+        <p>Generate grocery lists from your favorite meals, discover recipes based on ingredients you have, and manage everything in one place.</p>
+    </div>
+</div>
+
+
+<div class="container-home">
+    <div class="tab-nav">
+        <button class="tab-button active" onclick="showTab('grocery-list')">Generate Grocery List</button>
+        <button class="tab-button" onclick="showTab('meal-suggestions')">Meal Suggestions</button>
+        <button class="tab-button" onclick="showTab('manage-recipes')">Manage Recipes</button>
+        <button class="tab-button" onclick="showTab('manage-ingredients')">Manage Ingredients</button>
+    </div>
+</div>
+
+<div class="container-home">
+
+    <!-- All tab contents go here -->
+    <div id="grocery-list" class="tab-content active">
+        <!-- grocery list content -->
+    </div>
+
+    <div id="meal-suggestions" class="tab-content">
+        <!-- meal suggestions content -->
+    </div>
+
+    <div id="manage-recipes" class="tab-content">
+        <!-- manage recipes content -->
+    </div>
+
+    <div id="manage-ingredients" class="tab-content">
+        <!-- manage ingredients content -->
+    </div>
+</div>
+
+{% endblock %}
