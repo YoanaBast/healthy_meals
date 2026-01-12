@@ -36,6 +36,7 @@ PROJECT_APPS = [
     'recipes',
     'ingredients',
     'planner',
+    'core'
 ]
 
 INSTALLED_APPS = [

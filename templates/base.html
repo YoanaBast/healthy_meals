@@ -1,0 +1,64 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Meal Planner{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}"></head>
+<body>
+    <header>
+        <nav class="container">
+            <div class="logo"> Meal Planner</div>
+            <ul class="nav-links">
+                <li><a href="{% url 'homepage' %}">Home</a></li>
+                <li><a href="#about">About</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        {% block content %}
+        {% endblock %}
+    </main>
+    <footer class="footer">
+        <div class="container footer-grid">
+            <div>
+                <h4>Meal Planner</h4>
+                <p>Plan meals, manage ingredients, reduce waste.</p>
+            </div>
+
+            <div>
+                <h4>Navigation</h4>
+                <ul>
+                    <li><a href="{% url 'homepage' %}">Home</a></li>
+                    <li><a href="/recipes/">Recipes</a></li>
+                    <li><a href="/ingredients/">Ingredients</a></li>
+                    <li><a href="/planner/">Planner</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h4>Resources</h4>
+                <ul>
+                    <li><a href="#">How it works</a></li>
+                    <li><a href="#">FAQ</a></li>
+                    <li><a href="#">Tips</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h4>Contact</h4>
+                <p>Email: support@mealplanner.com</p>
+                <p>Instagram · Twitter · GitHub</p>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            © 2026 Meal Planner. All rights reserved.
+        </div>
+    </footer>
+
+</body>
+</html>
