@@ -15,12 +15,7 @@
 
 
 <div class="container-home">
-    <div class="tab-nav">
-        <button class="tab-button active" onclick="showTab('grocery-list')">Generate Grocery List</button>
-        <button class="tab-button" onclick="showTab('meal-suggestions')">Meal Suggestions</button>
-        <button class="tab-button" onclick="showTab('manage-recipes')">Manage Recipes</button>
-        <button class="tab-button" onclick="showTab('manage-ingredients')">Manage Ingredients</button>
-    </div>
+    {% include 'tab_nav.html' with active_tab='manage-ingredients' %}
 </div>
 
 <div class="container-home">

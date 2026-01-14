@@ -27,6 +27,7 @@ body {
     display: flex;
     flex-direction: column;
     min-height: 100vh;    /* ensures footer stays at bottom */
+
 }
 
 main {
@@ -50,9 +51,9 @@ main {
 header {
     border-bottom: 1px solid var(--border);
     padding: 1rem 0;
-    position: sticky;
+    position: static;
     top: 0;
-    background: #465946;
+    background:#2F4F3A;
     z-index: 100;
 }
 
@@ -89,7 +90,7 @@ nav {
 /* Hero Section */
 .hero {
     position: relative;
-    min-height: 550px; /* enough space for image */
+    min-height: 450px; /* enough space for image */
     text-align: center;
 }
 
@@ -112,7 +113,7 @@ nav {
 .tomato-image {
     width: 85%;
     object-fit: contain;
-    opacity: 0.2;
+    opacity: 0.5;
     transform: translateX(-5%); /* move a bit left */
 }
 /* Hide image on mobile */
@@ -142,7 +143,6 @@ nav {
 .container-home {
     position: relative;
     z-index: 2; /* above hero image */
-    margin-top: -90px; /* pull it up over hero */
     max-width: 1200px;
     margin-left: auto;
     margin-right: auto;
@@ -158,7 +158,7 @@ nav {
 
 .tab-button {
     padding: 0.75rem 1.5rem;
-    background: #465946;
+    background: #2F4F3A;
     border: 1px solid var(--border);
     color: #B1BFA3;
     cursor: pointer;
@@ -442,27 +442,22 @@ nav {
         .modal-overlay {
             display: none;
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
+            inset: 0;
+            background: rgba(0,0,0,0.6);
+            overflow-y: auto;      /* allow scrolling if modal is tall */
+            padding: 2rem 1rem;    /* top/bottom space */
+            z-index: 2000;
         }
 
         .modal-content {
             background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: 0.75rem;
-            padding: 2rem;
-            max-width: 600px;
-            width: 90%;
-            max-height: 90vh;
-            overflow-y: auto;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            width: 100%;
+            max-width: 400px;
+            margin: 2rem auto;     /* center horizontally, push from top */
+            box-sizing: border-box;
         }
-
         .modal-header {
             display: flex;
             justify-content: space-between;
@@ -544,7 +539,7 @@ nav {
 .footer {
     position: relative; /* allows z-index to take effect */
     z-index: 3;         /* above hero-bg */
-    background: #465946; /* solid color */
+    background: #2F4F3A; /* solid color */
     border-top: 1px solid var(--border);
     padding: 3rem 0 1rem;
     margin-top: 4rem;
@@ -578,4 +573,82 @@ nav {
     margin-top: 2rem;
     font-size: 0.75rem;
     color: var(--text-secondary);
+}
+
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0; /* top/right/bottom/left 0 */
+  background: rgba(0,0,0,0.6);
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-overlay:target {
+  display: flex; /* show when URL hash matches */
+}
+
+.modal-content {
+  background: var(--bg-secondary);
+  padding: 2rem;
+  border-radius: 0.5rem;
+  max-width: 500px;
+  width: 90%;
+  position: relative;
+}
+
+.close-button {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  text-decoration: none;
+  font-size: 1.5rem;
+  color: var(--text-secondary);
+}
+
+body:has(.modal-overlay:target) {
+/* block scrolling when modal ppop-up is open */
+    overflow: hidden;
+    height: 100%;
+}
+
+@media (max-width: 768px) {
+/* collapses the table for add-ingredients on mobile*/
+
+    .tab-nav {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+    .tab-button {
+        flex: 1 1 45%; /* two per row */
+        font-size: 0.8rem;
+    }
+}
+@media (max-width: 768px) {
+/* settings for the table on mobile */
+
+    .data-table {
+        display: block;
+        overflow-x: auto;
+        width: 100%;
+    }
+    .data-table thead, .data-table tbody, .data-table tr, .data-table th, .data-table td {
+        display: block;
+    }
+    .data-table tr {
+        margin-bottom: 1rem;
+    }
+    .data-table td {
+        text-align: right;
+        padding-left: 50%;
+        position: relative;
+    }
+    .data-table td::before {
+        content: attr(data-label);
+        position: absolute;
+        left: 1rem;
+        width: 45%;
+        text-align: left;
+        font-weight: 600;
+    }
 }
