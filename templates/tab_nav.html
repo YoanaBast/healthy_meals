@@ -1,0 +1,6 @@
+<div class="tab-nav">
+    <button class="tab-button" onclick="showTab('grocery-list')">Generate Grocery List</button>
+    <button class="tab-button" onclick="showTab('meal-suggestions')">Meal Suggestions</button>
+    <button class="tab-button" onclick="showTab('manage-recipes')">Manage Recipes</button>
+    <button class="tab-button {% if active_tab == 'manage-ingredients' %}active{% endif %}" onclick="showTab('manage-ingredients')">Manage Ingredients</button>
+</div>

@@ -1,3 +1,4 @@
 from django.shortcuts import render
 
-# Create your views here.
+def manage_ingredients(request):
+    return render(request, 'ingredients/manage_ingredients.html')
