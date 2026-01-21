@@ -1,10 +1,147 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title!</title>
-</head>
-<body>
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Manage Ingredients{% endblock %}
 
-</body>
-</html>
+{% block content %}
+
+<div class="container-home">
+    <!-- Tabs -->
+{% include 'tab_nav.html' with active_tab='manage-ingredients' %}
+
+
+    <!-- MANAGE INGREDIENTS (ONLY ONCE) -->
+    <div id="manage-ingredients" class="tab-content active">
+
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+            <div>
+                <h2 class="section-title" style="margin-bottom: 0.5rem;">Manage Ingredients</h2>
+                <p class="section-description" style="margin-bottom: 0;">
+                    Manage your ingredient database and track availability.
+                </p>
+            </div>
+
+            <a href="#addIngredientModal" class="btn">Add New Recipe</a>
+
+            <!-- Modal -->
+            <div id="addIngredientModal" class="modal-overlay">
+              <div class="modal-content">
+                <h3 class="modal-title">Add Ingredient</h3>
+                <a href="#" class="close-button">&times;</a>
+                <form>
+                    <div class="form-group">
+                        <label class="form-label" for="ingredientName">Ingredient Name</label>
+                        <input type="text" id="ingredientName" class="form-input" placeholder="Enter ingredient name">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="ingredientCategory">Category</label>
+                        <select id="ingredientCategory" class="form-select">
+                            <option>Protein</option>
+                            <option>Vegetables</option>
+                            <option>Fruits</option>
+                            <option>Grains</option>
+                            <option>Dairy</option>
+                            <option>Spices</option>
+                            <option>Condiments</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="unit">Unit of Measurement</label>
+                        <select id="unit" class="form-select">
+                            <option>g</option>
+                            <option>kg</option>
+                            <option>ml</option>
+                            <option>L</option>
+                            <option>units</option>
+                            <option>tbsp</option>
+                            <option>tsp</option>
+                            <option>cups</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="status">Status</label>
+                        <select id="status" class="form-select">
+                            <option>In Stock</option>
+                            <option>Low Stock</option>
+                            <option>Out of Stock</option>
+                        </select>
+                    </div>
+                    <div style="display: flex; gap: 1rem;">
+                        <button type="submit" class="btn">Save Ingredient</button>
+                        <a href="{% url 'create_ingredient_more' %}" class="btn btn-secondary">More...</a>
+                        <a href="{% url 'manage_ingredients' %}" class="btn btn-secondary">Cancel</a>
+                    </div>
+                </form>
+              </div>
+            </div>
+        </div>
+
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Ingredient Name</th>
+                    <th>Category</th>
+                    <th>Unit</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td data-label="Ingredient Name"> Chicken Breast</td>
+                    <td data-label="Category"> Protein</td>
+                    <td>kg</td>
+                    <td><span class="badge" style="background:#16a34a;color:white;">In Stock</span></td>
+                    <td>
+                        <button class="btn btn-secondary btn-small">Edit</button>
+                        <button class="btn btn-danger btn-small">Delete</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td data-label="Ingredient Name"> Tomatoes</td>
+                    <td data-label="Category"> Vegetables</td>
+                    <td>kg</td>
+                    <td><span class="badge" style="background:#16a34a;color:white;">In Stock</span></td>
+                    <td>
+                        <button class="btn btn-secondary btn-small">Edit</button>
+                        <button class="btn btn-danger btn-small">Delete</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td data-label="Ingredient Name"> Spaghetti Pasta</td>
+                    <td data-label="Category"> Grains</td>
+                    <td>g</td>
+                    <td><span class="badge" style="background:#dc2626;color:white;">Out of Stock</span></td>
+                    <td>
+                        <button class="btn btn-secondary btn-small">Edit</button>
+                        <button class="btn btn-danger btn-small">Delete</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td data-label="Ingredient Name"> Parmesan Cheese</td>
+                    <td data-label="Category"> Dairy</td>
+                    <td>g</td>
+                    <td><span class="badge" style="background:#16a34a;color:white;">In Stock</span></td>
+                    <td>
+                        <button class="btn btn-secondary btn-small">Edit</button>
+                        <button class="btn btn-danger btn-small">Delete</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td data-label="Ingredient Name"> Bell Peppers</td>
+                    <td data-label="Category"> Vegetables</td>
+                    <td>units</td>
+                    <td><span class="badge" style="background:#eab308;color:black;">Low Stock</span></td>
+                    <td>
+                        <button class="btn btn-secondary btn-small">Edit</button>
+                        <button class="btn btn-danger btn-small">Delete</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+
+
+    </div>
+</div>
+
+{% endblock %}
