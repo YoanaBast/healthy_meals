@@ -166,18 +166,21 @@ nav {
     font-size: 0.875rem;
     font-weight: 500;
     transition: all 0.2s;
+    text-decoration: none;
 }
 
+/* hover */
 .tab-button:hover {
     background: var(--bg-tertiary);
     color: var(--text-primary);
 }
 
 .tab-button.active {
-    background: var(--accent);
-    color: var(--bg-primary);
-    border-color: var(--accent);
+    background: #b4f7c1; /* lighter shade */
+    color: #000;
+    border-color: #b4f7c1;
 }
+
 
 /* Tab Content */
 .tab-content {
@@ -185,6 +188,13 @@ nav {
     padding: 2rem 0;
 }
 
+.tab-content:target {
+    display: block;
+}
+
+.tab-content:first-of-type {
+    display: block;
+}
 .tab-content.active {
     display: block;
 }
@@ -650,5 +660,31 @@ body:has(.modal-overlay:target) {
         width: 45%;
         text-align: left;
         font-weight: 600;
+    }
+}
+
+/* more create ingredients */
+
+.ingredient-form {
+    padding-top: 50px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+}
+
+.form-actions {
+    grid-column: 1 / -1;
+}
+
+
+@media (max-width: 900px) {
+    .ingredient-form {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 600px) {
+    .ingredient-form {
+        grid-template-columns: 1fr;
     }
 }

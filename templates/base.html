@@ -5,15 +5,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Meal Planner{% endblock %}</title>
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}"></head>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+
 <body>
     <header>
         <nav class="container">
             <div class="logo"> Meal Planner</div>
             <ul class="nav-links">
                 <li><a href="{% url 'homepage' %}">Home</a></li>
-                <li><a href="#about">About</a></li>
-                <li><a href="#contact">Contact</a></li>
+                <li><a href="{% url 'homepage' %}">About</a></li>
+                <li><a href="{% url 'homepage' %}">Contact</a></li>
             </ul>
         </nav>
     </header>

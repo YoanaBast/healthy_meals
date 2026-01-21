@@ -1,21 +1,13 @@
 {% extends 'base.html' %}
 {% load static %}
-{% block title %}Meal Planner - Organize Your Kitchen{% endblock %}
+{% block title %}Manage Ingredients{% endblock %}
 
 {% block content %}
 
 <div class="container-home">
-
     <!-- Tabs -->
 {% include 'tab_nav.html' with active_tab='manage-ingredients' %}
 
-
-    <!-- Other tabs -->
-    <div id="grocery-list" class="tab-content"></div>
-
-    <div id="meal-suggestions" class="tab-content"></div>
-
-    <div id="manage-recipes" class="tab-content"></div>
 
     <!-- MANAGE INGREDIENTS (ONLY ONCE) -->
     <div id="manage-ingredients" class="tab-content active">
@@ -75,7 +67,8 @@
                     </div>
                     <div style="display: flex; gap: 1rem;">
                         <button type="submit" class="btn">Save Ingredient</button>
-                        <button type="button" class="btn btn-secondary">Cancel</button>
+                        <a href="{% url 'create_ingredient_more' %}" class="btn btn-secondary">More...</a>
+                        <a href="{% url 'manage_ingredients' %}" class="btn btn-secondary">Cancel</a>
                     </div>
                 </form>
               </div>
