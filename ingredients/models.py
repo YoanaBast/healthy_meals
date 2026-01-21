@@ -113,7 +113,7 @@ class Ingredient(models.Model):
     def total_nutrients(self, unit):
 
         """
-        :return: {kcal: 123, protein:28, fat: 'Info not available', zinc: 8}
+        return: {kcal: 123, protein:28, fat: 'Info not available', zinc: 8}
         """
         return {
             n: self.scaled_nutrient(n, unit=unit)
