@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Manage Ingredients{% endblock %}
+
+{% block content %}
+
+<div class="container-home">
+
+
+<form class="ingredient-form">
+
+    <div class="form-group">
+        <label class="form-label">Ingredient Name</label>
+        <input type="text" class="form-input" placeholder="Chicken breast">
+    </div>
+
+    <div class="form-group">
+        <label class="form-label">Category</label>
+        <select class="form-select">
+            <option>Protein</option>
+            <option>Vegetables</option>
+            <option>Fruits</option>
+            <option>Grains</option>
+            <option>Dairy</option>
+            <option>Spices</option>
+            <option>Condiments</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label class="form-label">Base Quantity</label>
+        <input type="number" class="form-input" placeholder="100">
+    </div>
+
+    <div class="form-group">
+        <label class="form-label">Unit</label>
+        <select class="form-select">
+            <option>g</option>
+            <option>kg</option>
+            <option>ml</option>
+            <option>l</option>
+            <option>pc</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label class="form-label">Calories (kcal)</label>
+        <input type="number" class="form-input" placeholder="165">
+    </div>
+
+    <div class="form-group">
+        <label class="form-label">Protein (g)</label>
+        <input type="number" class="form-input" placeholder="31">
+    </div>
+
+    <div class="form-group">
+        <label class="form-label">Carbs (g)</label>
+        <input type="number" class="form-input" placeholder="0">
+    </div>
+
+    <div class="form-group">
+        <label class="form-label">Fat (g)</label>
+        <input type="number" class="form-input" placeholder="3.6">
+    </div>
+
+    <div class="form-group">
+        <label class="form-label">Fiber (g)</label>
+        <input type="number" class="form-input" placeholder="0">
+    </div>
+
+    <div class="form-group">
+        <label class="form-label">Sugar (g)</label>
+        <input type="number" class="form-input" placeholder="0">
+    </div>
+
+    <div class="form-group">
+        <label class="form-label">Salt (g)</label>
+        <input type="number" class="form-input" placeholder="0.1">
+    </div>
+
+    <div class="form-group">
+        <label class="form-label">Cholesterol (mg)</label>
+        <input type="number" class="form-input" placeholder="85">
+    </div>
+
+    <div class="form-actions">
+        <button type="submit" class="btn">Save Ingredient</button>
+        <a href="{% url 'manage_ingredients' %}" class="btn btn-secondary">Back</a>
+    </div>
+
+</form>
+
+
+    </div>
+
+
+{% endblock %}
