@@ -90,38 +90,39 @@ nav {
 /* Hero Section */
 .hero {
     position: relative;
-    min-height: 450px; /* enough space for image */
     text-align: center;
+    padding: 4rem 2rem;
+    min-height: 450px;
+    overflow: hidden;
+}
+
+.hero-text {
+    position: relative;
+    z-index: 2; /* above image */
+
 }
 
 .hero-bg {
     position: absolute;
-    top: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 85%;
-    z-index: 0;
-}
-
-
-.hero-text {
-    position: relative;
-    z-index: 1;
-    top: 100px; /* moves text down from top of hero */
-}
-
-.tomato-image {
-    width: 85%;
-    object-fit: contain;
+    top: 65%;        /* center vertically */
+    left: 47%;       /* center horizontally */
+    transform: translate(-50%, -50%);
+    width: 80%;      /* scale relative to hero container */
+    max-width: 1000px;
+    height: auto;
     opacity: 0.5;
-    transform: translateX(-5%); /* move a bit left */
+    z-index: 1;      /* behind text */
+    pointer-events: none; /* so text remains clickable */
 }
+
 /* Hide image on mobile */
 @media (max-width: 768px) {
     .hero-bg {
         display: none;
     }
 }
+
+
 
 .hero h1 {
     font-size: 3.5rem;
@@ -147,6 +148,7 @@ nav {
     margin-left: auto;
     margin-right: auto;
 }
+
 /* Tab Navigation */
 .tab-nav {
     display: flex;
