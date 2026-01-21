@@ -24,7 +24,7 @@ class Recipe(models.Model):
 
         total = {}
 
-        for ri in self.recipe_ingredients.all():
+        for ri in self.recipe_ingredient.all():
             ing = ri.ingredient
             qty = ri.quantity
             unit = ri.unit
@@ -32,25 +32,19 @@ class Recipe(models.Model):
             ing_totals = ing.total_nutrients(unit=unit)
 
             for nutrient, value in ing_totals.items():
-                if value == 'Info not available':
-                    continue
                 total[nutrient] = total.get(nutrient, 0) + value
 
-        # Ensure all nutrients appear
-        all_nutrients = set().union(*(ri.ingredient.NUTRIENTS for ri in self.recipe_ingredients.all()))
-        return {n: total.get(n, 'Info not available') for n in all_nutrients}
+        return total
 
 
     @property
     def quantity_ingredients(self):
-        ...
-
-
+        return {ri.ingredient: (ri.quantity, ri.unit) for ri in self.recipe_ingredients.all()}
 
 
 class RecipeIngredient(models.Model):
 
-    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE, related_name='recipe_ingredients')
+    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE, related_name='recipe_ingredient')
     ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
 
     quantity = models.FloatField()

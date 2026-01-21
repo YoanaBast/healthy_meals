@@ -115,9 +115,7 @@ class Ingredient(models.Model):
         """
         :return: {kcal: 123, protein:28, fat: 'Info not available', zinc: 8}
         """
-
         return {
-            n: (v if v is not None else 'Info not available')
-            for n, v in ((n, self.scaled_nutrient(n, unit=unit)) for n in self.NUTRIENTS)
+            n: self.scaled_nutrient(n, unit=unit)
+            for n in self.NUTRIENTS
         }
-
