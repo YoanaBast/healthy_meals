@@ -1,49 +1,54 @@
 from django.db import models
 
-from ingredients.models import Ingredient
+from ingredients.models import IngredientMeasurementUnit, Ingredient
 
 
 # Create your models here.
+
+
 class Recipe(models.Model):
+
     name = models.CharField(max_length=200)
     cooking_time = models.TimeField(null=True, blank=True)
     servings = models.PositiveIntegerField(default=1)
     ingredients = models.ManyToManyField(Ingredient, through='RecipeIngredient', related_name='recipes')
 
+
     @property
     def nutrients(self):
+
         """
-        Returns a dict of total nutrients for the recipe using Ingredient.total_nutrients
+        Returns a dict of total nutrients for the recipe.
+        Scales each ingredient by its quantity and unit.
         """
+
         total = {}
 
-        for ri in self.recipe_ingredients.all():
+        for ri in self.recipe_ingredient.all():
             ing = ri.ingredient
             qty = ri.quantity
-            ing_totals = ing.total_nutrients  # existing property
+            unit = ri.unit
+
+            ing_totals = ing.total_nutrients(unit=unit)
 
             for nutrient, value in ing_totals.items():
-                if value == 'Info not available':
-                    continue
-                # Scale by quantity in the recipe
-                total[nutrient] = total.get(nutrient, 0) + ing.total_nutrient(nutrient, qty)
+                total[nutrient] = total.get(nutrient, 0) + value
 
-        # Fill missing nutrients with 'Info not available'
-        all_nutrients = set().union(*(ri.ingredient.total_nutrients.keys() for ri in self.recipe_ingredients.all()))
-        return {n: total.get(n, 'Info not available') for n in all_nutrients}
+        return total
+
 
     @property
     def quantity_ingredients(self):
-        ...
-
+        return {ri.ingredient: (ri.quantity, ri.unit) for ri in self.recipe_ingredients.all()}
 
 
 class RecipeIngredient(models.Model):
-    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE, related_name='recipe_ingredients')
+
+    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE, related_name='recipe_ingredient')
     ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
 
     quantity = models.FloatField()
-    unit = models.CharField(max_length=10, choices=Ingredient.MeasureUnits.choices)
+    unit = models.CharField(max_length=10, choices=IngredientMeasurementUnit.MeasureUnits.choices)
 
 
     class Meta:

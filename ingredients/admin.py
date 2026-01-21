@@ -21,7 +21,6 @@ class IngredientAdmin(admin.ModelAdmin):
     list_display = (
         'name',
         'category',
-        'min_measure_unit',
         'base_quantity_kcal',
         'base_quantity_protein',
         'base_quantity_carbs',

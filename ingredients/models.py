@@ -2,21 +2,47 @@ from django.db import models
 
 # Create your models here.
 
+
 class IngredientDietaryTag(models.Model):
-    name = models.CharField(max_length=100)
+
+    """
+    INGREDIENT DIETARY TAG
+    ex: Vegan
+    """
+
+    name = models.CharField(max_length=100, unique=True)
+
 
     def __str__(self):
         return self.name
+
+
 
 
 class IngredientCategory(models.Model):
-    name = models.CharField(max_length=100)
+
+    """
+    INGREDIENT CATEGORY
+    ex: Vegetables
+    """
+
+    name = models.CharField(max_length=100, unique=True)
+
 
     def __str__(self):
         return self.name
 
 
-class BaseIngredient(models.Model):
+
+
+class IngredientMeasurementUnit(models.Model):
+
+    """
+    INGREDIENT MEASUREMENT UNIT
+
+    allows ingredients to have multiple measurement units - like grams and cups
+    """
+
     class MeasureUnits(models.TextChoices):
         GRAM = 'g', 'Gram'
         KILOGRAM = 'kg', 'Kilogram'
@@ -28,79 +54,68 @@ class BaseIngredient(models.Model):
         CUP = 'cup', 'Cup'
         OUNCE = 'oz', 'Ounce'
 
-    name = models.CharField(max_length=100)
-    min_measure_unit = models.CharField(max_length=10, choices=MeasureUnits.choices)
-    base_quantity = models.FloatField(default=100, help_text="The quantity this nutrition info is based on (100 g, 1 pc, etc.)")
+    ingredient = models.ForeignKey('Ingredient', on_delete=models.CASCADE, related_name='measurement_units')
+    unit = models.CharField(max_length=10, choices=MeasureUnits.choices)
+    conversion_to_base = models.FloatField(help_text="How much of this unit equals the base_quantity")
 
-    category = models.ForeignKey(IngredientCategory, null=True, on_delete=models.SET_NULL, related_name='ingredient')
-    # I want blank to be false to discourage users from creating lazy ingredients, this is intentional
-
-    dietary_tag = models.ManyToManyField(IngredientDietaryTag, blank=True,  related_name='ingredient')
-
-    base_quantity_kcal = models.FloatField(blank=True, null=True)
-    base_quantity_protein = models.FloatField(blank=True, null=True)
-    base_quantity_carbs = models.FloatField(blank=True, null=True)
-    base_quantity_fat = models.FloatField(blank=True, null=True)
-    base_quantity_fiber = models.FloatField(blank=True, null=True)
-    base_quantity_sugar = models.FloatField(blank=True, null=True)
-    base_quantity_salt = models.FloatField(blank=True, null=True)
-    base_quantity_cholesterol = models.FloatField(blank=True, null=True)
-    # Vitamins
-    base_quantity_vitamin_a = models.FloatField(blank=True, null=True)
-    base_quantity_vitamin_c = models.FloatField(blank=True, null=True)
-    base_quantity_vitamin_d = models.FloatField(blank=True, null=True)
-    base_quantity_vitamin_e = models.FloatField(blank=True, null=True)
-    base_quantity_vitamin_k = models.FloatField(blank=True, null=True)
-    base_quantity_vitamin_b1 = models.FloatField(blank=True, null=True)
-    base_quantity_vitamin_b2 = models.FloatField(blank=True, null=True)
-    base_quantity_vitamin_b3 = models.FloatField(blank=True, null=True)
-    base_quantity_vitamin_b6 = models.FloatField(blank=True, null=True)
-    base_quantity_vitamin_b12 = models.FloatField(blank=True, null=True)
-    base_quantity_folate = models.FloatField(blank=True, null=True)
-    # Minerals
-    base_quantity_calcium = models.FloatField(blank=True, null=True)
-    base_quantity_iron = models.FloatField(blank=True, null=True)
-    base_quantity_magnesium = models.FloatField(blank=True, null=True)
-    base_quantity_potassium = models.FloatField(blank=True, null=True)
-    base_quantity_zinc = models.FloatField(blank=True, null=True)
-
-    class Meta:
-        abstract = True
-
-
-class Ingredient(BaseIngredient):
-    quantity = models.FloatField(default=1.0, help_text="Quantity in min_measure_unit")
 
     def __str__(self):
-        return self.name
+        return f"{self.ingredient.name} - {self.unit}"
 
-    def total_nutrient(self, nutrient_name, quantity=None):
+
+
+
+class Ingredient(models.Model):
+
+    NUTRIENTS = [
+        'kcal', 'protein', 'carbs', 'fat', 'fiber', 'sugar', 'salt', 'cholesterol',
+        'vitamin_a', 'vitamin_c', 'vitamin_d', 'vitamin_e', 'vitamin_k',
+        'vitamin_b1', 'vitamin_b2', 'vitamin_b3', 'vitamin_b6', 'vitamin_b12',
+        'folate', 'calcium', 'iron', 'magnesium', 'potassium', 'zinc'
+    ]
+
+    name = models.CharField(max_length=100)
+
+    default_unit = models.ForeignKey('IngredientMeasurementUnit', null=True, blank=True, on_delete=models.SET_NULL, related_name='+')
+    # related_name='+' tells Django not to create a reverse relation from the target model back to this one
+
+    base_quantity = models.FloatField(default=100, help_text="The quantity the NUTRIENTS are based on in default_unit (100 g, 1 pc, etc.)")
+
+    category = models.ForeignKey(IngredientCategory, null=True, on_delete=models.SET_NULL, related_name='ingredient')
+    # discourage users from creating lazy ingredients, but if deleting a category, keep the ingredients
+
+    dietary_tag = models.ManyToManyField(IngredientDietaryTag, blank=True,  related_name='ingredient')
+    #ManyToManyField does not use null=True because the relation is stored in a separate join table
+
+    for nutrient in NUTRIENTS:
+        locals()[f'base_quantity_{nutrient}'] = models.FloatField(blank=True, null=True)
+    #dynamically creates a model field for each nutrient in the NUTRIENTS list
+
+
+    def scaled_nutrient(self, nutrient_name, quantity=None, unit=None):
+
         """
-        Returns scaled nutrient value.
-        - If user entered None → returns None
-        - If user entered 0 → returns 0
+        Returns the scaled and converted value for one nutrient (like kcal, protein).
         """
-        base_value = getattr(self, f'base_quantity_{nutrient_name}')
-        if base_value is None:
+
+        base_nutrient_value = getattr(self, f'base_quantity_{nutrient_name}', None)
+
+        if base_nutrient_value is None or quantity is None:
             return None
-        qty = quantity if quantity is not None else self.quantity
-        return base_value * (qty / self.base_quantity)
 
-    @property
-    def total_nutrients(self):
+        conversion = self.default_unit.conversion_to_base if self.default_unit else 1
+
+        qty_in_base = quantity * conversion / self.base_quantity
+
+        return round(base_nutrient_value * qty_in_base, 2)
+
+
+    def total_nutrients(self, unit):
+
         """
-        returns a dict of all nutrients that are filled in (more than 0)
         :return: {kcal: 123, protein:28, fat: 'Info not available', zinc: 8}
         """
-        nutrients = [
-            'kcal', 'protein', 'carbs', 'fat', 'fiber', 'sugar', 'salt', 'cholesterol',
-            'vitamin_a', 'vitamin_c', 'vitamin_d', 'vitamin_e', 'vitamin_k',
-            'vitamin_b1', 'vitamin_b2', 'vitamin_b3', 'vitamin_b6', 'vitamin_b12',
-            'folate', 'calcium', 'iron', 'magnesium', 'potassium', 'zinc'
-        ]
         return {
-            n: (v if v is not None else 'Info not available')
-            for n, v in ((n, self.total_nutrient(n)) for n in nutrients)
+            n: self.scaled_nutrient(n, unit=unit)
+            for n in self.NUTRIENTS
         }
-
-
