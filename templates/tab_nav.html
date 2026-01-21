@@ -1,6 +1,6 @@
 <div class="tab-nav">
-    <a href="{% url 'homepage' %}" class="tab-button {% if request.resolver_match.url_name == 'homepage' %}active{% endif %}">Grocery List</a>
-    <a href="{% url 'homepage' %}" class="tab-button {% if request.resolver_match.url_name == 'homepage' %}active{% endif %}">Meal Suggestions</a>
-    <a href="{% url 'homepage' %}" class="tab-button {% if request.resolver_match.url_name == 'homepage' %}active{% endif %}">Manage Recipes</a>
+    <a href="{% url 'homepage' %}" class="tab-button {% if request.resolver_match.url_name == 'homepage' %}active{% endif %}">Generate Grocery List</a>
+    <a href="{% url 'homepage' %}" class="tab-button {% if request.resolver_match.url_name == 'homepage' %}active{% endif %}">Get Meal Suggestions</a>
+    <a href="{% url 'manage_recipes' %}" class="tab-button {% if request.resolver_match.url_name == 'manage_recipes' %}active{% endif %}">Manage Recipes</a>
     <a href="{% url 'manage_ingredients' %}" class="tab-button {% if request.resolver_match.url_name == 'manage_ingredients' %}active{% endif %}">Manage Ingredients</a>
 </div>
