@@ -15,6 +15,9 @@ python manage.py migrate
 python manage.py runserver
 
 python manage.py populate_ingredients
+python manage.py populate_recipes
+
+
 run this for dummy data
 
 
@@ -42,3 +45,5 @@ make the 2026 function to take current year
 come up with a better name then meal planner, some mix of grocery and recipe/track
 
 clean up css and move to different files(?)
+
+add unique=true where applicable, make sure measure units are transformed dynamically
