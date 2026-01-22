@@ -9,8 +9,10 @@ DB_PASSWORD=dbpassword
 DB_HOST=127.0.0.1
 DB_PORT=5432
 
+detup venv??
 create db with the same creds
 pip install -r requirements.txt - install dependencies
+python manage.py makemigrations
 python manage.py migrate
 python manage.py runserver
 
@@ -19,6 +21,9 @@ python manage.py populate_recipes
 
 
 run this for dummy data
+
+lazy setup
+python lazy_setup.py
 
 
 edge cases and ideas:

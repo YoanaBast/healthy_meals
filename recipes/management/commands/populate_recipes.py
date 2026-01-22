@@ -1,38 +1,47 @@
 from django.core.management.base import BaseCommand
-from ingredients.models import Ingredient
+from ingredients.models import Ingredient, IngredientMeasurementUnit
 from recipes.models import Recipe, RecipeIngredient
 
 class Command(BaseCommand):
     help = "Populate sample recipes using existing ingredients"
 
     def handle(self, *args, **kwargs):
-        # Get ingredients by name
-        olive_oil = Ingredient.objects.get(name='Olive Oil')
-        cinnamon = Ingredient.objects.get(name='Cinnamon')
-        sugar = Ingredient.objects.get(name='Sugar')
-        butter = Ingredient.objects.get(name='Butter')
-        flour = Ingredient.objects.get(name='Flour')
-        milk = Ingredient.objects.get(name='Milk')
-        egg = Ingredient.objects.get(name='Egg')
+        # Fetch ingredients
+        ingredients = {i.name: i for i in Ingredient.objects.filter(
+            name__in=['Olive Oil', 'Cinnamon', 'Sugar', 'Butter', 'Flour', 'Milk', 'Egg']
+        )}
+
+        # Helper to create RecipeIngredient
+        def add_ingredient(recipe, name, qty, unit_code):
+            ing = ingredients[name]
+            # Use unit choices from IngredientMeasurementUnit
+            if unit_code not in dict(IngredientMeasurementUnit.MeasureUnits.choices):
+                self.stdout.write(self.style.WARNING(f"Unit '{unit_code}' not in choices for {name}, defaulting to 'g'"))
+                unit_code = 'g'
+            RecipeIngredient.objects.update_or_create(
+                recipe=recipe,
+                ingredient=ing,
+                defaults={'quantity': qty, 'unit': unit_code}
+            )
 
         # Recipe 1: Pancake
         pancake, _ = Recipe.objects.get_or_create(name='Pancake')
-        RecipeIngredient.objects.get_or_create(recipe=pancake, ingredient=flour, quantity=100, unit='g')
-        RecipeIngredient.objects.get_or_create(recipe=pancake, ingredient=milk, quantity=1, unit='cup')
-        RecipeIngredient.objects.get_or_create(recipe=pancake, ingredient=egg, quantity=1, unit='pc')
-        RecipeIngredient.objects.get_or_create(recipe=pancake, ingredient=sugar, quantity=10, unit='g')
-        RecipeIngredient.objects.get_or_create(recipe=pancake, ingredient=butter, quantity=1, unit='tbsp')
+        add_ingredient(pancake, 'Flour', 100, 'g')
+        add_ingredient(pancake, 'Milk', 1, 'cup')
+        add_ingredient(pancake, 'Egg', 1, 'pc')
+        add_ingredient(pancake, 'Sugar', 10, 'g')
+        add_ingredient(pancake, 'Butter', 1, 'tbsp')
 
         # Recipe 2: Cinnamon Sugar Toast
         toast, _ = Recipe.objects.get_or_create(name='Cinnamon Sugar Toast')
-        RecipeIngredient.objects.get_or_create(recipe=toast, ingredient=butter, quantity=1, unit='tbsp')
-        RecipeIngredient.objects.get_or_create(recipe=toast, ingredient=sugar, quantity=5, unit='g')
-        RecipeIngredient.objects.get_or_create(recipe=toast, ingredient=cinnamon, quantity=1, unit='tsp')
+        add_ingredient(toast, 'Butter', 1, 'tbsp')
+        add_ingredient(toast, 'Sugar', 5, 'g')
+        add_ingredient(toast, 'Cinnamon', 1, 'tsp')
 
         # Recipe 3: Buttered Olive Oil Egg
         egg_dish, _ = Recipe.objects.get_or_create(name='Buttered Olive Oil Egg')
-        RecipeIngredient.objects.get_or_create(recipe=egg_dish, ingredient=egg, quantity=2, unit='pc')
-        RecipeIngredient.objects.get_or_create(recipe=egg_dish, ingredient=olive_oil, quantity=1, unit='tbsp')
-        RecipeIngredient.objects.get_or_create(recipe=egg_dish, ingredient=butter, quantity=1, unit='tbsp')
+        add_ingredient(egg_dish, 'Egg', 2, 'pc')
+        add_ingredient(egg_dish, 'Olive Oil', 1, 'tbsp')
+        add_ingredient(egg_dish, 'Butter', 1, 'tbsp')
 
         self.stdout.write(self.style.SUCCESS("Sample recipes created successfully!"))
