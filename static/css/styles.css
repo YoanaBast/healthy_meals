@@ -23,6 +23,7 @@ body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', sans-serif;
     background: var(--bg-primary);
     color: var(--text-primary);
+
     line-height: 1.6;
     display: flex;
     flex-direction: column;
@@ -53,7 +54,7 @@ header {
     padding: 1rem 0;
     position: static;
     top: 0;
-    background:#2F4F3A;
+    background:#089e46;
     z-index: 100;
 }
 
@@ -131,6 +132,11 @@ nav {
     margin-bottom: 1rem;
     line-height: 1.1;
     color: #B1BFA3;
+    text-shadow:
+    1px 1px 1px #004d00,   /* dark green shadow */
+   -1px -1px 1px #004d00,
+    1px -1px 1px #004d00,
+   -1px 1px 1px #004d00;
 }
 
 .hero p {
@@ -159,29 +165,29 @@ nav {
 }
 
 .tab-button {
-    padding: 0.75rem 1.5rem;
-    background: #2F4F3A;
-    border: 1px solid var(--border);
-    color: #B1BFA3;
-    cursor: pointer;
-    border-radius: 0.5rem;
-    font-size: 0.875rem;
-    font-weight: 500;
-    transition: all 0.2s;
+    padding: 0.875rem 1.75rem;   /* match .btn */
+    background: var(--accent);   /* match .btn */
+    color: var(--bg-primary);    /* match .btn text */
     text-decoration: none;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    font-size: 0.875rem;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
 }
 
-/* hover */
 .tab-button:hover {
-    background: var(--bg-tertiary);
-    color: var(--text-primary);
+    background: var(--accent-hover); /* match .btn hover */
+    transform: translateY(-1px);
 }
 
 .tab-button.active {
-    background: #b4f7c1; /* lighter shade */
+    background: #b4f7c1; /* active style */
     color: #000;
     border-color: #b4f7c1;
 }
+
 
 
 /* Tab Content */
@@ -631,10 +637,8 @@ body:has(.modal-overlay:target) {
         flex-wrap: wrap;
         gap: 0.5rem;
     }
-    .tab-button {
-        flex: 1 1 45%; /* two per row */
-        font-size: 0.8rem;
-    }
+
+
 }
 @media (max-width: 768px) {
 /* settings for the table on mobile */
