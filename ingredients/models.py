@@ -57,7 +57,7 @@ class IngredientMeasurementUnit(models.Model):
     ingredient = models.ForeignKey('Ingredient', on_delete=models.CASCADE, related_name='measurement_units')
     unit = models.CharField(max_length=10, choices=MeasureUnits.choices)
     conversion_to_base = models.FloatField(help_text="How much of this unit equals the base_quantity")
-
+    # 1 cup of carrot ≈ 120 g → conversion_to_base = 120
 
     def __str__(self):
         return f"{self.ingredient.name} - {self.unit}"
@@ -76,10 +76,12 @@ class Ingredient(models.Model):
 
     name = models.CharField(max_length=100)
 
-    default_unit = models.ForeignKey('IngredientMeasurementUnit', null=True, blank=True, on_delete=models.SET_NULL, related_name='+')
+    default_unit = models.ForeignKey('IngredientMeasurementUnit', on_delete=models.PROTECT, related_name='+')
     # related_name='+' tells Django not to create a reverse relation from the target model back to this one
+    #the unit that holds the nutrient data for conversions
 
     base_quantity = models.FloatField(default=100, help_text="The quantity the NUTRIENTS are based on in default_unit (100 g, 1 pc, etc.)")
+    #base_quantity = 100 means nutrients are defined per 100g
 
     category = models.ForeignKey(IngredientCategory, null=True, on_delete=models.SET_NULL, related_name='ingredient')
     # discourage users from creating lazy ingredients, but if deleting a category, keep the ingredients
@@ -88,34 +90,24 @@ class Ingredient(models.Model):
     #ManyToManyField does not use null=True because the relation is stored in a separate join table
 
     for nutrient in NUTRIENTS:
-        locals()[f'base_quantity_{nutrient}'] = models.FloatField(blank=True, null=True)
+        locals()[f'base_quantity_{nutrient}'] = models.FloatField(blank=True, default=0)
     #dynamically creates a model field for each nutrient in the NUTRIENTS list
 
 
-    def scaled_nutrient(self, nutrient_name, quantity=None, unit=None):
+    def get_nutrients_dict(self, starting_unit, starting_quantity):
+        nutrients = {}
 
-        """
-        Returns the scaled and converted value for one nutrient (like kcal, protein).
-        """
+        for n in self.NUTRIENTS:
+            nutrient_name = f'base_quantity_{n}'
+            nutrient_base_value = getattr(self, nutrient_name, 0)
 
-        base_nutrient_value = getattr(self, f'base_quantity_{nutrient_name}', None)
+            #convert quantity to base
+            if starting_unit != self.default_unit:
+                quantity_in_base_units = starting_quantity * starting_unit.conversion_to_base
+            else:
+                quantity_in_base_units = starting_quantity
 
-        if base_nutrient_value is None or quantity is None:
-            return None
+            nutrient_in_base_units = nutrient_base_value * quantity_in_base_units / self.base_quantity # calc value in base
+            nutrients[n] = nutrient_in_base_units
 
-        conversion = self.default_unit.conversion_to_base if self.default_unit else 1
-
-        qty_in_base = quantity * conversion / self.base_quantity
-
-        return round(base_nutrient_value * qty_in_base, 2)
-
-
-    def total_nutrients(self, unit):
-
-        """
-        return: {kcal: 123, protein:28, fat: 'Info not available', zinc: 8}
-        """
-        return {
-            n: self.scaled_nutrient(n, unit=unit)
-            for n in self.NUTRIENTS
-        }
+        return nutrients
