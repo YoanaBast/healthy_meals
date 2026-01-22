@@ -76,8 +76,7 @@ class Ingredient(models.Model):
 
     name = models.CharField(max_length=100)
 
-    default_unit = models.ForeignKey('IngredientMeasurementUnit', on_delete=models.PROTECT, related_name='+')
-    # related_name='+' tells Django not to create a reverse relation from the target model back to this one
+    default_unit = models.CharField(max_length=10, choices=IngredientMeasurementUnit.MeasureUnits.choices, default=IngredientMeasurementUnit.MeasureUnits.GRAM)
     #the unit that holds the nutrient data for conversions
 
     base_quantity = models.FloatField(default=100, help_text="The quantity the NUTRIENTS are based on in default_unit (100 g, 1 pc, etc.)")
@@ -90,7 +89,7 @@ class Ingredient(models.Model):
     #ManyToManyField does not use null=True because the relation is stored in a separate join table
 
     for nutrient in NUTRIENTS:
-        locals()[f'base_quantity_{nutrient}'] = models.FloatField(blank=True, default=0)
+        locals()[f'base_quantity_{nutrient}'] = models.FloatField(default=0)
     #dynamically creates a model field for each nutrient in the NUTRIENTS list
 
 
@@ -99,9 +98,12 @@ class Ingredient(models.Model):
 
         for n in self.NUTRIENTS:
             nutrient_name = f'base_quantity_{n}'
-            nutrient_base_value = getattr(self, nutrient_name, 0)
+            nutrient_base_value = getattr(self, nutrient_name, 0) or 0
 
             #convert quantity to base
+            if not self.default_unit:
+                self.default_unit = starting_unit
+
             if starting_unit != self.default_unit:
                 quantity_in_base_units = starting_quantity * starting_unit.conversion_to_base
             else:
