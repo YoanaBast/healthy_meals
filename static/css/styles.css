@@ -23,6 +23,7 @@ body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', sans-serif;
     background: var(--bg-primary);
     color: var(--text-primary);
+
     line-height: 1.6;
     display: flex;
     flex-direction: column;
@@ -51,9 +52,10 @@ main {
 header {
     border-bottom: 1px solid var(--border);
     padding: 1rem 0;
+    margin: 0rem 1;
     position: static;
     top: 0;
-    background:#2F4F3A;
+    background:#089e46;
     z-index: 100;
 }
 
@@ -131,6 +133,11 @@ nav {
     margin-bottom: 1rem;
     line-height: 1.1;
     color: #B1BFA3;
+    text-shadow:
+    1px 1px 1px #004d00,   /* dark green shadow */
+   -1px -1px 1px #004d00,
+    1px -1px 1px #004d00,
+   -1px 1px 1px #004d00;
 }
 
 .hero p {
@@ -149,6 +156,38 @@ nav {
     margin-right: auto;
 }
 
+@media screen and (max-width: 768px) {
+    /* 1. Add breathing room around the entire table */
+    .container-home {
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+
+    /* 2. Style the row 'cards' with better spacing */
+    .data-table tr {
+        margin-bottom: 1.5rem;
+        border: 1px solid #e0e0e0;
+        border-radius: 12px; /* Smoother corners */
+        padding: 8px 0;      /* Vertical padding inside the card */
+        background: #fff;
+    }
+
+    /* 3. Give the cells internal "air" */
+    .data-table td {
+        padding: 12px 16px;  /* Spacing from the card edges */
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    /* 4. Ensure the buttons don't hit the edges */
+    .data-table td[data-label="Actions"] {
+        padding: 16px;
+        margin-top: 5px;
+        border-top: 1px solid #f0f0f0; /* Visual separator for the buttons */
+    }
+}
+
 /* Tab Navigation */
 .tab-nav {
     display: flex;
@@ -157,31 +196,54 @@ nav {
     margin: 3rem 0 2rem;
     flex-wrap: wrap;
 }
-
-.tab-button {
-    padding: 0.75rem 1.5rem;
-    background: #2F4F3A;
-    border: 1px solid var(--border);
-    color: #B1BFA3;
-    cursor: pointer;
-    border-radius: 0.5rem;
-    font-size: 0.875rem;
-    font-weight: 500;
-    transition: all 0.2s;
-    text-decoration: none;
+/* The Parent Wrapper */
+.tab-nav-container {
+    display: flex;
+    flex-direction: column; /* Stacks children vertically */
+    align-items: center;    /* Centers the rows horizontally */
+    margin: 3rem 0 2rem;    /* Your original top/bottom spacing */
+    gap: 0.75rem;           /* Controlled spacing between the two rows */
 }
 
-/* hover */
+/* Shared row styles */
+.tab-nav-upper,
+.tab-nav-lower {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    width: 100%; /* Ensures flex-wrap works correctly within the row */
+}
+
+/* Optional: Make lower buttons slightly distinct */
+.tab-nav-lower {
+    opacity: 0.9;
+}
+
+.tab-button {
+    padding: 0.875rem 1.75rem;   /* match .btn */
+    background: var(--accent);   /* match .btn */
+    color: var(--bg-primary);    /* match .btn text */
+    text-decoration: none;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    font-size: 0.875rem;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
 .tab-button:hover {
-    background: var(--bg-tertiary);
-    color: var(--text-primary);
+    background: var(--accent-hover); /* match .btn hover */
+    transform: translateY(-1px);
 }
 
 .tab-button.active {
-    background: #b4f7c1; /* lighter shade */
+    background: #b4f7c1; /* active style */
     color: #000;
     border-color: #b4f7c1;
 }
+
 
 
 /* Tab Content */
@@ -631,40 +693,68 @@ body:has(.modal-overlay:target) {
         flex-wrap: wrap;
         gap: 0.5rem;
     }
-    .tab-button {
-        flex: 1 1 45%; /* two per row */
-        font-size: 0.8rem;
-    }
-}
-@media (max-width: 768px) {
-/* settings for the table on mobile */
 
-    .data-table {
+
+}
+@media screen and (max-width: 768px) {
+    /* 1. Hide the original header row entirely */
+    .data-table thead {
+        display: none;
+    }
+
+    /* 2. Force table elements to stack */
+    .data-table,
+    .data-table tbody,
+    .data-table tr,
+    .data-table td {
         display: block;
-        overflow-x: auto;
         width: 100%;
     }
-    .data-table thead, .data-table tbody, .data-table tr, .data-table th, .data-table td {
-        display: block;
-    }
+
+    /* 3. Style each row as a 'card' */
     .data-table tr {
-        margin-bottom: 1rem;
+        background-color: transparent; /* Removes the white block */
+        margin-bottom: 1.5rem;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
     }
+
+    /* 4. Layout for each cell */
     .data-table td {
+        background-color: transparent; /* Removes the white block */
         text-align: right;
-        padding-left: 50%;
+        padding: 0.75rem 1rem;
         position: relative;
+        border-bottom: 1px solid #f0f0f0;
+        display: flex;
+        justify-content: space-between; /* Pushes Label to left, Data to right */
+        align-items: center;
     }
+
+    /* 5. Insert the labels from the HTML data-label */
     .data-table td::before {
         content: attr(data-label);
-        position: absolute;
-        left: 1rem;
-        width: 45%;
-        text-align: left;
-        font-weight: 600;
+        font-weight: 700;
+        text-transform: uppercase;
+        font-size: 0.8rem;
+        color: #666;
+    }
+
+    /* 6. Special handling for the Actions (Buttons) row */
+    .data-table td[data-label="Actions"] {
+        justify-content: center; /* Center buttons */
+        background-color: #fafafa;
+        gap: 0.5rem;
+                background-color: transparent; /* Removes the white block */
+
+    }
+
+    .data-table td[data-label="Actions"]::before {
+        display: none; /* Hide the word 'Actions' inside the button cell */
     }
 }
-
 /* more create ingredients */
 
 .ingredient-form {

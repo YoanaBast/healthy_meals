@@ -50,8 +50,9 @@ def create_ingredient(
     category = IngredientCategory.objects.filter(name=category_name).first() if category_name else None
 
     defaults = {'category': category, 'base_quantity': base_quantity}
-    defaults.update({f'base_quantity_{k}': v for k, v in nutrients.items()})
-
+    # sanitize nutrients so None → 0
+    cleaned_nutrients = {f'base_quantity_{k}': (v or 0) for k, v in nutrients.items()}
+    defaults.update(cleaned_nutrients)
     ingredient, created = Ingredient.objects.update_or_create(
         name=name,
         defaults=defaults

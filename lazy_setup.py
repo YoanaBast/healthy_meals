@@ -20,6 +20,7 @@ minimal_setup = [
     "pip install -r requirements.txt",
     "python manage.py makemigrations",
     "python manage.py migrate",
+    "python manage.py collectstatic"
 ]
 
 run_server_cmd = "python manage.py runserver"
