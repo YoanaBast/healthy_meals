@@ -8,8 +8,7 @@
     <!-- Tabs -->
 {% include 'tab_nav.html' with active_tab='manage-ingredients' %}
 
-
-    <!-- MANAGE INGREDIENTS (ONLY ONCE) -->
+    <!-- MANAGE INGREDIENTS -->
     <div id="manage-ingredients" class="tab-content active">
 
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
@@ -35,36 +34,30 @@
                     <div class="form-group">
                         <label class="form-label" for="ingredientCategory">Category</label>
                         <select id="ingredientCategory" class="form-select">
-                            <option>Protein</option>
-                            <option>Vegetables</option>
-                            <option>Fruits</option>
-                            <option>Grains</option>
-                            <option>Dairy</option>
-                            <option>Spices</option>
-                            <option>Condiments</option>
+                        {% for cat in categories %}
+
+                            <option> {{ cat }}</option>
+                        {% empty %}
+                            <option> No available categories </option>
+
+                        {% endfor %}
+
                         </select>
                     </div>
                     <div class="form-group">
                         <label class="form-label" for="unit">Unit of Measurement</label>
                         <select id="unit" class="form-select">
-                            <option>g</option>
-                            <option>kg</option>
-                            <option>ml</option>
-                            <option>L</option>
-                            <option>units</option>
-                            <option>tbsp</option>
-                            <option>tsp</option>
-                            <option>cups</option>
+                        {% for unit in measurment_units %}
+
+                            <option> {{ unit.unit }}</option>
+                        {% empty %}
+                            <option> No available units </option>
+
+                        {% endfor %}
+
                         </select>
                     </div>
-                    <div class="form-group">
-                        <label class="form-label" for="status">Status</label>
-                        <select id="status" class="form-select">
-                            <option>In Stock</option>
-                            <option>Low Stock</option>
-                            <option>Out of Stock</option>
-                        </select>
-                    </div>
+
                     <div style="display: flex; gap: 1rem;">
                         <button type="submit" class="btn">Save Ingredient</button>
                         <a href="{% url 'create_ingredient_more' %}" class="btn btn-secondary">More...</a>
@@ -85,58 +78,28 @@
                     <th>Actions</th>
                 </tr>
             </thead>
-            <tbody>
-                <tr>
-                    <td data-label="Ingredient Name"> Chicken Breast</td>
-                    <td data-label="Category"> Protein</td>
-                    <td>kg</td>
-                    <td><span class="badge" style="background:#16a34a;color:white;">In Stock</span></td>
-                    <td>
-                        <button class="btn btn-secondary btn-small">Edit</button>
-                        <button class="btn btn-danger btn-small">Delete</button>
-                    </td>
-                </tr>
-                <tr>
-                    <td data-label="Ingredient Name"> Tomatoes</td>
-                    <td data-label="Category"> Vegetables</td>
-                    <td>kg</td>
-                    <td><span class="badge" style="background:#16a34a;color:white;">In Stock</span></td>
-                    <td>
-                        <button class="btn btn-secondary btn-small">Edit</button>
-                        <button class="btn btn-danger btn-small">Delete</button>
-                    </td>
-                </tr>
-                <tr>
-                    <td data-label="Ingredient Name"> Spaghetti Pasta</td>
-                    <td data-label="Category"> Grains</td>
-                    <td>g</td>
-                    <td><span class="badge" style="background:#dc2626;color:white;">Out of Stock</span></td>
-                    <td>
-                        <button class="btn btn-secondary btn-small">Edit</button>
-                        <button class="btn btn-danger btn-small">Delete</button>
-                    </td>
-                </tr>
-                <tr>
-                    <td data-label="Ingredient Name"> Parmesan Cheese</td>
-                    <td data-label="Category"> Dairy</td>
-                    <td>g</td>
-                    <td><span class="badge" style="background:#16a34a;color:white;">In Stock</span></td>
-                    <td>
-                        <button class="btn btn-secondary btn-small">Edit</button>
-                        <button class="btn btn-danger btn-small">Delete</button>
-                    </td>
-                </tr>
-                <tr>
-                    <td data-label="Ingredient Name"> Bell Peppers</td>
-                    <td data-label="Category"> Vegetables</td>
-                    <td>units</td>
-                    <td><span class="badge" style="background:#eab308;color:black;">Low Stock</span></td>
-                    <td>
-                        <button class="btn btn-secondary btn-small">Edit</button>
-                        <button class="btn btn-danger btn-small">Delete</button>
-                    </td>
-                </tr>
-            </tbody>
+                <tbody>
+                    {% for ing in ingredients %}
+                    <tr>
+                        <td data-label="Ingredient Name">{{ ing.name }}</td>
+                        <td data-label="Category">{{ ing.category|default:"-" }}</td>
+                        <td data-label="Unit">{{ ing.default_unit }}</td>
+                        <td data-label="Status">
+                            <span class="badge" style="background:#16a34a;color:white;">In Stock</span>
+                        </td>
+                        <td data-label="Actions">
+                            <button class="btn btn-secondary btn-small">Edit</button>
+                            <button class="btn btn-danger btn-small">Delete</button>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" style="text-align: center; padding: 2rem;">
+                            <h2 style="margin: 0;">No ingredients yet...</h2>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
         </table>
 
 
