@@ -5,6 +5,21 @@ from ingredients.models import IngredientMeasurementUnit, Ingredient
 
 # Create your models here.
 
+class RecipeCategory(models.Model):
+
+    """
+    INGREDIENT CATEGORY
+    ex: Vegetables
+    """
+
+    name = models.CharField(max_length=100, unique=True)
+
+
+    def __str__(self):
+        return self.name
+
+
+
 
 class Recipe(models.Model):
 
@@ -12,6 +27,7 @@ class Recipe(models.Model):
     cooking_time = models.TimeField(null=True, blank=True)
     servings = models.PositiveIntegerField(default=1)
     ingredients = models.ManyToManyField(Ingredient, through='RecipeIngredient', related_name='recipes')
+    category = models.ForeignKey(RecipeCategory, null=True, on_delete=models.SET_NULL, related_name='ingredient')
 
 
     @property
@@ -40,6 +56,8 @@ class Recipe(models.Model):
     @property
     def quantity_ingredients(self):
         return {ri.ingredient: (ri.quantity, ri.unit) for ri in self.recipe_ingredients.all()}
+
+
 
 
 class RecipeIngredient(models.Model):
