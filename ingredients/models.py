@@ -92,24 +92,22 @@ class Ingredient(models.Model):
         locals()[f'base_quantity_{nutrient}'] = models.FloatField(default=0)
     #dynamically creates a model field for each nutrient in the NUTRIENTS list
 
-
     def get_nutrients_dict(self, starting_unit, starting_quantity):
         nutrients = {}
+
+        if starting_unit.unit != self.default_unit:
+            quantity_in_base_units = starting_quantity * starting_unit.conversion_to_base
+        else:
+            quantity_in_base_units = starting_quantity
 
         for n in self.NUTRIENTS:
             nutrient_name = f'base_quantity_{n}'
             nutrient_base_value = getattr(self, nutrient_name, 0) or 0
 
-            #convert quantity to base
-            if not self.default_unit:
-                self.default_unit = starting_unit
+            nutrients[n] = (nutrient_base_value / self.base_quantity) * quantity_in_base_units
 
-            if starting_unit != self.default_unit:
-                quantity_in_base_units = starting_quantity * starting_unit.conversion_to_base
-            else:
-                quantity_in_base_units = starting_quantity
-
-            nutrient_in_base_units = nutrient_base_value * quantity_in_base_units / self.base_quantity # calc value in base
-            nutrients[n] = nutrient_in_base_units
+        # Print debug info for this ingredient
+        print(f"{self.name} | {starting_quantity} {starting_unit.unit} → {quantity_in_base_units} {self.default_unit}")
+        print(", ".join([f"{n}: {v:.2f}" for n, v in nutrients.items() if v > 0]))
 
         return nutrients

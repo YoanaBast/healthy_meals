@@ -32,6 +32,8 @@ populate_dummy_data = [
 
 tests = [
     "python manage.py test ingredients",
+    "python manage.py test recipes",
+
 ]
 
 
