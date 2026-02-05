@@ -50,14 +50,54 @@ main {
 
 /* Header */
 header {
-    border-bottom: 1px solid var(--border);
-    padding: 1rem 0;
-    margin: 0rem 1;
-    position: static;
-    top: 0;
-    background:#089e46;
-    z-index: 100;
+  background: #1e1e1e;
+  position: relative;
+  padding: 0.5rem 2rem; /* smaller top/bottom padding */
 }
+
+header nav.container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+header::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 4px;
+  background: rgba(8, 100, 50, 0.6);
+}
+
+header nav.container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* logo left, nav right */
+}
+
+header .logo img.header-logo {
+  height: 35px;  /* bigger logo */
+}
+
+@media (max-width: 768px) {
+    header .logo img.header-logo {
+        height: 22px; /* smaller on mobile */
+    }
+}
+
+header .nav-links {
+  display: flex;
+  gap: 2rem;
+  list-style: none;
+}
+
+header .nav-links li a {
+  color: #fff;
+  text-decoration: none;
+}
+
+
 
 nav {
     display: flex;
@@ -93,11 +133,15 @@ nav {
 .hero {
     position: relative;
     text-align: center;
-    padding: 4rem 2rem;
     min-height: 450px;
     overflow: hidden;
+     padding-bottom: 37.5rem;
 }
-
+@media (max-width: 768px) {
+    .hero {
+        padding-bottom: 0rem; /* smaller on mobile */
+    }
+}
 .hero-text {
     position: relative;
     z-index: 2; /* above image */
@@ -106,24 +150,25 @@ nav {
 
 .hero-bg {
     position: absolute;
-    top: 65%;        /* center vertically */
-    left: 47%;       /* center horizontally */
-    transform: translate(-50%, -50%);
-    width: 80%;      /* scale relative to hero container */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(1); /* default scale */
+    width: 80%;
     max-width: 1000px;
     height: auto;
-    opacity: 0.5;
-    z-index: 1;      /* behind text */
-    pointer-events: none; /* so text remains clickable */
+    z-index: 1;
+    pointer-events: none;
+
+
+
 }
 
-/* Hide image on mobile */
-@media (max-width: 768px) {
+/* Keep image scaling when zooming in (scrolling browser zoom) */
+@media (min-width: 1000px) {
     .hero-bg {
-        display: none;
+        transform: translate(-50%, -50%) scale(1.2); /* scales up, never disappears */
     }
 }
-
 
 
 .hero h1 {
@@ -611,13 +656,23 @@ nav {
         }
 
 .footer {
-    position: relative; /* allows z-index to take effect */
-    z-index: 3;         /* above hero-bg */
-    background: #2F4F3A; /* solid color */
+    position: relative;
+    background: #1e1e1e;
     border-top: 1px solid var(--border);
     padding: 3rem 0 1rem;
     margin-top: 4rem;
 }
+
+.footer::before {
+    content: "";
+    position: absolute;
+    top: 0;           /* top line */
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: rgba(8, 100, 50, 0.6);
+}
+
 .footer-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -779,4 +834,59 @@ body:has(.modal-overlay:target) {
     .ingredient-form {
         grid-template-columns: 1fr;
     }
+}
+
+
+
+.container-home_bot .tab-content {
+  display: block;
+  padding: 20px 20px 20px 50px; /* top right bottom left */
+  margin-bottom: 5px;
+  color: white;
+  transition: transform 0.3s, box-shadow 0.3s;
+  transform-origin: top left; /* zoom toward right and top */
+}
+
+.container-home_bot .tab-content:nth-child(odd) {
+  background-color: #08643299;
+}
+
+.container-home_bot .tab-content:nth-child(even) {
+  background-color: black;
+}
+
+.container-home_bot .tab-content:hover {
+  transform: scale(1.05);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
+.tab-head {
+  text-decoration: none;
+  color: white;
+  font-size: 36px;
+  font-weight: bold;
+  display: inline-block;
+  cursor: pointer;
+}
+
+.tab-head span {
+  display: inline-block;
+  transition: transform 0.3s;
+  white-space: nowrap;
+}
+
+/* Apply wave only on hover */
+.tab-head:hover span {
+  animation: wave 1.5s ease-in-out infinite;
+}
+
+/* stagger letters automatically */
+.tab-head:hover span:nth-child(1)  { animation-delay: 0s; }
+.tab-head:hover span:nth-child(2)  { animation-delay: 0.05s; }
+.tab-head:hover span:nth-child(3)  { animation-delay: 0.1s; }
+/* continue for all letters, increase by ~0.05s per letter */
+
+@keyframes wave {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
 }
