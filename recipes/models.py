@@ -45,7 +45,8 @@ class Recipe(models.Model):
 
     @cooking_duration.setter
     def cooking_duration(self, value):
-        """Setter: accepts '1h 30m', '45m', or 'HH:MM:SS' like '00:10:00'"""
+        """Setter: accepts '1h 30m', '45m', or 'HH:MM:SS' like '00:10:00'
+        This will be used for display purposes in admin and frontend, instead of cooking_time"""
         hours, minutes = 0, 0
         value = value.strip()
         if ":" in value:  # HH:MM[:SS] format

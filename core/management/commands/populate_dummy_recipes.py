@@ -6,7 +6,7 @@ from ingredients.models import Ingredient, IngredientMeasurementUnit
 
 
 class Command(BaseCommand):
-    help = 'Populate dummy recipes using existing ingredients from JSON'
+    help = 'Populate dummy recipes using JSON only (no hardcoded defaults)'
 
     def handle(self, *args, **kwargs):
         json_path = Path(__file__).resolve().parent.parent / 'dummy_data' / 'dummy_recipes.json'
@@ -19,7 +19,7 @@ class Command(BaseCommand):
         with open(json_path, 'r') as f:
             data = json.load(f)
 
-        # Create categories dynamically
+        # Create recipe categories
         for cat_name in data.get('categories', []):
             _, created = RecipeCategory.objects.get_or_create(name=cat_name)
             if created:
@@ -45,19 +45,18 @@ class Command(BaseCommand):
                 qty = ing_info['quantity']
                 unit = ing_info['unit']
 
-                # Only use existing ingredients
                 ingredient = Ingredient.objects.filter(name=ing_name).first()
                 if not ingredient:
                     self.stdout.write(self.style.WARNING(f"Skipping missing ingredient: {ing_name}"))
                     continue
 
-                # Validate unit
+                # Only create units if present in JSON for the ingredient
                 valid_units = [u.unit for u in ingredient.measurement_units.all()]
                 if unit not in valid_units:
                     self.stdout.write(self.style.WARNING(
-                        f"Unit '{unit}' not found for {ing_name}, defaulting to '{ingredient.default_unit}'"
+                        f"Unit '{unit}' not defined for {ing_name} in JSON. Skipping ingredient."
                     ))
-                    unit = ingredient.default_unit
+                    continue
 
                 # Create/update RecipeIngredient
                 ri, _ = RecipeIngredient.objects.update_or_create(

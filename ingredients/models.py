@@ -98,6 +98,9 @@ class Ingredient(models.Model):
     #dynamically creates a model field for each nutrient in the NUTRIENTS list
 
     def get_nutrients_dict(self, starting_unit, starting_quantity):
+        """
+        it’s used for scaling nutrients based on a specific starting_unit and starting_quantity -> calculations
+        """
         nutrients = {}
 
         if starting_unit.unit != self.default_unit:
@@ -116,6 +119,11 @@ class Ingredient(models.Model):
         print(", ".join([f"{n}: {v:.2f}" for n, v in nutrients.items() if v > 0]))
 
         return nutrients
+
+    @property
+    def nutrients(self):
+        """Return a dict of all nutrient fields with their base values -> for visualization"""
+        return {n: getattr(self, f'base_quantity_{n}', 0) for n in self.NUTRIENTS}
 
     def __str__(self):
         return self.name
