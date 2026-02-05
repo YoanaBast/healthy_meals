@@ -1,3 +1,5 @@
+from datetime import time
+
 from django.db import models
 
 from ingredients.models import IngredientMeasurementUnit, Ingredient
@@ -18,6 +20,9 @@ class RecipeCategory(models.Model):
     def __str__(self):
         return self.name
 
+    class Meta:
+        verbose_name = "Recipe Category"
+        verbose_name_plural = "Recipe Categories"
 
 
 
@@ -28,6 +33,34 @@ class Recipe(models.Model):
     servings = models.PositiveIntegerField(default=1)
     ingredients = models.ManyToManyField(Ingredient, through='RecipeIngredient', related_name='recipes')
     category = models.ForeignKey(RecipeCategory, null=True, on_delete=models.SET_NULL, related_name='ingredient')
+
+    @property
+    def cooking_duration(self):
+        """Getter: returns formatted string like '1h 30m'"""
+        if not self.cooking_time:
+            return "0m"
+        total_minutes = self.cooking_time.hour * 60 + self.cooking_time.minute
+        hours, minutes = divmod(total_minutes, 60)
+        return f"{hours}h {minutes}m" if hours else f"{minutes}m"
+
+    @cooking_duration.setter
+    def cooking_duration(self, value):
+        """Setter: accepts '1h 30m', '45m', or 'HH:MM:SS' like '00:10:00'"""
+        hours, minutes = 0, 0
+        value = value.strip()
+        if ":" in value:  # HH:MM[:SS] format
+            parts = value.split(":")
+            hours = int(parts[0])
+            minutes = int(parts[1])
+        else:  # '1h 30m' or '45m'
+            if "h" in value:
+                parts = value.split("h")
+                hours = int(parts[0].strip())
+                if "m" in parts[1]:
+                    minutes = int(parts[1].replace("m", "").strip())
+            else:
+                minutes = int(value.replace("m", "").strip())
+        self.cooking_time = time(hour=hours, minute=minutes)
 
 
     @property

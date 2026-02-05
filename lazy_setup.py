@@ -26,8 +26,9 @@ minimal_setup = [
 run_server_cmd = "python manage.py runserver"
 
 populate_dummy_data = [
-    "python manage.py populate_ingredients",
-    "python manage.py populate_recipes"
+    "python manage.py populate_dummy_ingredients",
+    "python manage.py populate_dummy_recipes",
+    "python manage.py populate_dummy_fridge",
 ]
 
 tests = [

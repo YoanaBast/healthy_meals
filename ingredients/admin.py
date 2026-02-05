@@ -21,6 +21,7 @@ class IngredientAdmin(admin.ModelAdmin):
     list_display = (
         'name',
         'category',
+        'get_dietary_tags',
         'base_quantity_kcal',
         'base_quantity_protein',
         'base_quantity_carbs',
@@ -30,3 +31,6 @@ class IngredientAdmin(admin.ModelAdmin):
     search_fields = ('name',)
 
 
+    def get_dietary_tags(self, obj):
+        return ", ".join([tag.name for tag in obj.dietary_tag.all()])
+    get_dietary_tags.short_description = 'Dietary Tags'

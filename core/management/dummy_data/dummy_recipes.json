@@ -1,0 +1,25 @@
+{
+  "categories": ["Breakfast", "Snack", "Dinner"],
+  "recipes": {
+    "Pancake": {
+      "category": "Breakfast",
+      "cooking_time": "00:10:00",
+      "servings": 2,
+      "ingredients": [
+        {"name": "Flour", "quantity": 100, "unit": "g"},
+        {"name": "Milk", "quantity": 1, "unit": "cup"},
+        {"name": "Egg", "quantity": 1, "unit": "pc"},
+        {"name": "Butter", "quantity": 1, "unit": "tbsp"}
+      ]
+    },
+    "Cinnamon Butter Toast": {
+      "category": "Breakfast",
+      "cooking_time": "00:05:00",
+      "servings": 1,
+      "ingredients": [
+        {"name": "Butter", "quantity": 1, "unit": "tbsp"},
+        {"name": "Cinnamon", "quantity": 1, "unit": "tsp"}
+      ]
+    }
+  }
+}
