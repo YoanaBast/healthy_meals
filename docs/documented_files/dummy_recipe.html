@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meal Planner - Organize Your Kitchen</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #171717;
+            --bg-tertiary: #262626;
+            --text-primary: #ffffff;
+            --text-secondary: #a3a3a3;
+            --accent: #22c55e;
+            --accent-hover: #16a34a;
+            --border: #404040;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
+
+        /* Header */
+        header {
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            background: var(--bg-primary);
+            z-index: 100;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.875rem;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: var(--text-primary);
+        }
+
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            padding: 5rem 0 3rem;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            margin-bottom: 1rem;
+            line-height: 1.1;
+        }
+
+        .hero p {
+            font-size: 1.125rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto 2rem;
+        }
+
+        /* Tab Navigation */
+        .tab-nav {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin: 3rem 0 2rem;
+            flex-wrap: wrap;
+        }
+
+        .tab-button {
+            padding: 0.75rem 1.5rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            cursor: pointer;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .tab-button:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .tab-button.active {
+            background: var(--accent);
+            color: var(--bg-primary);
+            border-color: var(--accent);
+        }
+
+        /* Tab Content */
+        .tab-content {
+            display: none;
+            padding: 2rem 0;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Section Styling */
+        .section-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            letter-spacing: -0.02em;
+        }
+
+        .section-description {
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+            font-size: 1rem;
+        }
+
+        /* Card Grid */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            transition: all 0.2s;
+        }
+
+        .card:hover {
+            border-color: var(--accent);
+            transform: translateY(-2px);
+        }
+
+        .card h3 {
+            font-size: 1.25rem;
+            margin-bottom: 0.75rem;
+            font-weight: 600;
+        }
+
+        .card p {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            margin-bottom: 1rem;
+        }
+
+        .card-meta {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+
+        .badge {
+            background: var(--bg-tertiary);
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            border: 1px solid var(--border);
+        }
+
+        /* Checkbox List */
+        .checkbox-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .checkbox-item:hover {
+            border-color: var(--accent);
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            width: 1.25rem;
+            height: 1.25rem;
+            cursor: pointer;
+            accent-color: var(--accent);
+        }
+
+        .checkbox-item label {
+            cursor: pointer;
+            flex: 1;
+            font-weight: 500;
+        }
+
+        /* Button */
+        .btn {
+            display: inline-block;
+            padding: 0.875rem 1.75rem;
+            background: var(--accent);
+            color: var(--bg-primary);
+            text-decoration: none;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            font-size: 0.875rem;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn:hover {
+            background: var(--accent-hover);
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-tertiary);
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            font-size: 0.875rem;
+        }
+
+        .form-input,
+        .form-textarea,
+        .form-select {
+            width: 100%;
+            padding: 0.75rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            color: var(--text-primary);
+            font-size: 0.875rem;
+            font-family: inherit;
+        }
+
+        .form-input:focus,
+        .form-textarea:focus,
+        .form-select:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        /* Result List */
+        .result-box {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            padding: 2rem;
+            margin-top: 2rem;
+        }
+
+        .result-box h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .ingredient-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .ingredient-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background: var(--bg-tertiary);
+            border-radius: 0.5rem;
+            border: 1px solid var(--border);
+        }
+
+        .ingredient-name {
+            font-weight: 500;
+        }
+
+        .ingredient-quantity {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        /* Table */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .data-table th {
+            font-weight: 600;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .data-table tr:hover {
+            background: var(--bg-secondary);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-small {
+            padding: 0.5rem 0.875rem;
+            font-size: 0.75rem;
+        }
+
+        .btn-danger {
+            background: #dc2626;
+        }
+
+        .btn-danger:hover {
+            background: #b91c1c;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            padding: 2rem;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .close-button {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0;
+            width: 2rem;
+            height: 2rem;
+        }
+
+        .close-button:hover {
+            color: var(--text-primary);
+        }
+
+        /* Recipe Detail */
+        .recipe-detail {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .recipe-ingredients {
+            background: var(--bg-tertiary);
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+        }
+
+        .recipe-ingredients h4 {
+            margin-bottom: 1rem;
+            font-size: 1.125rem;
+        }
+
+        .recipe-ingredients ul {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .recipe-ingredients li::before {
+            content: "•";
+            color: var(--accent);
+            font-weight: bold;
+            margin-right: 0.5rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .tab-nav {
+                flex-direction: column;
+            }
+
+            .card-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="container">
+            <div class="logo">🥗 Meal Planner</div>
+            <ul class="nav-links">
+                <li><a href="#home">Home</a></li>
+                <li><a href="#about">About</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <div class="hero">
+            <div class="container">
+                <h1>Organize Your Kitchen Life</h1>
+                <p>Generate grocery lists from your favorite meals, discover recipes based on ingredients you have, and manage everything in one place.</p>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="tab-nav">
+                <button class="tab-button active" onclick="showTab('grocery-list')">Generate Grocery List</button>
+                <button class="tab-button" onclick="showTab('meal-suggestions')">Meal Suggestions</button>
+                <button class="tab-button" onclick="showTab('manage-recipes')">Manage Recipes</button>
+                <button class="tab-button" onclick="showTab('manage-ingredients')">Manage Ingredients</button>
+            </div>
+
+            <!-- Generate Grocery List Tab -->
+            <div id="grocery-list" class="tab-content active">
+                <h2 class="section-title">Generate Grocery List</h2>
+                <p class="section-description">Select your favorite meals and we'll generate a complete grocery list with all the ingredients you need.</p>
+
+                <div class="checkbox-list">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="meal1" name="meal1">
+                        <label for="meal1">Spaghetti Carbonara</label>
+                        <span class="badge">30 min</span>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="meal2" name="meal2">
+                        <label for="meal2">Chicken Stir-Fry</label>
+                        <span class="badge">25 min</span>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="meal3" name="meal3">
+                        <label for="meal3">Caesar Salad</label>
+                        <span class="badge">15 min</span>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="meal4" name="meal4">
+                        <label for="meal4">Beef Tacos</label>
+                        <span class="badge">35 min</span>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="meal5" name="meal5">
+                        <label for="meal5">Margherita Pizza</label>
+                        <span class="badge">45 min</span>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="meal6" name="meal6">
+                        <label for="meal6">Grilled Salmon with Vegetables</label>
+                        <span class="badge">40 min</span>
+                    </div>
+                </div>
+
+                <button class="btn" style="margin-top: 1.5rem;">Generate Grocery List</button>
+
+                <div class="result-box">
+                    <h3>Your Grocery List</h3>
+                    <div class="ingredient-list">
+                        <div class="ingredient-item">
+                            <span class="ingredient-name">Spaghetti Pasta</span>
+                            <span class="ingredient-quantity">500g</span>
+                        </div>
+                        <div class="ingredient-item">
+                            <span class="ingredient-name">Bacon</span>
+                            <span class="ingredient-quantity">200g</span>
+                        </div>
+                        <div class="ingredient-item">
+                            <span class="ingredient-name">Eggs</span>
+                            <span class="ingredient-quantity">4 units</span>
+                        </div>
+                        <div class="ingredient-item">
+                            <span class="ingredient-name">Parmesan Cheese</span>
+                            <span class="ingredient-quantity">100g</span>
+                        </div>
+                        <div class="ingredient-item">
+                            <span class="ingredient-name">Black Pepper</span>
+                            <span class="ingredient-quantity">1 tsp</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Meal Suggestions Tab -->
+            <div id="meal-suggestions" class="tab-content">
+                <h2 class="section-title">Find Meals by Ingredients</h2>
+                <p class="section-description">Select the ingredients you have available, and we'll suggest delicious meals you can make.</p>
+
+                <div class="checkbox-list">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="ing1" name="ing1">
+                        <label for="ing1">Chicken Breast</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="ing2" name="ing2">
+                        <label for="ing2">Tomatoes</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="ing3" name="ing3">
+                        <label for="ing3">Onions</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="ing4" name="ing4">
+                        <label for="ing4">Garlic</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="ing5" name="ing5">
+                        <label for="ing5">Rice</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="ing6" name="ing6">
+                        <label for="ing6">Bell Peppers</label>
+                    </div>
+                </div>
+
+                <button class="btn" style="margin-top: 1.5rem;">Find Recipes</button>
+
+                <div class="result-box">
+                    <h3>Suggested Recipes</h3>
+                    <div class="card-grid" style="margin-top: 1.5rem;">
+                        <div class="card">
+                            <h3>Chicken Stir-Fry</h3>
+                            <div class="card-meta">
+                                <span class="badge">25 min</span>
+                                <span class="badge">4 servings</span>
+                            </div>
+                            <p>A quick and flavorful Asian-inspired dish with tender chicken and crispy vegetables.</p>
+                            <button class="btn btn-secondary btn-small">View Recipe</button>
+                        </div>
+                        <div class="card">
+                            <h3>Chicken and Rice Bowl</h3>
+                            <div class="card-meta">
+                                <span class="badge">30 min</span>
+                                <span class="badge">2 servings</span>
+                            </div>
+                            <p>A wholesome one-bowl meal with seasoned chicken, fluffy rice, and fresh vegetables.</p>
+                            <button class="btn btn-secondary btn-small">View Recipe</button>
+                        </div>
+                        <div class="card">
+                            <h3>Spanish Chicken Rice</h3>
+                            <div class="card-meta">
+                                <span class="badge">45 min</span>
+                                <span class="badge">6 servings</span>
+                            </div>
+                            <p>A hearty Spanish-style dish with aromatic rice, tender chicken, and vibrant peppers.</p>
+                            <button class="btn btn-secondary btn-small">View Recipe</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Manage Recipes Tab -->
+            <div id="manage-recipes" class="tab-content">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                    <div>
+                        <h2 class="section-title" style="margin-bottom: 0.5rem;">Manage Recipes</h2>
+                        <p class="section-description" style="margin-bottom: 0;">Create, edit, and delete your recipe collection.</p>
+                    </div>
+                    <button class="btn">Add New Recipe</button>
+                </div>
+
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Recipe Name</th>
+                            <th>Cook Time</th>
+                            <th>Servings</th>
+                            <th>Category</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Spaghetti Carbonara</td>
+                            <td>30 min</td>
+                            <td>4</td>
+                            <td>Italian</td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn btn-secondary btn-small">Edit</button>
+                                    <button class="btn btn-danger btn-small">Delete</button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Chicken Stir-Fry</td>
+                            <td>25 min</td>
+                            <td>2</td>
+                            <td>Asian</td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn btn-secondary btn-small">Edit</button>
+                                    <button class="btn btn-danger btn-small">Delete</button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Caesar Salad</td>
+                            <td>15 min</td>
+                            <td>2</td>
+                            <td>Salad</td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn btn-secondary btn-small">Edit</button>
+                                    <button class="btn btn-danger btn-small">Delete</button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Beef Tacos</td>
+                            <td>35 min</td>
+                            <td>4</td>
+                            <td>Mexican</td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn btn-secondary btn-small">Edit</button>
+                                    <button class="btn btn-danger btn-small">Delete</button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Margherita Pizza</td>
+                            <td>45 min</td>
+                            <td>4</td>
+                            <td>Italian</td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn btn-secondary btn-small">Edit</button>
+                                    <button class="btn btn-danger btn-small">Delete</button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="result-box">
+                    <h3 class="modal-title">Add/Edit Recipe</h3>
+                    <form>
+                        <div class="form-group">
+                            <label class="form-label" for="recipeName">Recipe Name</label>
+                            <input type="text" id="recipeName" class="form-input" placeholder="Enter recipe name">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="cookTime">Cook Time (minutes)</label>
+                            <input type="number" id="cookTime" class="form-input" placeholder="30">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="servings">Servings</label>
+                            <input type="number" id="servings" class="form-input" placeholder="4">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="category">Category</label>
+                            <select id="category" class="form-select">
+                                <option>Italian</option>
+                                <option>Asian</option>
+                                <option>Mexican</option>
+                                <option>American</option>
+                                <option>Mediterranean</option>
+                                <option>Salad</option>
+                                <option>Dessert</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="ingredients">Ingredients (one per line)</label>
+                            <textarea id="ingredients" class="form-textarea" placeholder="2 cups flour&#10;1 tsp salt&#10;500g chicken breast"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="instructions">Instructions</label>
+                            <textarea id="instructions" class="form-textarea" placeholder="Step-by-step cooking instructions..."></textarea>
+                        </div>
+                        <div style="display: flex; gap: 1rem;">
+                            <button type="submit" class="btn">Save Recipe</button>
+                            <button type="button" class="btn btn-secondary">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Manage Ingredients Tab -->
+            <div id="manage-ingredients" class="tab-content">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                    <div>
+                        <h2 class="section-title" style="margin-bottom: 0.5rem;">Manage Ingredients</h2>
+                        <p class="section-description" style="margin-bottom: 0;">Manage your ingredient database and track availability.</p>
+                    </div>
+                    <button class="btn">Add New Ingredient</button>
+                </div>
+
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Ingredient Name</th>
+                            <th>Category</th>
+                            <th>Unit</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Chicken Breast</td>
+                            <td>Protein</td>
+                            <td>kg</td>
+                            <td><span class="badge" style="background: #16a34a; color: white;">In Stock</span></td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn btn-secondary btn-small">Edit</button>
+                                    <button class="btn btn-danger btn-small">Delete</button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Tomatoes</td>
+                            <td>Vegetables</td>
+                            <td>kg</td>
+                            <td><span class="badge" style="background: #16a34a; color: white;">In Stock</span></td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn btn-secondary btn-small">Edit</button>
+                                    <button class="btn btn-danger btn-small">Delete</button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Spaghetti Pasta</td>
+                            <td>Grains</td>
+                            <td>g</td>
+                            <td><span class="badge" style="background: #dc2626; color: white;">Out of Stock</span></td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn btn-secondary btn-small">Edit</button>
+                                    <button class="btn btn-danger btn-small">Delete</button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Parmesan Cheese</td>
+                            <td>Dairy</td>
+                            <td>g</td>
+                            <td><span class="badge" style="background: #16a34a; color: white;">In Stock</span></td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn btn-secondary btn-small">Edit</button>
+                                    <button class="btn btn-danger btn-small">Delete</button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Bell Peppers</td>
+                            <td>Vegetables</td>
+                            <td>units</td>
+                            <td><span class="badge" style="background: #eab308; color: black;">Low Stock</span></td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn btn-secondary btn-small">Edit</button>
+                                    <button class="btn btn-danger btn-small">Delete</button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="result-box">
+                    <h3 class="modal-title">Add/Edit Ingredient</h3>
+                    <form>
+                        <div class="form-group">
+                            <label class="form-label" for="ingredientName">Ingredient Name</label>
+                            <input type="text" id="ingredientName" class="form-input" placeholder="Enter ingredient name">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="ingredientCategory">Category</label>
+                            <select id="ingredientCategory" class="form-select">
+                                <option>Protein</option>
+                                <option>Vegetables</option>
+                                <option>Fruits</option>
+                                <option>Grains</option>
+                                <option>Dairy</option>
+                                <option>Spices</option>
+                                <option>Condiments</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="unit">Unit of Measurement</label>
+                            <select id="unit" class="form-select">
+                                <option>g</option>
+                                <option>kg</option>
+                                <option>ml</option>
+                                <option>L</option>
+                                <option>units</option>
+                                <option>tbsp</option>
+                                <option>tsp</option>
+                                <option>cups</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="status">Status</label>
+                            <select id="status" class="form-select">
+                                <option>In Stock</option>
+                                <option>Low Stock</option>
+                                <option>Out of Stock</option>
+                            </select>
+                        </div>
+                        <div style="display: flex; gap: 1rem;">
+                            <button type="submit" class="btn">Save Ingredient</button>
+                            <button type="button" class="btn btn-secondary">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        function showTab(tabId) {
+            // Hide all tabs
+            const tabs = document.querySelectorAll('.tab-content');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            // Remove active class from all buttons
+            const buttons = document.querySelectorAll('.tab-button');
+            buttons.forEach(button => button.classList.remove('active'));
+            
+            // Show selected tab
+            document.getElementById(tabId).classList.add('active');
+            
+            // Add active class to clicked button
+            event.target.classList.add('active');
+        }
+    </script>
+</body>
+</html>
