@@ -15,7 +15,7 @@
             <div>
                 <h2 class="section-title" style="margin-bottom: 0.5rem;">Manage Ingredients</h2>
                 <p class="section-description" style="margin-bottom: 0;">
-                    Manage your ingredient database and track availability.
+                    Manage your ingredient database.
                 </p>
             </div>
 
@@ -68,13 +68,15 @@
             </div>
         </div>
 
+
+
         <table class="data-table">
             <thead>
                 <tr>
                     <th>Ingredient Name</th>
                     <th>Category</th>
+                    <th>Dietary Information</th>
                     <th>Unit</th>
-                    <th>Status</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -83,14 +85,14 @@
                     <tr>
                         <td data-label="Ingredient Name">{{ ing.name }}</td>
                         <td data-label="Category">{{ ing.category|default:"-" }}</td>
-                        <td data-label="Unit">{{ ing.default_unit }}</td>
-                        <td data-label="Status">
-                            <span class="badge" style="background:#16a34a;color:white;">In Stock</span>
-                        </td>
+                        <td data-label="Dietary Information"> {{ ing.dietary_info|default:"-" }}</td>
+                        <td data-label="Unit">{{ ing.unit_name }}</td>
                         <td data-label="Actions">
-                            <button class="btn btn-secondary btn-small">Edit</button>
-                            <button class="btn btn-danger btn-small">Delete</button>
+                            <a href="{% url 'ingredient_detail' ing.id %}" class="btn btn-secondary btn-small">See Details</a>
+                            <a href="{% url 'edit_ingredient' ing.id %}" class="btn btn-secondary btn-small">Edit</a>
+                            <a href="{% url 'delete_ingredient' ing.id %}" class="btn btn-danger btn-small">Delete</a>
                         </td>
+
                     </tr>
                     {% empty %}
                     <tr>

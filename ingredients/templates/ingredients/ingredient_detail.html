@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Ingredient Details{% endblock %}
+
+{% block content %}
+
+<div class="container-home">
+
+    <h2 class="section-title">Ingredient Details</h2>
+
+    <table class="data-table">
+        <tbody>
+            <tr>
+                <th>Name</th>
+                <td>{{ ingredient.name }}</td>
+            </tr>
+            <tr>
+                <th>Category</th>
+                <td>{{ ingredient.category|default:"-" }}</td>
+            </tr>
+            <tr>
+                <th>Base Quantity</th>
+                <td>{{ ingredient.base_quantity }}</td>
+            </tr>
+            <tr>
+                <th>Main Unit</th>
+                <td>{{ ingredient.get_default_unit_display }}</td>
+            </tr>
+            <tr>
+                <th>Dietary Information</th>
+                <td>{{ ingredient.dietary_info|default:"-" }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h4 style="margin-top: 2rem;">Nutrients per the base quantity - {{ ingredient.base_quantity }} {{ ingredient.default_unit }}:</h4>
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Nutrient</th>
+                <th>Amount</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for nutrient, value in ingredient.nutrients.items %}
+            <tr>
+                <td>{{ nutrient|upper }}</td>
+                <td>{{ value }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div style="margin-top: 1rem;">
+        <a href="{% url 'manage_ingredients' %}" class="btn btn-secondary">Back</a>
+        <a href="{% url 'edit_ingredient' ingredient.id %}" class="btn btn-primary">Edit</a>
+        <a href="{% url 'delete_ingredient' ingredient.id %}" class="btn btn-danger">Delete</a>
+    </div>
+
+</div>
+
+{% endblock %}
