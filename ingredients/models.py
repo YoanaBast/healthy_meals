@@ -17,6 +17,9 @@ class IngredientDietaryTag(models.Model):
         return self.name
 
 
+    class Meta:
+        verbose_name = "Ingredient Dietary Tag"
+        verbose_name_plural = "Ingredient Dietary Tags"
 
 
 class IngredientCategory(models.Model):
@@ -32,7 +35,9 @@ class IngredientCategory(models.Model):
     def __str__(self):
         return self.name
 
-
+    class Meta:
+        verbose_name = "Ingredient Category"
+        verbose_name_plural = "Ingredient Categories"
 
 
 class IngredientMeasurementUnit(models.Model):
