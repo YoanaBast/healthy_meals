@@ -111,3 +111,6 @@ class Ingredient(models.Model):
         print(", ".join([f"{n}: {v:.2f}" for n, v in nutrients.items() if v > 0]))
 
         return nutrients
+
+    def __str__(self):
+        return self.name
