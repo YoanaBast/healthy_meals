@@ -5,15 +5,24 @@ from planner.models import Fridge
 
 # Register your models here.
 
-@admin.register(Fridge)
-class FridgeAdmin(admin.ModelAdmin):
-    list_display = ('get_ingredients', 'quantity', 'unit')
-    search_fields = ('ingredients__name',)
+# planner/admin.py
+from django.contrib import admin
+from .models import UserFridge, Fridge
 
-    # def get_ingredients(self, obj):
-    #     return ", ".join([i.name for i in obj.ingredients.all()])
-    # get_ingredients.short_description = 'Ingredients' --> this is the MTM version
 
-    def get_ingredients(self, obj):
-        # obj is a single Fridge instance
-        return obj.ingredient.name
+
+class FridgeInline(admin.TabularInline):
+    model = Fridge
+    extra = 0
+    readonly_fields = ('ingredient', 'quantity', 'unit')
+
+@admin.register(UserFridge)
+class UserFridgeAdmin(admin.ModelAdmin):
+    list_display = ('user', 'ingredient_list')
+    inlines = [FridgeInline]
+
+    def ingredient_list(self, obj):
+        return ", ".join([f"{f.ingredient.name} ({f.quantity} {f.unit})" for f in obj.items.all()])
+    ingredient_list.short_description = "Ingredients"
+
+

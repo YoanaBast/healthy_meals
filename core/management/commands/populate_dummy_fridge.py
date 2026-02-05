@@ -2,7 +2,7 @@ from django.contrib.auth.models import User
 from django.core.management.base import BaseCommand
 from pathlib import Path
 import json
-from planner.models import Fridge
+from planner.models import Fridge, UserFridge
 from ingredients.models import Ingredient
 
 class Command(BaseCommand):
@@ -15,9 +15,12 @@ class Command(BaseCommand):
             defaults={'username': 'default', 'is_superuser': True, 'is_staff': True}
         )
         if created:
-            default_user.set_password('defaultpassword')  # set any password
+            default_user.set_password('defaultpassword')
             default_user.save()
             self.stdout.write(self.style.SUCCESS("Created default superuser with ID=1"))
+
+        # Ensure UserFridge exists
+        user_fridge, _ = UserFridge.objects.get_or_create(user=default_user)
 
         json_path = Path(__file__).resolve().parent.parent / 'dummy_data' / 'dummy_fridge.json'
         self.stdout.write(f"DEBUG: Looking for JSON at {json_path}")
@@ -47,10 +50,11 @@ class Command(BaseCommand):
                 unit = ingredient.default_unit
 
             fridge_item, _ = Fridge.objects.update_or_create(
+                user_fridge=user_fridge,
                 ingredient=ingredient,
-                defaults={'quantity': qty, 'unit': unit, 'user': default_user}  # assign user
+                defaults={'quantity': qty, 'unit': unit}
             )
 
-            self.stdout.write(f"DEBUG: Added {qty} {unit} of {ing_name} to fridge")
+            self.stdout.write(f"DEBUG: Added {qty} {unit} of {ing_name} to {default_user.username}'s fridge")
 
         self.stdout.write(self.style.SUCCESS("\nFridge populated successfully!"))

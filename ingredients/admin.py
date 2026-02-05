@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.utils.safestring import mark_safe
 
 # Register your models here.
 from .models import Ingredient, IngredientCategory, IngredientDietaryTag
@@ -22,10 +23,9 @@ class IngredientAdmin(admin.ModelAdmin):
         'name',
         'category',
         'get_dietary_tags',
-        'base_quantity_kcal',
-        'base_quantity_protein',
-        'base_quantity_carbs',
-        'base_quantity_fat',
+        'default_unit',
+        'base_quantity',
+        'display_nutrients'
     )
     list_filter = ('category', 'dietary_tag')
     search_fields = ('name',)
@@ -34,3 +34,8 @@ class IngredientAdmin(admin.ModelAdmin):
     def get_dietary_tags(self, obj):
         return ", ".join([tag.name for tag in obj.dietary_tag.all()])
     get_dietary_tags.short_description = 'Dietary Tags'
+
+    def display_nutrients(self, obj):
+        nutrients = obj.nutrients
+        return mark_safe("<br>".join(f"{k.capitalize()}: {v}" for k, v in nutrients.items()))
+    display_nutrients.short_description = "Nutrients"

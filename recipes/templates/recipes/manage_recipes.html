@@ -85,7 +85,7 @@
                 <tr>
                     <td data-label="Recipe Name">{{ rec.name }}</td>
                     <td data-label="Category">{{ rec.category|default:"-" }}</td>
-                    <td data-label="Cooking Time">{{ rec.cooking_time|default:"-" }}</td>
+                    <td data-label="Cooking Time">{{ rec.cooking_duration|default:"-" }}</td>
                     <td data-label="Servings">{{ rec.servings }}</td>
                     <td data-label="Kcal">{{ rec.nutrients.kcal }}</td> <td data-label="Actions">
                         <button class="btn btn-secondary btn-small">Edit</button>
