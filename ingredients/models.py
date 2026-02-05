@@ -125,5 +125,16 @@ class Ingredient(models.Model):
         """Return a dict of all nutrient fields with their base values -> for visualization"""
         return {n: getattr(self, f'base_quantity_{n}', 0) for n in self.NUTRIENTS}
 
+    @property
+    def dietary_info(self):
+        """Return dietary tags as a comma-separated string"""
+        return ", ".join(tag.name for tag in self.dietary_tag.all()) or "-"
+
+    @property
+    def unit_name(self):
+        """Return human-readable unit for UI"""
+        # Convert code ('pc') to display ('Piece')
+        return dict(IngredientMeasurementUnit.MeasureUnits.choices).get(self.default_unit, self.default_unit)
+
     def __str__(self):
         return self.name
