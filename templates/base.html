@@ -11,11 +11,15 @@
 <body>
     <header>
         <nav class="container">
-            <div class="logo"> Meal Planner</div>
+            <div class="logo">
+                  <img class="header-logo" src="{% static 'images/simple_logo.svg' %}" alt="Tomato"/>
+            </div>
             <ul class="nav-links">
-                <li><a href="{% url 'homepage' %}">Home</a></li>
-                <li><a href="{% url 'homepage' %}">About</a></li>
-                <li><a href="{% url 'homepage' %}">Contact</a></li>
+                <a href="{% url 'homepage' %}">
+                    <img src="{% static 'images/home.svg' %}" alt="Home" width="24" height="24">
+
+                </a>
+
             </ul>
         </nav>
     </header>
