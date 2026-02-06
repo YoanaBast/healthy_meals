@@ -1,3 +1,6 @@
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/styles.css' %}">
+
 <div class="tab-nav">
     <div class="tab-nav-upper">
         <a href="{% url 'homepage' %}" class="tab-button {% if request.resolver_match.url_name == 'homepage' %}active{% endif %}">Generate Grocery List</a>
