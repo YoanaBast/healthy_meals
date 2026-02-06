@@ -3,34 +3,31 @@ from django.db import models
 # Create your models here.
 
 
-class IngredientDietaryTag(models.Model):
 
+
+class IngredientDietaryTag(models.Model):
     """
     INGREDIENT DIETARY TAG
     ex: Vegan
     """
-
     name = models.CharField(max_length=100, unique=True)
-
 
     def __str__(self):
         return self.name
-
 
     class Meta:
         verbose_name = "Ingredient Dietary Tag"
         verbose_name_plural = "Ingredient Dietary Tags"
 
 
-class IngredientCategory(models.Model):
 
+
+class IngredientCategory(models.Model):
     """
     INGREDIENT CATEGORY
     ex: Vegetables
     """
-
     name = models.CharField(max_length=100, unique=True)
-
 
     def __str__(self):
         return self.name
@@ -40,27 +37,26 @@ class IngredientCategory(models.Model):
         verbose_name_plural = "Ingredient Categories"
 
 
-class IngredientMeasurementUnit(models.Model):
 
+
+class MeasurementUnit(models.Model):
+    code = models.CharField(max_length=10, unique=True)
+    name = models.CharField(max_length=50)
+
+    def __str__(self):
+        return self.name
+
+
+
+
+class IngredientMeasurementUnit(models.Model):
     """
     INGREDIENT MEASUREMENT UNIT
 
     allows ingredients to have multiple measurement units - like grams and cups
     """
-
-    class MeasureUnits(models.TextChoices):
-        GRAM = 'g', 'Gram'
-        KILOGRAM = 'kg', 'Kilogram'
-        MILLILITER = 'ml', 'Milliliter'
-        LITER = 'l', 'Liter'
-        PIECE = 'pc', 'Piece'
-        TABLESPOON = 'tbsp', 'Tablespoon'
-        TEASPOON = 'tsp', 'Teaspoon'
-        CUP = 'cup', 'Cup'
-        OUNCE = 'oz', 'Ounce'
-
     ingredient = models.ForeignKey('Ingredient', on_delete=models.CASCADE, related_name='measurement_units')
-    unit = models.CharField(max_length=10, choices=MeasureUnits.choices)
+    unit = models.ForeignKey(MeasurementUnit, on_delete=models.CASCADE)
     conversion_to_base = models.FloatField(help_text="How much of this unit equals the base_quantity")
     # 1 cup of carrot ≈ 120 g → conversion_to_base = 120
 
@@ -81,7 +77,12 @@ class Ingredient(models.Model):
 
     name = models.CharField(max_length=100)
 
-    default_unit = models.CharField(max_length=10, choices=IngredientMeasurementUnit.MeasureUnits.choices, default=IngredientMeasurementUnit.MeasureUnits.GRAM)
+    default_unit = models.ForeignKey(
+        'MeasurementUnit',
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='+'
+    )
     #the unit that holds the nutrient data for conversions
 
     base_quantity = models.FloatField(default=100, help_text="The quantity the NUTRIENTS are based on in default_unit (100 g, 1 pc, etc.)")
@@ -133,8 +134,9 @@ class Ingredient(models.Model):
     @property
     def unit_name(self):
         """Return human-readable unit for UI"""
-        # Convert code ('pc') to display ('Piece')
-        return dict(IngredientMeasurementUnit.MeasureUnits.choices).get(self.default_unit, self.default_unit)
+        if self.default_unit:  # default_unit is now a FK to MeasurementUnit
+            return self.default_unit.name
+        return "-"
 
     def __str__(self):
         return self.name

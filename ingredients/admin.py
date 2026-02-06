@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.utils.safestring import mark_safe
 
 # Register your models here.
-from .models import Ingredient, IngredientCategory, IngredientDietaryTag
+from .models import Ingredient, IngredientCategory, IngredientDietaryTag, MeasurementUnit, IngredientMeasurementUnit
 
 
 @admin.register(IngredientDietaryTag)
@@ -39,3 +39,12 @@ class IngredientAdmin(admin.ModelAdmin):
         nutrients = obj.nutrients
         return mark_safe("<br>".join(f"{k.capitalize()}: {v}" for k, v in nutrients.items()))
     display_nutrients.short_description = "Nutrients"
+
+
+@admin.register(MeasurementUnit)
+class MeasurementUnitAdmin(admin.ModelAdmin):
+    list_display = ('code', 'name')
+
+@admin.register(IngredientMeasurementUnit)
+class IngredientMeasurementUnitAdmin(admin.ModelAdmin):
+    list_display = ('ingredient', 'unit', 'conversion_to_base')
