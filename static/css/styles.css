@@ -130,8 +130,10 @@ nav {
     text-align: center;
     min-height: 450px;
     overflow: hidden;
-     padding-bottom: 37.5rem;
+    padding-bottom: 37.5rem;
 }
+
+
 @media (max-width: 768px) {
     .hero {
         padding-bottom: 0rem; /* smaller on mobile */
@@ -148,7 +150,7 @@ nav {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%) scale(1); /* default scale */
-    width: 80%;
+    width: 100%;
     max-width: 1000px;
     height: auto;
     z-index: 1;
@@ -349,223 +351,228 @@ nav {
             background: var(--bg-tertiary);
         }
 
-        /* Form Elements */
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
+/* Form Elements */
+.form-group {
+    margin-bottom: 1.5rem;
+}
 
-        .form-label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 500;
-            font-size: 0.875rem;
-        }
+.form-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    font-size: 0.875rem;
+}
 
-        .form-input,
-        .form-textarea,
-        .form-select {
-            width: 100%;
-            padding: 0.75rem;
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: 0.5rem;
-            color: var(--text-primary);
-            font-size: 0.875rem;
-            font-family: inherit;
-        }
+.form-input,
+.form-textarea,
+.form-select {
+    width: 100%;
+    padding: 0.75rem;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    color: var(--text-primary);
+    font-size: 0.875rem;
+    font-family: inherit;
+}
 
-        .form-input:focus,
-        .form-textarea:focus,
-        .form-select:focus {
-            outline: none;
-            border-color: var(--accent);
-        }
+.form-input:focus,
+.form-textarea:focus,
+.form-select:focus {
+    outline: none;
+    border-color: var(--accent);
+}
 
-        .form-textarea {
-            resize: vertical;
-            min-height: 120px;
-        }
+.form-textarea {
+    resize: vertical;
+    min-height: 120px;
+}
 
-        /* Result List */
-        .result-box {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: 0.75rem;
-            padding: 2rem;
-            margin-top: 2rem;
-        }
+/* Result List */
+.result-box {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 0.75rem;
+    padding: 2rem;
+    margin-top: 2rem;
+}
 
-        .result-box h3 {
-            font-size: 1.5rem;
-            margin-bottom: 1.5rem;
-        }
+.result-box h3 {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+}
 
-        .ingredient-list {
-            display: flex;
-            flex-direction: column;
-            gap: 0.75rem;
-        }
+.ingredient-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
 
-        .ingredient-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem;
-            background: var(--bg-tertiary);
-            border-radius: 0.5rem;
-            border: 1px solid var(--border);
-        }
+.ingredient-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background: var(--bg-tertiary);
+    border-radius: 0.5rem;
+    border: 1px solid var(--border);
+}
 
-        .ingredient-name {
-            font-weight: 500;
-        }
+.ingredient-name {
+    font-weight: 500;
+}
 
-        .ingredient-quantity {
-            color: var(--text-secondary);
-            font-size: 0.875rem;
-        }
+.ingredient-quantity {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+}
 
-        /* Table */
-        .data-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 1rem;
-        }
+/* Table */
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+}
 
-        .data-table th,
-        .data-table td {
-            padding: 1rem;
-            text-align: left;
-            border-bottom: 1px solid var(--border);
-        }
+.data-table th,
+.data-table td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+}
 
-        .data-table th {
-            font-weight: 600;
-            font-size: 0.875rem;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
+.data-table th {
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
 
-        .data-table tr:hover {
-            background: var(--bg-secondary);
-        }
+.data-table tr:hover {
+    background: var(--bg-secondary);
+}
 
-        .action-buttons {
-            display: flex;
-            gap: 0.5rem;
-        }
+.action-buttons {
+    display: flex;
+    gap: 0.5rem;
+}
 
-        .btn-small {
-            padding: 0.5rem 0.875rem;
-            font-size: 0.75rem;
-        }
+.btn-small {
+    padding: 0.5rem 0.875rem;
+    font-size: 0.75rem;
+}
 
-        .btn-danger {
-            background: #dc2626;
-        }
+.btn-danger {
+    background: #dc2626;
+}
 
-        .btn-danger:hover {
-            background: #b91c1c;
-        }
+.btn-danger:hover {
+    background: #b91c1c;
+}
 
-        /* Modal Styles */
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.6);
-            overflow-y: auto;      /* allow scrolling if modal is tall */
-            padding: 2rem 1rem;    /* top/bottom space */
-            z-index: 2000;
-        }
+.modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    overflow-y: auto;
+    padding-top: 6rem;   /* 👈 pushes modal DOWN */
+    z-index: 2000;
+}
 
-        .modal-content {
-            background: var(--bg-secondary);
-            padding: 1.5rem;
-            border-radius: 0.5rem;
-            width: 100%;
-            max-width: 400px;
-            margin: 2rem auto;     /* center horizontally, push from top */
-            box-sizing: border-box;
-        }
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-        }
 
-        .modal-title {
-            font-size: 1.5rem;
-            font-weight: 700;
-        }
+.modal-content {
+    background: var(--bg-secondary);
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+    box-sizing: border-box;
+    overflow-y: auto;
+    scrollbar-width: none;
+    max-height: 90vh;
+    position: relative;
+}
 
-        .close-button {
-            background: none;
-            border: none;
-            color: var(--text-secondary);
-            font-size: 1.5rem;
-            cursor: pointer;
-            padding: 0;
-            width: 2rem;
-            height: 2rem;
-        }
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
 
-        .close-button:hover {
-            color: var(--text-primary);
-        }
+.modal-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+}
 
-        /* Recipe Detail */
-        .recipe-detail {
-            display: flex;
-            flex-direction: column;
-            gap: 1.5rem;
-        }
+.close-button {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0;
+    width: 2rem;
+    height: 2rem;
+}
 
-        .recipe-ingredients {
-            background: var(--bg-tertiary);
-            padding: 1.5rem;
-            border-radius: 0.5rem;
-        }
+.close-button:hover {
+    color: var(--text-primary);
+}
 
-        .recipe-ingredients h4 {
-            margin-bottom: 1rem;
-            font-size: 1.125rem;
-        }
+/* Recipe Detail */
+.recipe-detail {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
 
-        .recipe-ingredients ul {
-            list-style: none;
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
+.recipe-ingredients {
+    background: var(--bg-tertiary);
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+}
 
-        .recipe-ingredients li::before {
-            content: "•";
-            color: var(--accent);
-            font-weight: bold;
-            margin-right: 0.5rem;
-        }
+.recipe-ingredients h4 {
+    margin-bottom: 1rem;
+    font-size: 1.125rem;
+}
 
-        /* Responsive */
-        @media (max-width: 768px) {
-            .hero h1 {
-                font-size: 2rem;
-            }
+.recipe-ingredients ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
 
-            .nav-links {
-                display: none;
-            }
+.recipe-ingredients li::before {
+    content: "•";
+    color: var(--accent);
+    font-weight: bold;
+    margin-right: 0.5rem;
+}
 
-            .tab-nav {
-                flex-direction: column;
-            }
+/* Responsive */
+@media (max-width: 768px) {
+    .hero h1 {
+        font-size: 2rem;
+    }
 
-            .card-grid {
-                grid-template-columns: 1fr;
-            }
-        }
+    .nav-links {
+        display: none;
+    }
+
+    .tab-nav {
+        flex-direction: column;
+    }
+
+    .card-grid {
+        grid-template-columns: 1fr;
+    }
+}
 
 .footer {
     position: relative;
@@ -616,27 +623,11 @@ nav {
     color: var(--text-secondary);
 }
 
-.modal-overlay {
-  display: none;
-  position: fixed;
-  inset: 0; /* top/right/bottom/left 0 */
-  background: rgba(0,0,0,0.6);
-  justify-content: center;
-  align-items: center;
-}
 
 .modal-overlay:target {
   display: flex; /* show when URL hash matches */
 }
 
-.modal-content {
-  background: var(--bg-secondary);
-  padding: 2rem;
-  border-radius: 0.5rem;
-  max-width: 500px;
-  width: 90%;
-  position: relative;
-}
 
 .close-button {
   position: absolute;
@@ -803,7 +794,68 @@ body:has(.modal-overlay:target) {
   50% { transform: translateY(-10px); }
 }
 
+/* Delete Modal */
+/* Delete Modal */
+#deleteModal.modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    justify-content: center;   /* center horizontally */
+    align-items: center;       /* center vertically */
+    overflow: hidden;          /* no scroll needed for tiny modal */
+    padding: 0;                /* remove padding-top */
+    z-index: 2000;
+}
+
+.delete-modal {
+    max-width: 280px;
+    width: 90%;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    background: var(--bg-secondary);
+    text-align: center;
+    box-sizing: border-box;
+}
 
 
+.form-checkbox {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
 
+.form-checkbox label {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
 
+/* Remove the ugly frame and make checkboxes inline */
+.checkbox-inline label {
+    display: inline-block;
+    margin-right: 1rem;
+    cursor: pointer;
+}
+
+.checkbox-inline input[type="checkbox"] {
+    accent-color: var(--accent); /* keeps colored check mark */
+    width: auto;
+    height: auto;
+}
+
+.close-button {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+}
+
+.close-button:hover {
+    color: var(--text-primary);
+}

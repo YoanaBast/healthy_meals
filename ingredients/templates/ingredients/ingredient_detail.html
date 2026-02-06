@@ -6,8 +6,29 @@
 
 <div class="container-home">
 
-    <h2 class="section-title">Ingredient Details</h2>
+    <!-- DELETE POPUP -->
+    {% include 'ingredients/delete_popup.html' %}
+    <!-- END OF DELETE POPUP -->
 
+    <!-- Section Header like manage page -->
+    <div class="section-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem;">
+        <div>
+            <h2 class="section-title">Ingredient Details</h2>
+            <p class="section-description">View detailed information about this ingredient.</p>
+        </div>
+        <div>
+                <!--  Buttons-->
+            <a href="{% url 'manage_ingredients' %}" class="btn btn-secondary">Back</a>
+            <a href="{% url 'edit_ingredient' ingredient.id %}" class="btn btn-secondary">Edit</a>
+            <button class="btn btn-danger"
+                    type="button"
+                    onclick="openDeleteModal({{ ingredient.id }}, '{{ ingredient.name }}')">
+                Delete
+            </button>
+        </div>
+    </div>
+
+    <!-- Details Table -->
     <table class="data-table">
         <tbody>
             <tr>
@@ -33,6 +54,7 @@
         </tbody>
     </table>
 
+    <!-- Nutrients Table -->
     <h4 style="margin-top: 2rem;">Nutrients per the base quantity - {{ ingredient.base_quantity }} {{ ingredient.default_unit }}:</h4>
     <table class="data-table">
         <thead>
@@ -50,13 +72,9 @@
             {% endfor %}
         </tbody>
     </table>
-
-    <div style="margin-top: 1rem;">
-        <a href="{% url 'manage_ingredients' %}" class="btn btn-secondary">Back</a>
-        <a href="{% url 'edit_ingredient' ingredient.id %}" class="btn btn-primary">Edit</a>
-        <a href="{% url 'delete_ingredient' ingredient.id %}" class="btn btn-danger">Delete</a>
-    </div>
-
 </div>
+
+<script src="{% static 'js/delete_popup.js' %}"></script>
+
 
 {% endblock %}

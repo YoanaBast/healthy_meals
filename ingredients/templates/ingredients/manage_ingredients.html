@@ -1,77 +1,88 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load form_extras %}
+
 {% block title %}Manage Ingredients{% endblock %}
 
 {% block content %}
 
 <div class="container-home">
-    <!-- Tabs -->
+<!-- Tabs -->
 {% include 'tab_nav.html' with active_tab='manage-ingredients' %}
 
-    <!-- MANAGE INGREDIENTS -->
-    <div id="manage-ingredients" class="tab-content active">
+<div id="manage-ingredients" class="tab-content active">
 
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-            <div>
-                <h2 class="section-title" style="margin-bottom: 0.5rem;">Manage Ingredients</h2>
-                <p class="section-description" style="margin-bottom: 0;">
-                    Manage your ingredient database.
-                </p>
-            </div>
-
-            <a href="#addIngredientModal" class="btn">Add New Ingredient</a>
-
+    <!-- Title + Button Row -->
+    <div class="section-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem;">
+        <div>
+            <h2 class="section-title">Manage Ingredients</h2>
+            <p class="section-description">Manage your ingredient database.</p>
+        </div>
+        <a href="#addIngredientModal" class="btn">Add New Ingredient</a>
+    </div>
 
 <!-- Add Ingredient Modal -->
-
             <div id="addIngredientModal" class="modal-overlay">
-              <div class="modal-content">
-                <h3 class="modal-title">Add Ingredient</h3>
-                <a href="#" class="close-button">&times;</a>
-                <form>
-                    <div class="form-group">
-                        <label class="form-label" for="ingredientName">Ingredient Name</label>
-                        <input type="text" id="ingredientName" class="form-input" placeholder="Enter ingredient name">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label" for="ingredientCategory">Category</label>
-                        <select id="ingredientCategory" class="form-select">
-                        {% for cat in categories %}
+                <div class="modal-content">
+                    <h3 class="modal-title">Add Ingredient</h3>
 
-                            <option> {{ cat }}</option>
-                        {% empty %}
-                            <option> No available categories </option>
+                    <!-- Small X button -->
+                    <a href="#" class="close-button">&times;</a>
 
+
+                    <form id="ingredient-form" method="post" action="{% url 'add_ingredient_popup' %}">
+                        {% csrf_token %}
+
+                        {# Name #}
+                        <div class="form-group">
+                            {{ form|get_label:"name" }}
+                            {{ form|get_item:"name" }}
+                        </div>
+
+                        {# Category #}
+                        <div class="form-group">
+                            {{ form|get_label:"category" }}
+                            {{ form|get_item:"category" }}
+                        </div>
+
+                        {# Dietary tags #}
+                        <div class="form-group">
+                            {{ form|get_label:"dietary_tag" }}
+                            {{ form|get_item:"dietary_tag" }}
+                        </div>
+
+                        {# Base quantity and default unit #}
+                        <div class="form-group">
+                            {{ form|get_label:"base_quantity" }}
+                            {{ form|get_item:"base_quantity" }}
+                        </div>
+
+                        <div class="form-group">
+                            {{ form|get_label:"default_unit" }}
+                            {{ form|get_item:"default_unit" }}
+                        </div>
+
+                        {# Nutrients dynamically #}
+                        {% for nutrient in nutrients %}
+                            {% with field_name="base_quantity_"|add:nutrient %}
+                                <div class="form-group">
+                                    {{ form|get_label:field_name }}
+                                    {{ form|get_field:field_name }}
+                                </div>
+                            {% endwith %}
                         {% endfor %}
 
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label" for="unit">Unit of Measurement</label>
-                            <select id="unit" class="form-select">
-                                {% for unit in measurement_units %}
-                                    <option value="{{ unit.code }}">{{ unit.name }}</option>
-                                {% empty %}
-                                    <option>No available units</option>
-                                {% endfor %}
-                            </select>
+                        <div class="form-actions">
+                            <button type="submit" class="btn">Save</button>
+                            <a href="#" class="btn btn-secondary">Cancel</a>
+                        </div>
+                    </form>
 
-
-                    </div>
-
-                    <div style="display: flex; gap: 1rem;">
-                        <button type="submit" class="btn">Save Ingredient</button>
-                        <a href="{% url 'create_ingredient_more' %}" class="btn btn-secondary">More...</a>
-                        <a href="{% url 'manage_ingredients' %}" class="btn btn-secondary">Cancel</a>
-                    </div>
-                </form>
-              </div>
+                </div>
             </div>
-        </div>
-<!-- END OF Add Ingredient Modal -->
+            <!-- END Add Ingredient Modal -->
 
-
-
+<!-- Table with all ingredients -->
         <table class="data-table">
             <thead>
                 <tr>
@@ -91,11 +102,22 @@
                         <td data-label="Unit">{{ ing.unit_name }}</td>
                         <td data-label="Actions">
                             <a href="{% url 'ingredient_detail' ing.id %}" class="btn btn-secondary btn-small">See Details</a>
-                            <a href="{% url 'edit_ingredient' ing.id %}" class="btn btn-secondary btn-small">Edit</a>
-                            <a href="{% url 'delete_ingredient' ing.id %}" class="btn btn-danger btn-small">Delete</a>
+                            <button class="btn btn-secondary btn-small"
+                                    type="button"
+                                    onclick="openEditModal({{ ing.id }})">
+                                Edit
+                            </button>
+
+                            <button class="btn btn-danger btn-small"
+                                type="button"
+                                onclick="openDeleteModal({{ ing.id }}, '{{ ing.name }}')">
+                            Delete
+                            </button>
                         </td>
 
                     </tr>
+
+
                     {% empty %}
                     <tr>
                         <td colspan="5" style="text-align: center; padding: 2rem;">
@@ -105,10 +127,20 @@
                     {% endfor %}
                 </tbody>
         </table>
+<!-- END OFTable with all ingredients -->
 
-
+<!-- DELETE POPUP -->
+{% include 'ingredients/delete_popup.html' %}
+<!-- END OF DELETE POPUP -->
 
     </div>
 </div>
+
+<!-- Script for quick save on popup -->
+
+<script src="{% static 'js/zero_inputt_handler.js' %}"></script>
+<script src="{% static 'js/form_submitter.js' %}"></script>
+<script src="{% static 'js/delete_popup.js' %}"></script>
+<script src="{% static 'js/edit_popup.js' %}"></script>
 
 {% endblock %}
