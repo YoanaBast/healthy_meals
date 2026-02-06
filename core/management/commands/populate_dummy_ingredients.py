@@ -5,12 +5,13 @@ from ingredients.models import (
     Ingredient,
     IngredientCategory,
     IngredientDietaryTag,
-    IngredientMeasurementUnit
+    IngredientMeasurementUnit,
+    MeasurementUnit
 )
 
 
 class Command(BaseCommand):
-    help = 'Populate ingredients from dummy_ingredients.json'
+    help = 'Populate ingredients and units from JSON'
 
     def handle(self, *args, **kwargs):
         json_path = Path(__file__).resolve().parent.parent / 'dummy_data' / 'dummy_ingredients.json'
@@ -23,17 +24,29 @@ class Command(BaseCommand):
         with open(json_path, 'r') as f:
             data = json.load(f)
 
-        # Create categories and dietary tags from JSON
+        # 1️⃣ Create units table from JSON
+        self.create_units(data.get('units', {}))
+
+        # 2️⃣ Create categories and dietary tags
         self.create_categories(data.get('categories', []))
         self.create_dietary_tags(data.get('dietary_tags', []))
 
-        # Process ingredients
+        # 3️⃣ Process ingredients and link units
         ingredients_data = data.get('ingredients', {})
         for name, info in ingredients_data.items():
             self.stdout.write(f"\n>>> PROCESSING: {name}")
-            self.process_ingredient(name, info)
+            self.process_ingredient(name, info, data.get('units', {}))
 
         self.stdout.write(self.style.SUCCESS('\nFinished populating ingredients!'))
+
+    def create_units(self, units_dict):
+        for code, names in units_dict.items():
+            unit, created = MeasurementUnit.objects.get_or_create(
+                code=code,
+                defaults={'name': names.get('singular', code)}
+            )
+            if created:
+                self.stdout.write(f"DEBUG: Created MeasurementUnit: {code} → {names.get('singular')}")
 
     def create_categories(self, categories):
         for name in categories:
@@ -47,16 +60,19 @@ class Command(BaseCommand):
             if created:
                 self.stdout.write(f"DEBUG: Created Tag: {name}")
 
-    def process_ingredient(self, name, data):
+    def process_ingredient(self, name, data, units_dict):
         # Category
         category = IngredientCategory.objects.filter(name=data.get('category')).first()
 
-        # Base quantity and unit
+        # Base quantity and default unit
         base_qty = data.get('base_quantity', 100)
+        unit_code = data.get('primary_unit', 'g')
+        default_unit_obj = MeasurementUnit.objects.get(code=unit_code)  # <-- fetch object
+
         defaults = {
             'category': category,
             'base_quantity': base_qty,
-            'default_unit': data.get('primary_unit', 'g'),
+            'default_unit': default_unit_obj,  # <-- assign object
         }
 
         # Nutrients
@@ -64,6 +80,7 @@ class Command(BaseCommand):
             val = data.get(nutrient, 0)
             defaults[f'base_quantity_{nutrient}'] = val or 0
 
+        # Create or update ingredient
         ingredient, _ = Ingredient.objects.update_or_create(name=name, defaults=defaults)
 
         # Dietary tags
@@ -71,18 +88,17 @@ class Command(BaseCommand):
             tags = IngredientDietaryTag.objects.filter(name__in=data['dietary_tags'])
             ingredient.dietary_tag.set(tags)
 
-        # Measurement units
+        # Measurement units (junction table)
         for unit_info in data.get('units', []):
-            unit_code = unit_info.get('unit')
+            code = unit_info.get('unit')
             conversion = unit_info.get('conversion_to_base', 1.0)
 
-            # Simple fallback for common units
-            if conversion is None:
-                conversion = 1.0 if unit_code != 'cup' else 240.0
+            # Get the MeasurementUnit object
+            unit_obj = MeasurementUnit.objects.get(code=code)
 
             IngredientMeasurementUnit.objects.update_or_create(
                 ingredient=ingredient,
-                unit=unit_code,
+                unit=unit_obj,  # <-- assign object, not string
                 defaults={'conversion_to_base': conversion}
             )
-            self.stdout.write(f"DEBUG: Set unit {unit_code} for {name} → {conversion}g")
+            self.stdout.write(f"DEBUG: Linked {ingredient.name} → {unit_obj.name} ({conversion})")

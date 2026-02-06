@@ -1,7 +1,22 @@
 {
-  "categories": ["Vegetable", "Fruit", "Dairy & Eggs", "Meat", "Grain", "Spice", "Seafood", "Butter & Oil", "Nuts & Seeds", "Legumes"],
-  "dietary_tags": ["Vegan", "Vegetarian", "Gluten-Free", "Dairy-Free", "Nut-Free", "Sugar-Free"],
-
+  "units": {
+    "g": {"singular": "Gram", "plural": "Grams"},
+    "kg": {"singular": "Kilogram", "plural": "Kilograms"},
+    "ml": {"singular": "Milliliter", "plural": "Milliliters"},
+    "l": {"singular": "Liter", "plural": "Liters"},
+    "pc": {"singular": "Piece", "plural": "Pieces"},
+    "tbsp": {"singular": "Tablespoon", "plural": "Tablespoons"},
+    "tsp": {"singular": "Teaspoon", "plural": "Teaspoons"},
+    "cup": {"singular": "Cup", "plural": "Cups"},
+    "oz": {"singular": "Ounce", "plural": "Ounces"}
+  },
+  "categories": [
+    "Vegetable", "Fruit", "Dairy & Eggs", "Meat", "Grain", "Spice",
+    "Seafood", "Butter & Oil", "Nuts & Seeds", "Legumes"
+  ],
+  "dietary_tags": [
+    "Vegan", "Vegetarian", "Gluten-Free", "Dairy-Free", "Nut-Free", "Sugar-Free"
+  ],
   "ingredients": {
     "Flour": {
       "category": "Grain",
@@ -14,9 +29,12 @@
       "fiber": 2.7,
       "sugar": 0.3,
       "zinc": 1,
-       "units": [{"unit": "g", "conversion_to_base": 1}]
+      "units": [
+        {"unit": "g", "conversion_to_base": 1},
+        {"unit": "kg", "conversion_to_base": 1000},
+        {"unit": "cup", "conversion_to_base": 120}
+      ]
     },
-
     "Milk": {
       "category": "Dairy & Eggs",
       "primary_unit": "ml",
@@ -28,9 +46,12 @@
       "fiber": 0,
       "sugar": 5,
       "dietary_tags": ["Vegan", "Vegetarian", "Gluten-Free", "Nut-Free", "Sugar-Free"],
-      "units": [{"unit": "ml", "conversion_to_base": 1}]
+      "units": [
+        {"unit": "ml", "conversion_to_base": 1},
+        {"unit": "l", "conversion_to_base": 1000},
+        {"unit": "cup", "conversion_to_base": 240}
+      ]
     },
-
     "Carrot": {
       "category": "Vegetable",
       "primary_unit": "g",
@@ -42,9 +63,12 @@
       "sugar": 4.7,
       "zinc": 0.3,
       "dietary_tags": ["Vegan", "Vegetarian", "Gluten-Free", "Dairy-Free", "Nut-Free", "Sugar-Free"],
-      "units": [{"unit": "g", "conversion_to_base": 1}, {"unit": "cup", "conversion_to_base": 130}]
+      "units": [
+        {"unit": "g", "conversion_to_base": 1},
+        {"unit": "cup", "conversion_to_base": 130},
+        {"unit": "tbsp", "conversion_to_base": 7.8}
+      ]
     },
-
     "Egg": {
       "category": "Dairy & Eggs",
       "primary_unit": "pc",
@@ -57,7 +81,9 @@
       "sugar": 0.6,
       "zinc": 0.5,
       "dietary_tags": ["Vegan", "Vegetarian", "Dairy-Free", "Nut-Free", "Sugar-Free"],
-      "units": [{"unit": "pc", "conversion_to_base": 1}]
+      "units": [
+        {"unit": "pc", "conversion_to_base": 1}
+      ]
     }
   }
 }

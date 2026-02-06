@@ -2,7 +2,7 @@ from datetime import time
 
 from django.db import models
 
-from ingredients.models import IngredientMeasurementUnit, Ingredient
+from ingredients.models import IngredientMeasurementUnit, Ingredient, MeasurementUnit
 
 
 # Create your models here.
@@ -63,40 +63,32 @@ class Recipe(models.Model):
                 minutes = int(value.replace("m", "").strip())
         self.cooking_time = time(hour=hours, minute=minutes)
 
-
     @property
     def nutrients(self):
-
-        """
-        Returns a dict of total nutrients for the recipe.
-        Scales each ingredient by its quantity and unit.
-        """
-
         total = {}
-
-        for ri in self.recipe_ingredient.all():
+        print(f"obj: {self.recipe_ingredient.all()}")
+        for ri in self.recipe_ingredient.all():  # correct related_name
+            print(f"ri: {ri}")
             ing = ri.ingredient
             qty = ri.quantity
-            unit_str = ri.unit
+            unit_obj = ri.unit  # ✅ already a MeasurementUnit instance
 
             try:
-                unit_obj = ing.measurement_units.get(unit=unit_str)
+                ing_unit_obj = ing.measurement_units.get(unit=unit_obj)  # get IngredientMeasurementUnit
             except IngredientMeasurementUnit.DoesNotExist:
                 continue
 
-            ing_totals = ing.get_nutrients_dict(starting_unit=unit_obj, starting_quantity=qty)
+            ing_totals = ing.get_nutrients_dict(starting_unit=ing_unit_obj, starting_quantity=qty)
 
             for nutrient, value in ing_totals.items():
                 total[nutrient] = total.get(nutrient, 0) + value
 
+        print(f"total: {total}")
         return total
-
 
     @property
     def quantity_ingredients(self):
-        return {ri.ingredient: (ri.quantity, ri.unit) for ri in self.recipe_ingredients.all()}
-
-
+        return {ri.ingredient: (ri.quantity, ri.unit) for ri in self.recipe_ingredient.all()}
 
 
 class RecipeIngredient(models.Model):
@@ -105,7 +97,7 @@ class RecipeIngredient(models.Model):
     ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
 
     quantity = models.FloatField()
-    unit = models.CharField(max_length=10, choices=IngredientMeasurementUnit.MeasureUnits.choices)
+    unit = models.ForeignKey(MeasurementUnit, on_delete=models.SET_NULL, null=True)
 
 
     class Meta:
