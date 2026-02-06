@@ -1,4 +1,6 @@
 {% load static %}
+{% load form_extras %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -11,7 +13,9 @@
     <header>
         <nav class="container">
             <div class="logo">
-                  <img class="header-logo" src="{% static 'images/simple_logo.svg' %}" alt="Tomato"/>
+                <a href="{% url 'homepage' %}">
+                  <img class="header-logo" src="{% static 'images/simple_logo.svg' %}" alt="logo"/>
+                </a>
             </div>
             <ul class="nav-links">
                 <a href="{% url 'homepage' %}">

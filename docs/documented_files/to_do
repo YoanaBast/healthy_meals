@@ -56,3 +56,13 @@ add unique=true where applicable, make sure measure units are transformed dynami
 later I plan to have a check that allows edit/delete only on fields created by a specific user
 
 add weight to ingredients and recipes
+
+make add ing popup grid for PC
+
+add favourites table for recipe + user
+
+add View to recipes dashboard
+
+fix edit popup for ingredients - x and cancel are not working
+
+figure out a way to inherit forms

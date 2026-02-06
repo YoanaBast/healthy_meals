@@ -1,17 +1,68 @@
+from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
+from django.urls import reverse
+
 from .models import Ingredient, IngredientCategory, IngredientMeasurementUnit, MeasurementUnit
+from .forms import IngredientForm
 
 
 def manage_ingredients(request):
-    ingredients = Ingredient.objects.all()
-    categories = IngredientCategory.objects.all()
-    measurement_units = MeasurementUnit.objects.all()
+    ingredients = Ingredient.objects.select_related(
+        'category', 'default_unit'
+    ).prefetch_related(
+        'dietary_tag'
+    ).all().order_by('name')
+
+    form = IngredientForm()
+
     context = {
-        "ingredients": ingredients,
-        "categories": categories,
-        "measurement_units": measurement_units,
+        'ingredients': ingredients,
+        'form': form,
+        'nutrients': Ingredient.NUTRIENTS,
+        'add_url': reverse('add_ingredient_popup'),  # important
     }
+
     return render(request, 'ingredients/manage_ingredients.html', context)
+
+
+def add_ingredient_popup(request):
+    if request.method == 'POST':
+        form = IngredientForm(request.POST)
+        if form.is_valid():
+            ingredient = form.save()
+            return JsonResponse({
+                'success': True,
+                'id': ingredient.id,
+                'name': ingredient.name,
+                'category': ingredient.category.name if ingredient.category else '-',
+                'unit': ingredient.default_unit.name if ingredient.default_unit else '-',
+            })
+        return JsonResponse({'success': False, 'errors': form.errors})
+
+def edit_ingredient_popup(request, ingredient_id):
+    ing = get_object_or_404(Ingredient, pk=ingredient_id)
+
+    if request.method == "POST":
+        form = IngredientForm(request.POST, instance=ing)
+        if form.is_valid():
+            form.save()  # updates, does not create new
+            return JsonResponse({
+                "success": True,
+                "id": ing.id,
+                "name": ing.name,
+                "category": ing.category.name if ing.category else "-",
+                "unit": ing.default_unit.name if ing.default_unit else "-",
+            })
+        return JsonResponse({"success": False, "errors": form.errors})
+
+    else:
+        form = IngredientForm(instance=ing)  # pre-fill with DB values
+
+    return render(request, "ingredients/edit_ingredient_modal.html", {
+        "form": form,
+        "ingredient": ing,
+        "nutrients": Ingredient.NUTRIENTS,
+    })
 
 def create_ingredient_more(request):
     return render(request, 'ingredients/more_ingredient_creation.html')
