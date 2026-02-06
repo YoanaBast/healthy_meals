@@ -21,7 +21,9 @@
 
             <a href="#addIngredientModal" class="btn">Add New Ingredient</a>
 
-            <!-- Modal -->
+
+<!-- Add Ingredient Modal -->
+
             <div id="addIngredientModal" class="modal-overlay">
               <div class="modal-content">
                 <h3 class="modal-title">Add Ingredient</h3>
@@ -46,16 +48,15 @@
                     </div>
                     <div class="form-group">
                         <label class="form-label" for="unit">Unit of Measurement</label>
-                        <select id="unit" class="form-select">
-                        {% for unit in measurment_units %}
+                            <select id="unit" class="form-select">
+                                {% for unit in measurement_units %}
+                                    <option value="{{ unit.code }}">{{ unit.name }}</option>
+                                {% empty %}
+                                    <option>No available units</option>
+                                {% endfor %}
+                            </select>
 
-                            <option> {{ unit.unit }}</option>
-                        {% empty %}
-                            <option> No available units </option>
 
-                        {% endfor %}
-
-                        </select>
                     </div>
 
                     <div style="display: flex; gap: 1rem;">
@@ -67,6 +68,7 @@
               </div>
             </div>
         </div>
+<!-- END OF Add Ingredient Modal -->
 
 
 

@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 from django.core.management.base import BaseCommand
 from recipes.models import Recipe, RecipeIngredient, RecipeCategory
-from ingredients.models import Ingredient, IngredientMeasurementUnit
+from ingredients.models import Ingredient, IngredientMeasurementUnit, MeasurementUnit
 
 
 class Command(BaseCommand):
@@ -51,7 +51,7 @@ class Command(BaseCommand):
                     continue
 
                 # Only create units if present in JSON for the ingredient
-                valid_units = [u.unit for u in ingredient.measurement_units.all()]
+                valid_units = [u.unit.code for u in ingredient.measurement_units.all()]  # get the code string
                 if unit not in valid_units:
                     self.stdout.write(self.style.WARNING(
                         f"Unit '{unit}' not defined for {ing_name} in JSON. Skipping ingredient."
@@ -59,10 +59,22 @@ class Command(BaseCommand):
                     continue
 
                 # Create/update RecipeIngredient
+                # Get the MeasurementUnit instance for this unit
+                unit_obj = MeasurementUnit.objects.filter(code=unit).first()
+                if not unit_obj:
+                    self.stdout.write(self.style.WARNING(
+                        f"Unit '{unit}' not found in MeasurementUnit table. Skipping {ing_name}."
+                    ))
+                    continue
+
+                # Create/update RecipeIngredient with proper FK
                 ri, _ = RecipeIngredient.objects.update_or_create(
                     recipe=recipe,
                     ingredient=ingredient,
-                    defaults={'quantity': qty, 'unit': unit}
+                    defaults={
+                        'quantity': qty,
+                        'unit': unit_obj  # ✅ pass the FK, not a string
+                    }
                 )
 
                 self.stdout.write(f"DEBUG: Added {qty} {unit} of {ing_name} to {recipe_name}")

@@ -1,13 +1,15 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from .models import Ingredient, IngredientCategory, IngredientMeasurementUnit
+from .models import Ingredient, IngredientCategory, IngredientMeasurementUnit, MeasurementUnit
+
 
 def manage_ingredients(request):
     ingredients = Ingredient.objects.all()
     categories = IngredientCategory.objects.all()
+    measurement_units = MeasurementUnit.objects.all()
     context = {
         "ingredients": ingredients,
         "categories": categories,
-
+        "measurement_units": measurement_units,
     }
     return render(request, 'ingredients/manage_ingredients.html', context)
 
