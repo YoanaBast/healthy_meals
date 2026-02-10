@@ -1,4 +1,4 @@
-setup:
+Setup:
 
 create a .env file in root healthy_meals
 since you are running a local db, please use db name, user and password that you have access to.
@@ -9,7 +9,7 @@ DB_PASSWORD=dbpassword
 DB_HOST=127.0.0.1
 DB_PORT=5432
 
-detup venv??
+do i need to give insturctions how to setup venv??
 create db with the same creds
 pip install -r requirements.txt - install dependencies
 python manage.py makemigrations
@@ -24,17 +24,14 @@ run this for dummy data
 
 lazy setup
 python lazy_setup.py
+remove the persistent run server, rework in the end and don't forget to pip freeze
 
+TO-DO:
 
-edge cases and ideas:
-
-404 - ops someone ate that if trying to access deleted record?
-
+add category option right on the dashboards
 when deleting a category i want the ingredients to set null and display as uncategorized + add category from edit ingredients but force users to add category at form
 
-make the nutrients so that it displays 0 only if the user input 0, otherwise it is info not available
-
-fix the nav menu for mobile
+fix the nav menu for mobile -> make resposnive in general
 
 check if i can make guide
 
@@ -42,27 +39,29 @@ check if i can make day/night widget
 
 add calorie tracker
 
-edit/fast edit (exclude nutrients)
-on add ingredient add option for add more details + redirect to all nutri
 
-make the 2026 function to take current year
+make the 2026 function to take current year -> not sure if this is creation year or current year, maybe remove it altohgether
 
-come up with a better name then meal planner, some mix of grocery and recipe/track
-
-clean up css and move to different files(?)
+clean up css and move to different files(?) - the project breaks when I try to import css and I'm not sure why yet
 
 add unique=true where applicable, make sure measure units are transformed dynamically
 
-later I plan to have a check that allows edit/delete only on fields created by a specific user
+later I plan to have a check that allows edit/delete only on fields created by a specific user (user cannot delete public ingredients made by other users)
 
-add weight to ingredients and recipes
+add weight to ingredients and recipes (total weight to be split to portions?)
 
 make add ing popup grid for PC
 
 add favourites table for recipe + user
 
-add View to recipes dashboard
+add View option to recipes dashboard
 
-fix edit popup for ingredients - x and cancel are not working
+remove attrs={'class':
 
-figure out a way to inherit forms
+fix DRY for the form in edit_ingredient_popup (? no idea what i meant here, check if calling form twice is optimal)
+
+use exclude in the form
+
+add search boxes
+
+add documentation, redme and nested files in docs

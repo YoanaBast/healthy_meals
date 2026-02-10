@@ -3,7 +3,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 
 from .models import Ingredient, IngredientCategory, IngredientMeasurementUnit, MeasurementUnit
-from .forms import IngredientForm
+from .forms import IngredientAddForm, IngredientEditForm
 
 
 def manage_ingredients(request):
@@ -13,86 +13,88 @@ def manage_ingredients(request):
         'dietary_tag'
     ).all().order_by('name')
 
-    form = IngredientForm()
+    add_form = IngredientAddForm()
 
     context = {
         'ingredients': ingredients,
-        'form': form,
+        'add_form': add_form,
         'nutrients': Ingredient.NUTRIENTS,
-        'add_url': reverse('add_ingredient_popup'),  # important
+        'add_url': reverse('add_ingredient'),
     }
 
     return render(request, 'ingredients/manage_ingredients.html', context)
 
 
-def add_ingredient_popup(request):
-    if request.method == 'POST':
-        form = IngredientForm(request.POST)
-        if form.is_valid():
-            ingredient = form.save()
-            return JsonResponse({
-                'success': True,
-                'id': ingredient.id,
-                'name': ingredient.name,
-                'category': ingredient.category.name if ingredient.category else '-',
-                'unit': ingredient.default_unit.name if ingredient.default_unit else '-',
-            })
-        return JsonResponse({'success': False, 'errors': form.errors})
+def add_ingredient(request):
+    form = IngredientAddForm(request.POST or None)
 
-def edit_ingredient_popup(request, ingredient_id):
+    if request.method == 'POST' and form.is_valid():
+        form.save()
+        return redirect('manage_ingredients')  # reloads the page after save
+
+    context = {
+        'form': form,
+        'ingredients': Ingredient.objects.select_related('category', 'default_unit')
+                                         .prefetch_related('dietary_tag')
+                                         .all()
+                                         .order_by('name')
+    }
+
+    return render(request, 'ingredients/manage_ingredients.html', context)
+
+
+
+def edit_ingredient(request, ingredient_id):
+    default_url = reverse('manage_ingredients')
     ing = get_object_or_404(Ingredient, pk=ingredient_id)
 
     if request.method == "POST":
-        form = IngredientForm(request.POST, instance=ing)
+        form = IngredientEditForm(request.POST, instance=ing) #instance fills the info from the object to the form, updates instead of creating new obj
         if form.is_valid():
-            form.save()  # updates, does not create new
-            return JsonResponse({
-                "success": True,
-                "id": ing.id,
-                "name": ing.name,
-                "category": ing.category.name if ing.category else "-",
-                "unit": ing.default_unit.name if ing.default_unit else "-",
-            })
-        return JsonResponse({"success": False, "errors": form.errors})
+            form.save()  # updates, does not create new because of instance
+            return redirect('manage_ingredients')  # reloads page
 
     else:
-        form = IngredientForm(instance=ing)  # pre-fill with DB values
+        form = IngredientEditForm(instance=ing)  # pre-fill with DB values
 
-    return render(request, "ingredients/edit_ingredient_modal.html", {
+    context = {
         "form": form,
         "ingredient": ing,
         "nutrients": Ingredient.NUTRIENTS,
-    })
+        'default_url': default_url,
 
-def create_ingredient_more(request):
-    return render(request, 'ingredients/more_ingredient_creation.html')
+    }
 
-# DETAIL
+    return render(request, "ingredients/edit_ingredient.html", context)
+
+
+
 def ingredient_detail(request, ingredient_id):
-    ing = get_object_or_404(Ingredient, pk=ingredient_id)
-    return render(request, 'ingredients/ingredient_detail.html', {'ingredient': ing})
+    ingredient = get_object_or_404(Ingredient, pk=ingredient_id)
+    unit_id = request.GET.get("unit_id")
 
-# EDIT (minimal, no ModelForm)
-def edit_ingredient(request, ingredient_id):
-    ing = get_object_or_404(Ingredient, pk=ingredient_id)
-    categories = IngredientCategory.objects.all()
-    units = IngredientMeasurementUnit.objects.all()
+    if unit_id:
+        selected_unit = ingredient.measurement_units.filter(id=unit_id).first()
+    else:
+        selected_unit = ingredient.measurement_units.first()
 
-    if request.method == 'POST':
-        ing.name = request.POST.get('name', ing.name)
-        ing.category_id = request.POST.get('category') or ing.category_id
-        ing.default_unit = request.POST.get('unit', ing.default_unit)
-        ing.save()
-        return redirect('manage_ingredients')
+    # Fallback if no units exist
+    if not selected_unit:
+        selected_unit = None
+        nutrients = ingredient.nutrients
+    else:
+        nutrients = ingredient.get_nutrients_dict(selected_unit, 1)  # 1 unit of selected_unit
 
     context = {
-        'ingredient': ing,
-        'categories': categories,
-        'units': units,
+        "ingredient": ingredient,
+        "selected_unit": selected_unit,
+        'nutrients': nutrients,
     }
-    return render(request, 'ingredients/ingredient_edit.html', context)
 
-# DELETE
+    return render(request, "ingredients/ingredient_detail.html", context)
+
+
+
 def delete_ingredient(request, ingredient_id):
     ing = get_object_or_404(Ingredient, pk=ingredient_id)
     if request.method == 'POST':

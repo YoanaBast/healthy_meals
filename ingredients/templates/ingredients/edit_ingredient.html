@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Edit Ingredient{% endblock %}
+
+{% block content %}
+
+<div class="container-home">
+
+    {% include 'ingredients/delete_ingredient_modal.html' %}
+
+    <div class="section-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem;">
+        <div>
+            <h2 class="section-title">Edit Ingredient</h2>
+            <p class="section-description">Update information about this ingredient.</p>
+        </div>
+        <div>
+        <a href="{{ request.META.HTTP_REFERER|default:default_url }}" class="btn btn-secondary">Back</a>
+
+            <button class="btn btn-danger"
+                    type="button"
+                    onclick="openDeleteModal({{ ingredient.id }}, '{{ ingredient.name }}')">
+                Delete
+            </button>
+        </div>
+    </div>
+
+    <form method="POST">
+        {% csrf_token %}
+
+        <!-- Basic fields -->
+        <div class="basic-fields">
+            {{ form.name.label_tag }} {{ form.name }}
+            {{ form.category.label_tag }} {{ form.category }}
+            {{ form.dietary_tag.label_tag }} {{ form.dietary_tag }}
+            {{ form.base_quantity.label_tag }} {{ form.base_quantity }}
+            {{ form.default_unit.label_tag }} {{ form.default_unit }}
+        </div>
+
+        <!-- Nutrients editable -->
+        <h4 style="margin-top: 2rem;">Nutrients (per base quantity)</h4>
+        <div class="nutrients-grid" style="display:grid; grid-template-columns: repeat(4, 1fr); gap:1rem;">
+            {% for field in form.visible_fields %}
+                {% if "base_quantity_" in field.name %}
+                <div class="form-group">
+                    {{ field.label_tag }}
+                    {{ field }}
+                </div>
+                {% endif %}
+            {% endfor %}
+
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="margin-top:1rem;">Save Changes</button>
+    </form>
+
+</div>
+
+<script src="{% static 'js/delete_popup.js' %}"></script>
+
+{% endblock %}
