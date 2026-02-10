@@ -6,18 +6,14 @@
 
 <div class="container-home">
 
-    <!-- DELETE POPUP -->
-    {% include 'ingredients/delete_popup.html' %}
-    <!-- END OF DELETE POPUP -->
+    {% include 'ingredients/delete_ingredient_modal.html' %}
 
-    <!-- Section Header like manage page -->
     <div class="section-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem;">
         <div>
             <h2 class="section-title">Ingredient Details</h2>
             <p class="section-description">View detailed information about this ingredient.</p>
         </div>
         <div>
-                <!--  Buttons-->
             <a href="{% url 'manage_ingredients' %}" class="btn btn-secondary">Back</a>
             <a href="{% url 'edit_ingredient' ingredient.id %}" class="btn btn-secondary">Edit</a>
             <button class="btn btn-danger"
@@ -44,8 +40,8 @@
                 <td>{{ ingredient.base_quantity }}</td>
             </tr>
             <tr>
-                <th>Main Unit</th>
-                <td>{{ ingredient.get_default_unit_display }}</td>
+                <th>Default Unit</th>
+                <td>{{ ingredient.default_unit.name|default:"-" }}</td>
             </tr>
             <tr>
                 <th>Dietary Information</th>
@@ -54,9 +50,22 @@
         </tbody>
     </table>
 
-    <!-- Nutrients Table -->
-    <h4 style="margin-top: 2rem;">Nutrients per the base quantity - {{ ingredient.base_quantity }} {{ ingredient.default_unit }}:</h4>
-    <table class="data-table">
+    <!-- Unit Selection & Nutrients Table -->
+    <h4 style="margin-top: 2rem;">Nutrients per selected unit:</h4>
+
+    <form method="get">
+        <label for="unit">Select unit:</label>
+        <select name="unit" id="unit" onchange="this.form.submit()">
+            {% for im in ingredient.measurement_units.all %}
+                <option value="{{ im.id }}" {% if selected_unit and im.id == selected_unit.id %}selected{% endif %}>
+                    {{ im.unit.name }}
+                </option>
+            {% endfor %}
+        </select>
+        <noscript><button type="submit">Apply</button></noscript>
+    </form>
+
+    <table class="data-table" style="margin-top:1rem;">
         <thead>
             <tr>
                 <th>Nutrient</th>
@@ -64,17 +73,17 @@
             </tr>
         </thead>
         <tbody>
-            {% for nutrient, value in ingredient.nutrients.items %}
+            {% for n, value in nutrients.items %}
             <tr>
-                <td>{{ nutrient|upper }}</td>
-                <td>{{ value }}</td>
+                <td>{{ n|upper }}</td>
+                <td>{{ value|floatformat:2 }}</td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
+
 </div>
 
 <script src="{% static 'js/delete_popup.js' %}"></script>
-
 
 {% endblock %}

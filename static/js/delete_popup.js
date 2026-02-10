@@ -4,7 +4,7 @@
     const form = document.getElementById('deleteForm');
 
     text.textContent = `Are you sure you want to delete "${name}"?`;
-    form.action = `/ingredients/${id}delete/`;
+    form.action = `/ingredients/${id}/delete/`;
     modal.style.display = 'flex';
     document.body.style.overflow = 'hidden';
 }

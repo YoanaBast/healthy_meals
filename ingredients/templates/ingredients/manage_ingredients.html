@@ -10,128 +10,68 @@
 <!-- Tabs -->
 {% include 'tab_nav.html' with active_tab='manage-ingredients' %}
 
-<div id="manage-ingredients" class="tab-content active">
-
-    <!-- Title + Button Row -->
-    <div class="section-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem;">
-        <div>
-            <h2 class="section-title">Manage Ingredients</h2>
-            <p class="section-description">Manage your ingredient database.</p>
-        </div>
-        <a href="#addIngredientModal" class="btn">Add New Ingredient</a>
-    </div>
-
-<!-- Add Ingredient Modal -->
-            <div id="addIngredientModal" class="modal-overlay">
-                <div class="modal-content">
-                    <h3 class="modal-title">Add Ingredient</h3>
-
-                    <!-- Small X button -->
-                    <a href="#" class="close-button">&times;</a>
+    <div id="manage-ingredients" class="tab-content active">
 
 
-                    <form id="ingredient-form" method="post" action="{% url 'add_ingredient_popup' %}">
-                        {% csrf_token %}
-
-                        {# Name #}
-                        <div class="form-group">
-                            {{ form|get_label:"name" }}
-                            {{ form|get_item:"name" }}
-                        </div>
-
-                        {# Category #}
-                        <div class="form-group">
-                            {{ form|get_label:"category" }}
-                            {{ form|get_item:"category" }}
-                        </div>
-
-                        {# Dietary tags #}
-                        <div class="form-group">
-                            {{ form|get_label:"dietary_tag" }}
-                            {{ form|get_item:"dietary_tag" }}
-                        </div>
-
-                        {# Base quantity and default unit #}
-                        <div class="form-group">
-                            {{ form|get_label:"base_quantity" }}
-                            {{ form|get_item:"base_quantity" }}
-                        </div>
-
-                        <div class="form-group">
-                            {{ form|get_label:"default_unit" }}
-                            {{ form|get_item:"default_unit" }}
-                        </div>
-
-                        {# Nutrients dynamically #}
-                        {% for nutrient in nutrients %}
-                            {% with field_name="base_quantity_"|add:nutrient %}
-                                <div class="form-group">
-                                    {{ form|get_label:field_name }}
-                                    {{ form|get_field:field_name }}
-                                </div>
-                            {% endwith %}
-                        {% endfor %}
-
-                        <div class="form-actions">
-                            <button type="submit" class="btn">Save</button>
-                            <a href="#" class="btn btn-secondary">Cancel</a>
-                        </div>
-                    </form>
-
-                </div>
+        <!-- Title + Button Row -->
+        <div class="section-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem;">
+            <div>
+                <h2 class="section-title">Manage Ingredients</h2>
+                <p class="section-description">Manage your ingredient database.</p>
             </div>
-            <!-- END Add Ingredient Modal -->
+            <a href="#addIngredientModal" class="btn">Add New Ingredient</a>
+        </div>
 
-<!-- Table with all ingredients -->
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th>Ingredient Name</th>
-                    <th>Category</th>
-                    <th>Dietary Information</th>
-                    <th>Unit</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-                <tbody>
-                    {% for ing in ingredients %}
-                    <tr>
-                        <td data-label="Ingredient Name">{{ ing.name }}</td>
-                        <td data-label="Category">{{ ing.category|default:"-" }}</td>
-                        <td data-label="Dietary Information"> {{ ing.dietary_info|default:"-" }}</td>
-                        <td data-label="Unit">{{ ing.unit_name }}</td>
-                        <td data-label="Actions">
-                            <a href="{% url 'ingredient_detail' ing.id %}" class="btn btn-secondary btn-small">See Details</a>
-                            <button class="btn btn-secondary btn-small"
+
+        <!-- ADD POPUP -->
+        {% include 'ingredients/add_ingredient_modal.html' %}
+
+
+        <!-- DELETE POPUP -->
+        {% include 'ingredients/delete_ingredient_modal.html' %}
+
+
+        <!-- Table with all ingredients -->
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Ingredient Name</th>
+                            <th>Category</th>
+                            <th>Dietary Information</th>
+                            <th>Unit</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                        <tbody>
+                            {% for ing in ingredients %}
+                            <tr>
+                                <td data-label="Ingredient Name">{{ ing.name }}</td>
+                                <td data-label="Category">{{ ing.category|default:"-" }}</td>
+                                <td data-label="Dietary Information"> {{ ing.dietary_info|default:"-" }}</td>
+                                <td data-label="Unit">{{ ing.unit_name }}</td>
+                                <td data-label="Actions">
+                                <a href="{% url 'ingredient_details' ing.id %}" class="btn btn-secondary btn-small">See Details</a>
+                                <a href="{% url 'edit_ingredient' ing.id %}" class="btn btn-secondary btn-small">Edit</a>
+
+                                <button class="btn btn-danger btn-small"
                                     type="button"
-                                    onclick="openEditModal({{ ing.id }})">
-                                Edit
-                            </button>
-
-                            <button class="btn btn-danger btn-small"
-                                type="button"
-                                onclick="openDeleteModal({{ ing.id }}, '{{ ing.name }}')">
-                            Delete
-                            </button>
-                        </td>
-
-                    </tr>
+                                    onclick="openDeleteModal({{ ing.id }}, '{{ ing.name }}')">
+                                Delete
+                                </button>
+                            </td>
 
 
-                    {% empty %}
-                    <tr>
-                        <td colspan="5" style="text-align: center; padding: 2rem;">
-                            <h2 style="margin: 0;">No ingredients yet...</h2>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-        </table>
-<!-- END OFTable with all ingredients -->
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" style="text-align: center; padding: 2rem;">
+                                    <h2 style="margin: 0;">No ingredients yet...</h2>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                </table>
+        <!-- END OFTable with all ingredients -->
 
-<!-- DELETE POPUP -->
-{% include 'ingredients/delete_popup.html' %}
-<!-- END OF DELETE POPUP -->
 
     </div>
 </div>
@@ -139,8 +79,6 @@
 <!-- Script for quick save on popup -->
 
 <script src="{% static 'js/zero_inputt_handler.js' %}"></script>
-<script src="{% static 'js/form_submitter.js' %}"></script>
 <script src="{% static 'js/delete_popup.js' %}"></script>
-<script src="{% static 'js/edit_popup.js' %}"></script>
 
 {% endblock %}

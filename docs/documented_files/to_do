@@ -66,3 +66,13 @@ add View to recipes dashboard
 fix edit popup for ingredients - x and cancel are not working
 
 figure out a way to inherit forms
+
+remove attrs={'class':
+
+fix DRY for the form in edit_ingredient_popup
+
+use exclude in the form
+
+inherit forms
+
+fix no negative nums
