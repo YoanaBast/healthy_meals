@@ -10,7 +10,7 @@
 
     <div class="section-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem;">
         <div>
-            <h2 class="section-title">Ingredient Details</h2>
+            <h2 class="section-title">Ingredient Details - {{ ingredient.name }} </h2>
             <p class="section-description">View detailed information about this ingredient.</p>
         </div>
         <div>
@@ -41,7 +41,7 @@
             </tr>
             <tr>
                 <th>Default Unit</th>
-                <td>{{ ingredient.default_unit.name|default:"-" }}</td>
+                <td>{{ ingredient.default_unit|default:"-" }}</td>
             </tr>
             <tr>
                 <th>Dietary Information</th>
@@ -51,19 +51,30 @@
     </table>
 
     <!-- Unit Selection & Nutrients Table -->
-    <h4 style="margin-top: 2rem;">Nutrients per selected unit:</h4>
+    <h4 style="margin-top: 2rem;">
+        Nutrients for {{ quantity }} {{ unit_name }}:
+    </h4>
 
-    <form method="get">
-        <label for="unit">Select unit:</label>
-        <select name="unit" id="unit" onchange="this.form.submit()">
-            {% for im in ingredient.measurement_units.all %}
-                <option value="{{ im.id }}" {% if selected_unit and im.id == selected_unit.id %}selected{% endif %}>
-                    {{ im.unit.name }}
-                </option>
-            {% endfor %}
-        </select>
-        <noscript><button type="submit">Apply</button></noscript>
-    </form>
+
+
+        <form method="post">
+            {% csrf_token %}
+
+            {{ form.as_p }}
+
+            <label>Measurement unit:</label>
+            <select name="unit">
+                {% for mu in ingredient.measurement_units.all %}
+                    <option value="{{ mu.id }}">
+                        {{ mu.unit }}
+                    </option>
+                {% endfor %}
+            </select>
+            <input type="number" name="quantity" step="0.01" required>
+
+            <button type="submit">Save</button>
+        </form>
+
 
     <table class="data-table" style="margin-top:1rem;">
         <thead>

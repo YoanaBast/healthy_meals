@@ -43,7 +43,7 @@ class Command(BaseCommand):
         for code, names in units_dict.items():
             unit, created = MeasurementUnit.objects.get_or_create(
                 code=code,
-                defaults={'name': names.get('singular', code)}
+                defaults={'name_singular': names.get('singular', code), 'name_plural': names.get('plural', code)}
             )
             if created:
                 self.stdout.write(f"DEBUG: Created MeasurementUnit: {code} → {names.get('singular')}")
@@ -67,8 +67,8 @@ class Command(BaseCommand):
         # Base quantity and default unit
         base_qty = data.get('base_quantity', 100)
         unit_code = data.get('primary_unit', 'g')
-        default_unit_obj = MeasurementUnit.objects.get(code=unit_code)  # <-- fetch object
-
+        default_unit_obj = MeasurementUnit.objects.get(code=unit_code)
+        print(default_unit_obj)
         defaults = {
             'category': category,
             'base_quantity': base_qty,
@@ -101,4 +101,4 @@ class Command(BaseCommand):
                 unit=unit_obj,  # <-- assign object, not string
                 defaults={'conversion_to_base': conversion}
             )
-            self.stdout.write(f"DEBUG: Linked {ingredient.name} → {unit_obj.name} ({conversion})")
+            self.stdout.write(f"DEBUG: Linked {ingredient.name} → {unit_obj.code} ({conversion})")
