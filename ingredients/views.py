@@ -71,24 +71,36 @@ def edit_ingredient(request, ingredient_id):
 
 def ingredient_detail(request, ingredient_id):
     ingredient = get_object_or_404(Ingredient, pk=ingredient_id)
-    unit_id = request.GET.get("unit_id")
+    unit_name = ingredient.default_unit
 
-    if unit_id:
-        selected_unit = ingredient.measurement_units.filter(id=unit_id).first()
-    else:
-        selected_unit = ingredient.measurement_units.first()
+    quantity = ingredient.base_quantity
 
-    # Fallback if no units exist
-    if not selected_unit:
-        selected_unit = None
-        nutrients = ingredient.nutrients
-    else:
-        nutrients = ingredient.get_nutrients_dict(selected_unit, 1)  # 1 unit of selected_unit
+    nutrients = ingredient.get_nutrients_dict(
+        ingredient_unit=ingredient.default_unit,
+        quantity=quantity
+    )
+
+    if request.method == "POST":
+        selected_unit_id = request.POST.get("unit")
+        quantity = float(request.POST.get("quantity", 0))
+
+        if selected_unit_id and quantity:
+            selected_unit = IngredientMeasurementUnit.objects.get(id=selected_unit_id)
+            nutrients = ingredient.get_nutrients_dict(
+                ingredient_unit=selected_unit,
+                quantity=quantity
+            )
+            # print(f"nutrients {nutrients}") # dict!
+            unit_name = selected_unit.name_for_quantity(quantity)
+
+    quantity = int(quantity) if quantity == int(quantity) else quantity
 
     context = {
         "ingredient": ingredient,
-        "selected_unit": selected_unit,
+        "unit_name": unit_name,
         'nutrients': nutrients,
+        "quantity": quantity,
+
     }
 
     return render(request, "ingredients/ingredient_detail.html", context)

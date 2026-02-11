@@ -1,15 +1,10 @@
+from django.core.validators import MinLengthValidator
 from django.db import models
 
 # Create your models here.
 
 
-
-
 class IngredientDietaryTag(models.Model):
-    """
-    INGREDIENT DIETARY TAG
-    ex: Vegan
-    """
     name = models.CharField(max_length=100, unique=True)
 
     def __str__(self):
@@ -20,13 +15,7 @@ class IngredientDietaryTag(models.Model):
         verbose_name_plural = "Ingredient Dietary Tags"
 
 
-
-
 class IngredientCategory(models.Model):
-    """
-    INGREDIENT CATEGORY
-    ex: Vegetables
-    """
     name = models.CharField(max_length=100, unique=True)
 
     def __str__(self):
@@ -37,33 +26,39 @@ class IngredientCategory(models.Model):
         verbose_name_plural = "Ingredient Categories"
 
 
-
-
 class MeasurementUnit(models.Model):
     code = models.CharField(max_length=10, unique=True)
-    name = models.CharField(max_length=50)
+    name_singular = models.CharField(max_length=50)
+    name_plural = models.CharField(max_length=50)
+
 
     def __str__(self):
-        return self.name
+        return f"{self.name_singular} ({self.code})"
 
+class MeasurementUnitsConvert(models.Model):
+    """maybe not neeeded"""
+    first_unit = models.ForeignKey(MeasurementUnit, on_delete=models.CASCADE, related_name='first_measurment_unit')
+    first_unit_quantity = models.FloatField(default=1, validators=[MinLengthValidator(0.01)])
+
+    second_unit = models.ForeignKey(MeasurementUnit, on_delete=models.CASCADE, related_name='second_measurment_unit')
+    second_unit_quantity = models.FloatField(validators=[MinLengthValidator(0.01)])
 
 
 
 class IngredientMeasurementUnit(models.Model):
     """
-    INGREDIENT MEASUREMENT UNIT
-
-    allows ingredients to have multiple measurement units - like grams and cups
+    allows ingredients to have multiple measurement units - like grams and cups, conversion to base will be 1 for the main unit
     """
     ingredient = models.ForeignKey('Ingredient', on_delete=models.CASCADE, related_name='measurement_units')
     unit = models.ForeignKey(MeasurementUnit, on_delete=models.CASCADE)
     conversion_to_base = models.FloatField(help_text="How much of this unit equals the base_quantity")
     # 1 cup of carrot ≈ 120 g → conversion_to_base = 120
 
+    def name_for_quantity(self, quantity=1):
+        return self.unit.name_singular if quantity == 1 else self.unit.name_plural
+
     def __str__(self):
         return f"{self.ingredient.name} - {self.unit}"
-
-
 
 
 class Ingredient(models.Model):
@@ -75,7 +70,7 @@ class Ingredient(models.Model):
         'folate', 'calcium', 'iron', 'magnesium', 'potassium', 'zinc'
     ]
 
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, unique=True)
 
     default_unit = models.ForeignKey(
         'MeasurementUnit',
@@ -102,7 +97,7 @@ class Ingredient(models.Model):
         """
         Convert nutrients to the selected ingredient measurement unit and quantity
         """
-        if ingredient_unit.unit == self.default_unit:
+        if ingredient_unit == self.default_unit:
             quantity_in_base_units = quantity
         else:
             quantity_in_base_units = quantity * ingredient_unit.conversion_to_base / self.base_quantity
@@ -114,6 +109,7 @@ class Ingredient(models.Model):
 
         return nutrients
 
+
     @property
     def nutrients(self):
         """Return a dict of all nutrient fields with their base values -> for visualization"""
@@ -124,12 +120,7 @@ class Ingredient(models.Model):
         """Return dietary tags as a comma-separated string"""
         return ", ".join(tag.name for tag in self.dietary_tag.all()) or "-"
 
-    @property
-    def unit_name(self):
-        """Return human-readable unit for UI"""
-        if self.default_unit:  # default_unit is now a FK to MeasurementUnit
-            return self.default_unit.name
-        return "-"
+
 
     def __str__(self):
         return self.name

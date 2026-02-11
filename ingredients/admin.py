@@ -43,7 +43,7 @@ class IngredientAdmin(admin.ModelAdmin):
 
 @admin.register(MeasurementUnit)
 class MeasurementUnitAdmin(admin.ModelAdmin):
-    list_display = ('code', 'name')
+    list_display = ('code', 'name_singular', 'name_plural')
 
 @admin.register(IngredientMeasurementUnit)
 class IngredientMeasurementUnitAdmin(admin.ModelAdmin):
