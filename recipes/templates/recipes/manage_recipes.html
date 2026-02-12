@@ -1,108 +1,84 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load form_extras %}
+
 {% block title %}Manage Recipes{% endblock %}
 
 {% block content %}
 
 <div class="container-home">
-    <!-- Tabs -->
+<!-- Tabs -->
 {% include 'tab_nav.html' with active_tab='manage-ingredients' %}
 
-
-    <!-- MANAGE RECIPES (ONLY ONCE) -->
     <div id="manage-ingredients" class="tab-content active">
 
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+
+        <!-- Title + Button Row -->
+        <div class="section-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem;">
             <div>
-                <h2 class="section-title" style="margin-bottom: 0.5rem;">Manage Recipes</h2>
-                <p class="section-description" style="margin-bottom: 0;">
-                    Manage your recipe database and track availability.
-                </p>
+                <h2 class="section-title">Manage Ingredients</h2>
+                <p class="section-description">Manage your recipe database.</p>
             </div>
-
             <a href="#addIngredientModal" class="btn">Add New Recipe</a>
-
-            <!-- Modal -->
-            <div id="addIngredientModal" class="modal-overlay">
-              <div class="modal-content">
-                <h3 class="modal-title">Add Recipe</h3>
-                <a href="#" class="close-button">&times;</a>
-                <form>
-                    <div class="form-group">
-                        <label class="form-label" for="ingredientName">Recipe Name</label>
-                        <input type="text" id="ingredientName" class="form-input" placeholder="Enter recipe name">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label" for="ingredientCategory">Category</label>
-                        <select id="ingredientCategory" class="form-select">
-                        {% for cat in category %}
-
-                            <option> {{ cat.name }}</option>
-                        {% empty %}
-                            <option> No available categories </option>
-
-                        {% endfor %}
-
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label" for="unit">Unit of Measurement</label>
-                        <select id="unit" class="form-select">
-                        {% for unit in measurment_units %}
-
-                            <option> {{ unit.unit }}</option>
-                        {% empty %}
-                            <option> No available units </option>
-
-                        {% endfor %}
-
-                        </select>
-                    </div>
-
-                    <div style="display: flex; gap: 1rem;">
-                        <button type="submit" class="btn">Save Recipe</button>
-                        <a href="{% url 'create_ingredient_more' %}" class="btn btn-secondary">More...</a>
-                        <a href="{% url 'manage_ingredients' %}" class="btn btn-secondary">Cancel</a>
-                    </div>
-                </form>
-              </div>
-            </div>
         </div>
 
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th>Recipe Name</th>
-                    <th>Category</th>
-                    <th>Cooking Time</th>
-                    <th>Servings</th>
-                    <th>Kcal</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for rec in recipe %}
-                <tr>
-                    <td data-label="Recipe Name">{{ rec.name }}</td>
-                    <td data-label="Category">{{ rec.category|default:"-" }}</td>
-                    <td data-label="Cooking Time">{{ rec.cooking_duration|default:"-" }}</td>
-                    <td data-label="Servings">{{ rec.servings }}</td>
-                    <td data-label="Kcal">{{ rec.nutrients.kcal }}</td> <td data-label="Actions">
-                        <button class="btn btn-secondary btn-small">Edit</button>
-                        <button class="btn btn-danger btn-small">Delete</button>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="6" style="text-align: center;"><h2>No recipes yet...</h2></td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
 
+        <!-- ADD POPUP -->
+        {% include 'ingredients/add_ingredient_modal.html' %}
+
+
+        <!-- DELETE POPUP -->
+        {% include 'ingredients/delete_ingredient_modal.html' %}
+
+
+        <!-- Table with all ingredients -->
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Ingredient Name</th>
+                            <th>Category</th>
+                            <th>Dietary Information</th>
+                            <th>Default Unit</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                        <tbody>
+                            {% for ing in ingredients %}
+                            <tr>
+                                <td data-label="Ingredient Name">{{ ing.name }}</td>
+                                <td data-label="Category">{{ ing.category|default:"-" }}</td>
+                                <td data-label="Dietary Information"> {{ ing.dietary_info|default:"-" }}</td>
+                                <td data-label="Default Unit">{{ ing.default_unit }}</td>
+                                <td data-label="Actions">
+                                <a href="{% url 'ingredient_details' ing.id %}" class="btn btn-secondary btn-small">See Details</a>
+                                <a href="{% url 'edit_ingredient' ing.id %}" class="btn btn-secondary btn-small">Edit</a>
+
+                                <button class="btn btn-danger btn-small"
+                                    type="button"
+                                    onclick="openDeleteModal({{ ing.id }}, '{{ ing.name }}')">
+                                Delete
+                                </button>
+                            </td>
+
+
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" style="text-align: center; padding: 2rem;">
+                                    <h2 style="margin: 0;">No ingredients yet...</h2>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                </table>
+        <!-- END OFTable with all ingredients -->
 
 
     </div>
 </div>
+
+<!-- Script for quick save on popup -->
+
+<script src="{% static 'js/zero_inputt_handler.js' %}"></script>
+<script src="{% static 'js/delete_popup.js' %}"></script>
 
 {% endblock %}
