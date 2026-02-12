@@ -16,55 +16,58 @@
         <!-- Title + Button Row -->
         <div class="section-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem;">
             <div>
-                <h2 class="section-title">Manage Ingredients</h2>
-                <p class="section-description">Manage your recipe database.</p>
+                <h2 class="section-title">Manage Recipes</h2>
+                <p class="section-description">Introduce the Foodganizer to new tasty recipes!</p>
             </div>
-            <a href="#addIngredientModal" class="btn">Add New Recipe</a>
+
+                <a href="{% url 'add_recipe' %}" class="btn btn-secondary btn-small">Add Recipe</a>
+
         </div>
 
 
-        <!-- ADD POPUP -->
-        {% include 'ingredients/add_ingredient_modal.html' %}
-
-
         <!-- DELETE POPUP -->
-        {% include 'ingredients/delete_ingredient_modal.html' %}
+        {% include 'recipes/delete_recipe_modal.html' %}
 
 
         <!-- Table with all ingredients -->
                 <table class="data-table">
                     <thead>
                         <tr>
-                            <th>Ingredient Name</th>
+                            <th>Recipe Name</th>
                             <th>Category</th>
                             <th>Dietary Information</th>
-                            <th>Default Unit</th>
+                            <th>Cooking Duration</th>
+                            <th>Kcal per Serving</th>
+                            <th>Servings</th>
                             <th>Actions</th>
                         </tr>
+
                     </thead>
                         <tbody>
-                            {% for ing in ingredients %}
+                            {% for rec in recipes %}
                             <tr>
-                                <td data-label="Ingredient Name">{{ ing.name }}</td>
-                                <td data-label="Category">{{ ing.category|default:"-" }}</td>
-                                <td data-label="Dietary Information"> {{ ing.dietary_info|default:"-" }}</td>
-                                <td data-label="Default Unit">{{ ing.default_unit }}</td>
-                                <td data-label="Actions">
-                                <a href="{% url 'ingredient_details' ing.id %}" class="btn btn-secondary btn-small">See Details</a>
-                                <a href="{% url 'edit_ingredient' ing.id %}" class="btn btn-secondary btn-small">Edit</a>
+                                <td data-label="Ingredient Name">{{ rec.name }}</td>
+                                <td data-label="Category">{{ rec.category|default:"-" }}</td>
+                                <td data-label="Dietary Information"> {{ rec.dietary_info|default:"-" }}</td>
+                                <td data-label="Cooking Duration">{{ rec.cooking_duration|default:"-"  }}</td>
+                                <td data-label="Kcal per Serving">{{ rec.kcal_per_serving|default:"-"  }}</td>
+                                <td data-label="Servings">{{ rec.servings|default:"-"  }}</td>
 
-                                <button class="btn btn-danger btn-small"
-                                    type="button"
-                                    onclick="openDeleteModal({{ ing.id }}, '{{ ing.name }}')">
-                                Delete
-                                </button>
+                                <td data-label="Actions">
+                                <a href="{% url 'recipe_detail' rec.id %}" class="btn btn-secondary btn-small">See Details</a>
+                                <a href="{% url 'edit_recipe' rec.id %}" class="btn btn-secondary btn-small">Edit</a>
+
+
+                                <button class="btn btn-danger" onclick="openDeleteModal('recipe', {{ rec.id }}, '{{ rec.name|escapejs }}')">Delete</button>
+
+
                             </td>
 
 
                             {% empty %}
                             <tr>
                                 <td colspan="5" style="text-align: center; padding: 2rem;">
-                                    <h2 style="margin: 0;">No ingredients yet...</h2>
+                                    <h2 style="margin: 0;">No recipes yet...</h2>
                                 </td>
                             </tr>
                             {% endfor %}

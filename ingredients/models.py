@@ -69,6 +69,32 @@ class Ingredient(models.Model):
         'vitamin_b1', 'vitamin_b2', 'vitamin_b3', 'vitamin_b6', 'vitamin_b12',
         'folate', 'calcium', 'iron', 'magnesium', 'potassium', 'zinc'
     ]
+    NUTRIENT_UNITS = {
+        'kcal': 'kcal',
+        'protein': 'g',
+        'carbs': 'g',
+        'fat': 'g',
+        'fiber': 'g',
+        'sugar': 'g',
+        'salt': 'g',
+        'cholesterol': 'g',
+        'vitamin_a': 'µg',
+        'vitamin_c': 'mg',
+        'vitamin_d': 'µg',
+        'vitamin_e': 'mg',
+        'vitamin_k': 'µg',
+        'vitamin_b1': 'mg',
+        'vitamin_b2': 'mg',
+        'vitamin_b3': 'mg',
+        'vitamin_b6': 'mg',
+        'vitamin_b12': 'µg',
+        'folate': 'µg',
+        'calcium': 'mg',
+        'iron': 'mg',
+        'magnesium': 'mg',
+        'potassium': 'mg',
+        'zinc': 'mg',
+    }
 
     name = models.CharField(max_length=100, unique=True)
 
@@ -93,22 +119,28 @@ class Ingredient(models.Model):
         locals()[f'base_quantity_{nutrient}'] = models.FloatField(default=0)
     #dynamically creates a model field for each nutrient in the NUTRIENTS list
 
+    @property
+    def dietary_info(self):
+        """Return dietary tags as a comma-separated string"""
+        return ", ".join(tag.name for tag in self.dietary_tag.all()) or "-"
+
     def get_nutrients_dict(self, ingredient_unit: 'IngredientMeasurementUnit', quantity: float):
         """
         Convert nutrients to the selected ingredient measurement unit and quantity
         """
+        # convert quantity to base units (e.g., grams)
         if ingredient_unit == self.default_unit:
             quantity_in_base_units = quantity
         else:
-            quantity_in_base_units = quantity * ingredient_unit.conversion_to_base / self.base_quantity
+            quantity_in_base_units = quantity * ingredient_unit.conversion_to_base
 
         nutrients = {}
         for n in self.NUTRIENTS:
             nutrient_base_value = getattr(self, f'base_quantity_{n}', 0)
-            nutrients[n] = (nutrient_base_value / self.base_quantity) * quantity_in_base_units
+            # scale nutrient proportionally to quantity
+            nutrients[n] = nutrient_base_value * (quantity_in_base_units / self.base_quantity)
 
         return nutrients
-
 
     @property
     def nutrients(self):
@@ -116,11 +148,14 @@ class Ingredient(models.Model):
         return {n: getattr(self, f'base_quantity_{n}', 0) for n in self.NUTRIENTS}
 
     @property
-    def dietary_info(self):
-        """Return dietary tags as a comma-separated string"""
-        return ", ".join(tag.name for tag in self.dietary_tag.all()) or "-"
+    def nutrients_with_units(self):
+        """Return nutrients with units, using NUTRIENT_UNITS dict"""
+        return {n: f"{getattr(self, f'base_quantity_{n}', 0)} {self.NUTRIENT_UNITS.get(n, '')}"
+                for n in self.NUTRIENTS}
 
-
+    def nutrients_for_quantity(self, ingredient_unit, quantity):
+        nutrients_dict = self.get_nutrients_dict(ingredient_unit, quantity)
+        return {n: f"{round(v, 2)} {self.NUTRIENT_UNITS.get(n, '')}" for n, v in nutrients_dict.items()}
 
     def __str__(self):
         return self.name
