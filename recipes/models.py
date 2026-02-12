@@ -70,7 +70,10 @@ class Recipe(models.Model):
             except IngredientMeasurementUnit.DoesNotExist:
                 continue
 
-            ing_totals = ing.get_nutrients_dict(starting_unit=ing_unit_obj, starting_quantity=qty)
+            ing_totals = ing.get_nutrients_dict(
+                ingredient_unit=ing_unit_obj,
+                quantity=qty
+            )
 
             for nutrient, value in ing_totals.items():
                 total[nutrient] = total.get(nutrient, 0) + value
@@ -82,6 +85,8 @@ class Recipe(models.Model):
     def quantity_ingredients(self):
         return {ri.ingredient: (ri.quantity, ri.unit) for ri in self.recipe_ingredient.all()}
 
+    def __str__(self):
+        return self.name
 
 class RecipeIngredient(models.Model):
 
