@@ -8,14 +8,7 @@ from ingredients.models import IngredientMeasurementUnit, Ingredient, Measuremen
 # Create your models here.
 
 class RecipeCategory(models.Model):
-
-    """
-    INGREDIENT CATEGORY
-    ex: Vegetables
-    """
-
     name = models.CharField(max_length=100, unique=True)
-
 
     def __str__(self):
         return self.name
@@ -25,14 +18,13 @@ class RecipeCategory(models.Model):
         verbose_name_plural = "Recipe Categories"
 
 
-
 class Recipe(models.Model):
-
-    name = models.CharField(max_length=200)
+    name = models.CharField(max_length=200, unique=True)
     cooking_time = models.TimeField(null=True, blank=True)
     servings = models.PositiveIntegerField(default=1)
     ingredients = models.ManyToManyField(Ingredient, through='RecipeIngredient', related_name='recipes')
     category = models.ForeignKey(RecipeCategory, null=True, on_delete=models.SET_NULL, related_name='ingredient')
+    instructions = models.TextField()
 
     @property
     def cooking_duration(self):
@@ -78,7 +70,10 @@ class Recipe(models.Model):
             except IngredientMeasurementUnit.DoesNotExist:
                 continue
 
-            ing_totals = ing.get_nutrients_dict(starting_unit=ing_unit_obj, starting_quantity=qty)
+            ing_totals = ing.get_nutrients_dict(
+                ingredient_unit=ing_unit_obj,
+                quantity=qty
+            )
 
             for nutrient, value in ing_totals.items():
                 total[nutrient] = total.get(nutrient, 0) + value
@@ -90,6 +85,8 @@ class Recipe(models.Model):
     def quantity_ingredients(self):
         return {ri.ingredient: (ri.quantity, ri.unit) for ri in self.recipe_ingredient.all()}
 
+    def __str__(self):
+        return self.name
 
 class RecipeIngredient(models.Model):
 

@@ -21,7 +21,7 @@ class RecipeForm(forms.ModelForm):
 class RecipeAdmin(admin.ModelAdmin):
     form = RecipeForm
 
-    list_display = ('name', 'category', 'cooking_duration', 'servings', 'display_ingredients', 'display_nutrients')
+    list_display = ('name', 'category', 'cooking_duration', 'servings', 'display_ingredients', 'display_nutrients', 'instructions')
     search_fields = ('name',)
 
     def display_ingredients(self, obj):
@@ -37,3 +37,8 @@ class RecipeAdmin(admin.ModelAdmin):
 @admin.register(RecipeCategory)
 class RecipeCategoryAdmin(admin.ModelAdmin):
     list_display = ['name']
+
+@admin.register(RecipeIngredient)
+class RecipeIngredientAdmin(admin.ModelAdmin):
+    list_display = ['recipe', 'ingredient', 'quantity', 'unit']
+
