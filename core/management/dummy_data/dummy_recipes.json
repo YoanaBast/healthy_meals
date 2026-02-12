@@ -69,7 +69,9 @@
         {"name": "Milk", "quantity": 1, "unit": "cup"},
         {"name": "Egg", "quantity": 1, "unit": "pc"},
         {"name": "Butter", "quantity": 1, "unit": "tbsp"}
-      ]
+      ],
+      "instructions": "Mix everything till smooth and runny and flip in pan"
+
     },
     "Cinnamon Butter Toast": {
       "category": "Breakfast",
@@ -78,7 +80,9 @@
       "ingredients": [
         {"name": "Butter", "quantity": 1, "unit": "tbsp"},
         {"name": "Cinnamon", "quantity": 1, "unit": "tsp"}
-      ]
+      ],
+      "instructions": "knife in jar -> bread -> sprinkle"
+
     }
   }
 }

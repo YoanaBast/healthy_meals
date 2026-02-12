@@ -35,7 +35,8 @@ class Command(BaseCommand):
                 defaults={
                     'category': category,
                     'cooking_time': info.get('cooking_time'),
-                    'servings': info.get('servings', 1)
+                    'servings': info.get('servings', 1),
+                    'instructions': info.get('instructions')
                 }
             )
             self.stdout.write(f"\n>>> PROCESSING RECIPE: {recipe_name}")
