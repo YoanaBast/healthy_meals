@@ -18,9 +18,10 @@
             <a href="{% url 'edit_ingredient' ingredient.id %}" class="btn btn-secondary">Edit</a>
             <button class="btn btn-danger"
                     type="button"
-                    onclick="openDeleteModal({{ ingredient.id }}, '{{ ingredient.name }}')">
+                    onclick="openDeleteModal('ingredient', {{ ingredient.id }}, '{{ ingredient.name|escapejs }}')">
                 Delete
             </button>
+
         </div>
     </div>
 
@@ -87,9 +88,10 @@
             {% for n, value in nutrients.items %}
             <tr>
                 <td>{{ n|upper }}</td>
-                <td>{{ value|floatformat:2 }}</td>
+                <td>{{ value }}</td>
             </tr>
             {% endfor %}
+
         </tbody>
     </table>
 

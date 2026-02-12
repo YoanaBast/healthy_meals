@@ -75,7 +75,7 @@ def ingredient_detail(request, ingredient_id):
 
     quantity = ingredient.base_quantity
 
-    nutrients = ingredient.get_nutrients_dict(
+    nutrients_dict  = ingredient.get_nutrients_dict(
         ingredient_unit=ingredient.default_unit,
         quantity=quantity
     )
@@ -86,13 +86,17 @@ def ingredient_detail(request, ingredient_id):
 
         if selected_unit_id and quantity:
             selected_unit = IngredientMeasurementUnit.objects.get(id=selected_unit_id)
-            nutrients = ingredient.get_nutrients_dict(
+            nutrients_dict  = ingredient.get_nutrients_dict(
                 ingredient_unit=selected_unit,
                 quantity=quantity
             )
             # print(f"nutrients {nutrients}") # dict!
             unit_name = selected_unit.name_for_quantity(quantity)
 
+    nutrients = {
+        n: f"{round(v, 2)} {ingredient.NUTRIENT_UNITS.get(n, '')}"
+        for n, v in nutrients_dict.items()
+    }
     quantity = int(quantity) if quantity == int(quantity) else quantity
 
     context = {
