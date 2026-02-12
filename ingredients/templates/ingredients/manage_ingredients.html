@@ -53,11 +53,8 @@
                                 <a href="{% url 'ingredient_details' ing.id %}" class="btn btn-secondary btn-small">See Details</a>
                                 <a href="{% url 'edit_ingredient' ing.id %}" class="btn btn-secondary btn-small">Edit</a>
 
-                                <button class="btn btn-danger btn-small"
-                                    type="button"
-                                    onclick="openDeleteModal({{ ing.id }}, '{{ ing.name }}')">
-                                Delete
-                                </button>
+                                <button class="btn btn-danger" onclick="openDeleteModal('ingredient', {{ ing.id }}, '{{ ing.name|escapejs }}')">Delete</button>
+
                             </td>
 
 

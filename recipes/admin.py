@@ -2,24 +2,16 @@ from django.contrib import admin
 from django.utils.html import mark_safe
 
 from django import forms
+
+from .forms import RecipeFormAdmin
 # Register your models here.
 from .models import Recipe, RecipeIngredient, RecipeCategory
 
-class RecipeForm(forms.ModelForm):
-    """
-    this changes the input/eedit option for the cooking time, the default was time and not duration
-    """
-    class Meta:
-        model = Recipe
-        fields = '__all__'
-        widgets = {
-            'cooking_time': forms.TimeInput(format='%H:%M'),  # HH:MM
-        }
 
 
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
-    form = RecipeForm
+    form = RecipeFormAdmin
 
     list_display = ('name', 'category', 'cooking_duration', 'servings', 'display_ingredients', 'display_nutrients', 'instructions')
     search_fields = ('name',)

@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% block title %}Add Recipe{% endblock %}
+
+{% block content %}
+<div class="container-home">
+    <h2>Add Recipe</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ recipe_form.as_p }}
+
+        <h3>Ingredients</h3>
+        <div id="ingredientsContainer">
+            {% for form in ingredient_formset %}
+            <div class="ingredient-row">
+                {{ form.ingredient.as_widget(attrs={'onchange': 'updateUnit(this)'}) }}
+                {{ form.quantity }}
+                {{ form.unit }}
+            </div>
+            {% endfor %}
+            {% if ingredient_formset|length == 0 %}
+            <div class="ingredient-row">
+                <select name="ingredient" onchange="updateUnit(this)">
+                    <option value="">Select Ingredient</option>
+                    {% for ing in ingredients %}
+                    <option value="{{ ing.id }}">{{ ing.name }}</option>
+                    {% endfor %}
+                </select>
+                <input type="number" name="quantity" min="0.01" step="0.01">
+                <select name="unit"><option value="">Select Unit</option></select>
+            </div>
+            {% endif %}
+        </div>
+
+        <button type="button" id="addIngredientBtn" class="btn btn-primary">+ Add Ingredient</button>
+        <br><br>
+        <button type="submit" class="btn btn-success">Save Recipe</button>
+        <a href="{% url 'manage_recipes' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+
+<script>
+const ingredientUnits = {
+    {% for ing in ingredients %}
+    "{{ ing.id }}": [
+        {% for mu in ing.measurement_units.all %}
+        {"id": "{{ mu.unit.id }}", "name": "{{ mu.unit.name_singular }}"},
+        {% endfor %}
+    ],
+    {% endfor %}
+};
+
+function updateUnit(selectElem) {
+    const selectedIngredientId = selectElem.value;
+    const unitSelect = selectElem.closest('.ingredient-row').querySelector('select[name="unit"]');
+    unitSelect.innerHTML = '<option value="">Select Unit</option>';
+    if(selectedIngredientId in ingredientUnits) {
+        ingredientUnits[selectedIngredientId].forEach(u => {
+            const option = document.createElement('option');
+            option.value = u.id;
+            option.text = u.name;
+            unitSelect.appendChild(option);
+        });
+    }
+}
+
+// Clone ingredient row
+document.getElementById('addIngredientBtn').addEventListener('click', () => {
+    const container = document.getElementById('ingredientsContainer');
+    const newRow = container.querySelector('.ingredient-row').cloneNode(true);
+    newRow.querySelector('select[name="ingredient"]').value = '';
+    newRow.querySelector('select[name="unit"]').innerHTML = '<option value="">Select Unit</option>';
+    newRow.querySelector('input[name="quantity"]').value = '';
+    container.appendChild(newRow);
+});
+</script>
+{% endblock %}
