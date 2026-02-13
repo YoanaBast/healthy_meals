@@ -28,19 +28,30 @@ class RecipeIngredientForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+        # Default empty
         self.fields['unit'].queryset = IngredientMeasurementUnit.objects.none()
 
         if self.is_bound:
             ingredient_id = self.data.get(self.add_prefix('ingredient'))
             if ingredient_id:
                 try:
-                    ingredient = Ingredient.objects.get(pk=int(ingredient_id))
-                    self.fields['unit'].queryset = ingredient.measurement_units.values_list('unit', flat=True)
-                except:
+                    self.fields['unit'].queryset = IngredientMeasurementUnit.objects.filter(
+                        ingredient_id=int(ingredient_id)
+                    )
+                except (ValueError, TypeError):
                     pass
-        elif self.instance.pk and self.instance.ingredient:
-            self.fields['unit'].queryset = self.instance.ingredient.measurement_units.values_list('unit', flat=True)
 
+        elif self.instance.pk and self.instance.ingredient:
+            self.fields['unit'].queryset = IngredientMeasurementUnit.objects.filter(
+                ingredient=self.instance.ingredient
+            )
+
+    def clean_quantity(self):
+        quantity = self.cleaned_data.get("quantity")
+        if quantity is not None and quantity <= 0:
+            raise forms.ValidationError("Quantity must be greater than 0.")
+        return quantity
 
 RecipeIngredientFormSet = inlineformset_factory(
     Recipe, RecipeIngredient, form=RecipeIngredientForm,

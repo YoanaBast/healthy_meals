@@ -53,9 +53,16 @@ class IngredientMeasurementUnit(models.Model):
     unit = models.ForeignKey(MeasurementUnit, on_delete=models.CASCADE)
     conversion_to_base = models.FloatField(help_text="How much of this unit equals the base_quantity")
     # 1 cup of carrot ≈ 120 g → conversion_to_base = 120
-
     def name_for_quantity(self, quantity=1):
         return self.unit.name_singular if quantity == 1 else self.unit.name_plural
+
+    @property
+    def name_for_quantity_singular(self):
+        return self.unit.name_singular
+
+    @property
+    def name_for_quantity_plural(self):
+        return self.unit.name_plural
 
     def __str__(self):
         return f"{self.ingredient.name} - {self.unit}"
@@ -106,7 +113,7 @@ class Ingredient(models.Model):
     )
     #the unit that holds the nutrient data for conversions
 
-    base_quantity = models.FloatField(default=100, help_text="The quantity the NUTRIENTS are based on in default_unit (100 g, 1 pc, etc.)")
+    base_quantity = models.FloatField(default=100, validators=[MinLengthValidator(0.01)], help_text="The quantity the NUTRIENTS are based on in default_unit (100 g, 1 pc, etc.)")
     #base_quantity = 100 means nutrients are defined per 100g
 
     category = models.ForeignKey(IngredientCategory, null=True, on_delete=models.SET_NULL, related_name='ingredient')

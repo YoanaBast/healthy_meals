@@ -60,11 +60,11 @@ class Command(BaseCommand):
                     continue
 
                 # Create/update RecipeIngredient
-                # Get the MeasurementUnit instance for this unit
-                unit_obj = MeasurementUnit.objects.filter(code=unit).first()
+                # Get the IngredientMeasurementUnit for this ingredient/unit
+                unit_obj = ingredient.measurement_units.filter(unit__code=unit).first()
                 if not unit_obj:
                     self.stdout.write(self.style.WARNING(
-                        f"Unit '{unit}' not found in MeasurementUnit table. Skipping {ing_name}."
+                        f"IngredientMeasurementUnit '{unit}' not found for {ing_name}. Skipping."
                     ))
                     continue
 
@@ -74,7 +74,7 @@ class Command(BaseCommand):
                     ingredient=ingredient,
                     defaults={
                         'quantity': qty,
-                        'unit': unit_obj  # ✅ pass the FK, not a string
+                        'unit': unit_obj  # ✅ correct FK
                     }
                 )
 

@@ -1,5 +1,6 @@
 from datetime import time
 
+from django.core.validators import MinLengthValidator
 from django.db import models
 
 from ingredients.models import IngredientMeasurementUnit, Ingredient, MeasurementUnit
@@ -102,16 +103,19 @@ class Recipe(models.Model):
     @property
     def nutrients(self):
         total = {}
-        # print(f"obj: {self.recipe_ingredient.all()}")
-        for ri in self.recipe_ingredient.all():  # correct related_name
-            print(f"ri: {ri}")
+        for ri in self.recipe_ingredient.all():
             ing = ri.ingredient
             qty = ri.quantity
-            unit_obj = ri.unit  # already a MeasurementUnit instance
+            ing_unit_obj = ri.unit
 
-            try:
-                ing_unit_obj = ing.measurement_units.get(unit=unit_obj)  # get IngredientMeasurementUnit
-            except IngredientMeasurementUnit.DoesNotExist:
+            print(f"\n--- DEBUG RECIPE INGREDIENT ---")
+            print(f"Ingredient: {ing}")
+            print(f"Quantity: {qty}")
+            print(f"Unit object: {ing_unit_obj}")
+
+            # skip if not a proper IngredientMeasurementUnit
+            if not ing_unit_obj or not hasattr(ing_unit_obj, 'conversion_to_base'):
+                print(f"Skipping: Invalid unit for ingredient {ing}")
                 continue
 
             ing_totals = ing.get_nutrients_dict(
@@ -119,9 +123,15 @@ class Recipe(models.Model):
                 quantity=qty
             )
 
+            print(f"Nutrient totals for this ingredient: {ing_totals}")
+
             for nutrient, value in ing_totals.items():
                 total[nutrient] = total.get(nutrient, 0) + value
-        # print(f"total: {total}")
+
+            print(f"Running total after this ingredient: {total}")
+
+        print(f"\n=== FINAL TOTAL NUTRIENTS FOR RECIPE {self.name} ===")
+        print(total)
         return total
 
     @property
@@ -140,9 +150,13 @@ class RecipeIngredient(models.Model):
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE, related_name='recipe_ingredient')
     ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
 
-    quantity = models.FloatField()
-    unit = models.ForeignKey(MeasurementUnit, on_delete=models.SET_NULL, null=True)
-
+    quantity = models.FloatField(validators=[MinLengthValidator(0.01)])
+    unit = models.ForeignKey(
+        IngredientMeasurementUnit,
+        on_delete=models.SET_NULL,
+        null=True,
+        limit_choices_to=models.Q(ingredient=models.F('ingredient'))
+    )
 
     class Meta:
         unique_together = ('recipe', 'ingredient')
