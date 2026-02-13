@@ -2,75 +2,168 @@
 {% block title %}Add Recipe{% endblock %}
 
 {% block content %}
+
+<style>
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+}
+
+.modal-content {
+    background: white;
+    width: 400px;
+    padding: 20px;
+    margin: 10% auto;
+    border-radius: 8px;
+}
+</style>
+
 <div class="container-home">
     <h2>Add Recipe</h2>
+
     <form method="post">
         {% csrf_token %}
         {{ recipe_form.as_p }}
+        {{ ingredient_formset.management_form }}
 
         <h3>Ingredients</h3>
-        <div id="ingredientsContainer">
-            {% for form in ingredient_formset %}
-            <div class="ingredient-row">
-                {{ form.ingredient.as_widget(attrs={'onchange': 'updateUnit(this)'}) }}
-                {{ form.quantity }}
-                {{ form.unit }}
-            </div>
-            {% endfor %}
-            {% if ingredient_formset|length == 0 %}
-            <div class="ingredient-row">
-                <select name="ingredient" onchange="updateUnit(this)">
-                    <option value="">Select Ingredient</option>
-                    {% for ing in ingredients %}
-                    <option value="{{ ing.id }}">{{ ing.name }}</option>
-                    {% endfor %}
-                </select>
-                <input type="number" name="quantity" min="0.01" step="0.01">
-                <select name="unit"><option value="">Select Unit</option></select>
-            </div>
-            {% endif %}
-        </div>
+        <div id="ingredientsContainer"></div>
 
-        <button type="button" id="addIngredientBtn" class="btn btn-primary">+ Add Ingredient</button>
+        <button type="button" id="addIngredientBtn" class="btn btn-primary">
+            + Add Ingredient
+        </button>
+
         <br><br>
+
         <button type="submit" class="btn btn-success">Save Recipe</button>
         <a href="{% url 'manage_recipes' %}" class="btn btn-secondary">Cancel</a>
     </form>
 </div>
 
-<script>
-const ingredientUnits = {
-    {% for ing in ingredients %}
-    "{{ ing.id }}": [
-        {% for mu in ing.measurement_units.all %}
-        {"id": "{{ mu.unit.id }}", "name": "{{ mu.unit.name_singular }}"},
-        {% endfor %}
-    ],
-    {% endfor %}
-};
+<!-- MODAL -->
+<div id="ingredientModal" class="modal">
+    <div class="modal-content">
+        <h4>Add Ingredient</h4>
 
-function updateUnit(selectElem) {
-    const selectedIngredientId = selectElem.value;
-    const unitSelect = selectElem.closest('.ingredient-row').querySelector('select[name="unit"]');
-    unitSelect.innerHTML = '<option value="">Select Unit</option>';
-    if(selectedIngredientId in ingredientUnits) {
-        ingredientUnits[selectedIngredientId].forEach(u => {
-            const option = document.createElement('option');
-            option.value = u.id;
-            option.text = u.name;
-            unitSelect.appendChild(option);
-        });
-    }
+        <select id="ingredientSelect" onchange="loadUnits()">
+            <option value="">Select ingredient</option>
+                {% for ing in ingredients %}
+                    <option value="{{ ing.id }}"
+                        data-units='[
+                            {% for mu in ing.measurement_units.all %}
+                                {"id": "{{ mu.id }}", "name": "{{ mu.name_for_quantity_singular }}"}
+                                {% if not forloop.last %},{% endif %}
+                            {% endfor %}
+                        ]'
+
+                    >{{ ing.name }}</option>
+                {% endfor %}
+
+        </select>
+
+        <br><br>
+
+        <input type="number" id="quantityInput" step="0.01" min="0.01" placeholder="Quantity">
+
+        <br><br>
+
+        <select id="unitSelect"></select>
+
+        <br><br>
+
+        <button type="button" onclick="addIngredient()">Add</button>
+        <button type="button" onclick="closeModal()">Cancel</button>
+    </div>
+</div>
+
+<script>
+let formIndex = 0;
+
+// Open modal
+function openIngredientModal() {
+    document.getElementById("ingredientModal").style.display = "block";
 }
 
-// Clone ingredient row
-document.getElementById('addIngredientBtn').addEventListener('click', () => {
-    const container = document.getElementById('ingredientsContainer');
-    const newRow = container.querySelector('.ingredient-row').cloneNode(true);
-    newRow.querySelector('select[name="ingredient"]').value = '';
-    newRow.querySelector('select[name="unit"]').innerHTML = '<option value="">Select Unit</option>';
-    newRow.querySelector('input[name="quantity"]').value = '';
-    container.appendChild(newRow);
-});
+// Close modal
+function closeModal() {
+    document.getElementById("ingredientModal").style.display = "none";
+}
+
+// Attach button
+document.getElementById("addIngredientBtn")
+    .addEventListener("click", openIngredientModal);
+
+// Load units for selected ingredient
+function loadUnits() {
+    const ingredientSelect = document.getElementById("ingredientSelect");
+    const unitSelect = document.getElementById("unitSelect");
+
+    unitSelect.innerHTML = "";
+
+    const selectedOption = ingredientSelect.options[ingredientSelect.selectedIndex];
+    if (!selectedOption || !selectedOption.dataset.units) return;
+
+    const units = JSON.parse(selectedOption.dataset.units);
+    units.forEach(u => {
+        const option = document.createElement("option");
+        option.value = u.id;
+        option.text = u.name;
+        unitSelect.add(option);
+    });
+}
+
+// Add ingredient to formset
+function addIngredient() {
+    const ingredientSelect = document.getElementById("ingredientSelect");
+    const ingredient = ingredientSelect.value;
+    const ingredientText = ingredientSelect.options[ingredientSelect.selectedIndex].text;
+
+    const quantity = parseFloat(document.getElementById("quantityInput").value);
+
+    const unitSelect = document.getElementById("unitSelect");
+    const unit = unitSelect.value;
+    const unitText = unitSelect.options[unitSelect.selectedIndex]?.text || "";
+
+    if (!ingredient || !quantity || !unit || quantity <= 0) {
+        alert("Fill all fields with valid values");
+        return;
+    }
+
+    const container = document.getElementById("ingredientsContainer");
+
+    container.innerHTML += `
+        <div class="ingredient-item">
+            <input type="hidden" name="recipeingredient_set-${formIndex}-ingredient" value="${ingredient}">
+            <input type="hidden" name="recipeingredient_set-${formIndex}-quantity" value="${quantity}">
+            <input type="hidden" name="recipeingredient_set-${formIndex}-unit" value="${unit}">
+
+            <p><strong>${ingredientText}</strong> - ${quantity} ${unitText}</p>
+        </div>
+    `;
+
+    formIndex++;
+
+    // Update management form
+    document.querySelector('[name="recipeingredient_set-TOTAL_FORMS"]').value = formIndex;
+
+    // Reset modal
+    document.getElementById("quantityInput").value = "";
+    document.getElementById("unitSelect").innerHTML = "";
+
+    closeModal();
+}
+
+// Close modal on outside click
+window.onclick = function(event) {
+    const modal = document.getElementById("ingredientModal");
+    if (event.target === modal) closeModal();
+};
 </script>
+
 {% endblock %}
