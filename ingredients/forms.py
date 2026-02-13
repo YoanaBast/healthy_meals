@@ -19,6 +19,9 @@ class IngredientFormBase(forms.ModelForm):
         #  '__all__'
 
         widgets = {
+            'ingredient': forms.Select(attrs={
+                'onchange': 'updateUnit(this)'
+            }),
             'name': forms.TextInput(attrs={'class': 'form-input'}),
             'category': forms.Select(attrs={'class': 'form-select'}),
             'dietary_tag': forms.CheckboxSelectMultiple(),  # multiple choice
