@@ -1,4 +1,4 @@
-from django.core.validators import MinLengthValidator
+from django.core.validators import MinValueValidator
 from django.db import models
 
 # Create your models here.
@@ -38,10 +38,10 @@ class MeasurementUnit(models.Model):
 class MeasurementUnitsConvert(models.Model):
     """maybe not neeeded"""
     first_unit = models.ForeignKey(MeasurementUnit, on_delete=models.CASCADE, related_name='first_measurment_unit')
-    first_unit_quantity = models.FloatField(default=1, validators=[MinLengthValidator(0.01)])
+    first_unit_quantity = models.FloatField(default=1, validators=[MinValueValidator(0.01)])
 
     second_unit = models.ForeignKey(MeasurementUnit, on_delete=models.CASCADE, related_name='second_measurment_unit')
-    second_unit_quantity = models.FloatField(validators=[MinLengthValidator(0.01)])
+    second_unit_quantity = models.FloatField(validators=[MinValueValidator(0.01)])
 
 
 
@@ -113,7 +113,7 @@ class Ingredient(models.Model):
     )
     #the unit that holds the nutrient data for conversions
 
-    base_quantity = models.FloatField(default=100, validators=[MinLengthValidator(0.01)], help_text="The quantity the NUTRIENTS are based on in default_unit (100 g, 1 pc, etc.)")
+    base_quantity = models.FloatField(default=100, validators=[MinValueValidator(0.01)], help_text="The quantity the NUTRIENTS are based on in default_unit (100 g, 1 pc, etc.)")
     #base_quantity = 100 means nutrients are defined per 100g
 
     category = models.ForeignKey(IngredientCategory, null=True, on_delete=models.SET_NULL, related_name='ingredient')

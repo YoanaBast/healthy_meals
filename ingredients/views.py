@@ -62,7 +62,6 @@ def edit_ingredient(request, ingredient_id):
         "ingredient": ing,
         "nutrients": Ingredient.NUTRIENTS,
         'default_url': default_url,
-
     }
 
     return render(request, "ingredients/edit_ingredient.html", context)
