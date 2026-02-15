@@ -1,33 +1,12 @@
 {% extends 'base.html' %}
 {% block title %}Add Recipe{% endblock %}
-
+{% load static %}
 {% block content %}
-
-<style>
-.modal {
-    display: none;
-    position: fixed;
-    z-index: 1000;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0,0,0,0.5);
-}
-
-.modal-content {
-    background: white;
-    width: 400px;
-    padding: 20px;
-    margin: 10% auto;
-    border-radius: 8px;
-}
-</style>
 
 <div class="container-home">
     <h2>Add Recipe</h2>
 
-    <form method="post">
+    <form method="post" action="{% url 'add_recipe' %}">
         {% csrf_token %}
         {{ recipe_form.as_p }}
         {{ ingredient_formset.management_form }}
@@ -47,8 +26,8 @@
 </div>
 
 <!-- MODAL -->
-<div id="ingredientModal" class="modal">
-    <div class="modal-content">
+<div id="ingredientModal" class="recipe-modal">
+    <div class="recipe-modal-content">
         <h4>Add Ingredient</h4>
 
         <select id="ingredientSelect" onchange="loadUnits()">
@@ -82,88 +61,7 @@
     </div>
 </div>
 
-<script>
-let formIndex = 0;
+<script src="{% static 'js/add_recipe_handler.js' %}"></script>
 
-// Open modal
-function openIngredientModal() {
-    document.getElementById("ingredientModal").style.display = "block";
-}
-
-// Close modal
-function closeModal() {
-    document.getElementById("ingredientModal").style.display = "none";
-}
-
-// Attach button
-document.getElementById("addIngredientBtn")
-    .addEventListener("click", openIngredientModal);
-
-// Load units for selected ingredient
-function loadUnits() {
-    const ingredientSelect = document.getElementById("ingredientSelect");
-    const unitSelect = document.getElementById("unitSelect");
-
-    unitSelect.innerHTML = "";
-
-    const selectedOption = ingredientSelect.options[ingredientSelect.selectedIndex];
-    if (!selectedOption || !selectedOption.dataset.units) return;
-
-    const units = JSON.parse(selectedOption.dataset.units);
-    units.forEach(u => {
-        const option = document.createElement("option");
-        option.value = u.id;
-        option.text = u.name;
-        unitSelect.add(option);
-    });
-}
-
-// Add ingredient to formset
-function addIngredient() {
-    const ingredientSelect = document.getElementById("ingredientSelect");
-    const ingredient = ingredientSelect.value;
-    const ingredientText = ingredientSelect.options[ingredientSelect.selectedIndex].text;
-
-    const quantity = parseFloat(document.getElementById("quantityInput").value);
-
-    const unitSelect = document.getElementById("unitSelect");
-    const unit = unitSelect.value;
-    const unitText = unitSelect.options[unitSelect.selectedIndex]?.text || "";
-
-    if (!ingredient || !quantity || !unit || quantity <= 0) {
-        alert("Fill all fields with valid values");
-        return;
-    }
-
-    const container = document.getElementById("ingredientsContainer");
-
-    container.innerHTML += `
-        <div class="ingredient-item">
-            <input type="hidden" name="recipeingredient_set-${formIndex}-ingredient" value="${ingredient}">
-            <input type="hidden" name="recipeingredient_set-${formIndex}-quantity" value="${quantity}">
-            <input type="hidden" name="recipeingredient_set-${formIndex}-unit" value="${unit}">
-
-            <p><strong>${ingredientText}</strong> - ${quantity} ${unitText}</p>
-        </div>
-    `;
-
-    formIndex++;
-
-    // Update management form
-    document.querySelector('[name="recipeingredient_set-TOTAL_FORMS"]').value = formIndex;
-
-    // Reset modal
-    document.getElementById("quantityInput").value = "";
-    document.getElementById("unitSelect").innerHTML = "";
-
-    closeModal();
-}
-
-// Close modal on outside click
-window.onclick = function(event) {
-    const modal = document.getElementById("ingredientModal");
-    if (event.target === modal) closeModal();
-};
-</script>
 
 {% endblock %}

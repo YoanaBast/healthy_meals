@@ -54,6 +54,8 @@ class RecipeIngredientForm(forms.ModelForm):
         return quantity
 
 RecipeIngredientFormSet = inlineformset_factory(
-    Recipe, RecipeIngredient, form=RecipeIngredientForm,
-    extra=3, can_delete=True  # extra=3 gives 3 blank rows to start, user can fill multiple ingredients
+    Recipe, RecipeIngredient,
+    form=RecipeIngredientForm,
+    extra=0,
+    can_delete=True
 )

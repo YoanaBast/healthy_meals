@@ -1,6 +1,6 @@
 from datetime import time
 
-from django.core.validators import MinLengthValidator
+from django.core.validators import MinValueValidator
 from django.db import models
 
 from ingredients.models import IngredientMeasurementUnit, Ingredient, MeasurementUnit
@@ -45,12 +45,32 @@ class Recipe(models.Model):
 
     @property
     def quantity_ingredients_list(self):
-        result = []
+        items = []
         for ri in self.recipe_ingredient.all():
-            unit = ri.unit.name_plural if ri.quantity >= 2 else ri.unit.name_singular
-            quantity = int(ri.quantity) if ri.quantity == int(ri.quantity) else ri.quantity
-            result.append((ri.ingredient, quantity, unit))
-        return result
+            mu = ri.unit  # this is the IngredientMeasurementUnit instance
+            unit_name = mu.name_for_quantity(ri.quantity)
+            items.append((ri.ingredient, ri.quantity, unit_name))
+        return items
+
+    @property
+    def quantity_ingredients_list_all_units(self):
+        """Return ingredients with all available units using proper formatting"""
+        items = []
+        for ri in self.recipe_ingredient.all():
+            ingredient = ri.ingredient
+            all_units = []
+            for mu in ingredient.measurement_units.all():
+                conv_qty = (ri.quantity * ri.unit.conversion_to_base) / mu.conversion_to_base
+                # Round to 2 decimals
+                conv_qty = round(conv_qty, 2)
+                # Remove .0 if integer
+                if conv_qty.is_integer():
+                    conv_qty = int(conv_qty)
+                # Use singular/plural correctly
+                unit_name = mu.name_for_quantity(conv_qty)
+                all_units.append(f"{conv_qty} {unit_name}")
+            items.append((ingredient, " / ".join(all_units)))
+        return items
 
     @property
     def cooking_duration(self):
@@ -108,14 +128,14 @@ class Recipe(models.Model):
             qty = ri.quantity
             ing_unit_obj = ri.unit
 
-            print(f"\n--- DEBUG RECIPE INGREDIENT ---")
-            print(f"Ingredient: {ing}")
-            print(f"Quantity: {qty}")
-            print(f"Unit object: {ing_unit_obj}")
+            # print(f"\n--- DEBUG RECIPE INGREDIENT ---")
+            # print(f"Ingredient: {ing}")
+            # print(f"Quantity: {qty}")
+            # print(f"Unit object: {ing_unit_obj}")
 
             # skip if not a proper IngredientMeasurementUnit
             if not ing_unit_obj or not hasattr(ing_unit_obj, 'conversion_to_base'):
-                print(f"Skipping: Invalid unit for ingredient {ing}")
+                # print(f"Skipping: Invalid unit for ingredient {ing}")
                 continue
 
             ing_totals = ing.get_nutrients_dict(
@@ -123,15 +143,15 @@ class Recipe(models.Model):
                 quantity=qty
             )
 
-            print(f"Nutrient totals for this ingredient: {ing_totals}")
+            # print(f"Nutrient totals for this ingredient: {ing_totals}")
 
             for nutrient, value in ing_totals.items():
                 total[nutrient] = total.get(nutrient, 0) + value
-
-            print(f"Running total after this ingredient: {total}")
-
-        print(f"\n=== FINAL TOTAL NUTRIENTS FOR RECIPE {self.name} ===")
-        print(total)
+        #
+        #     print(f"Running total after this ingredient: {total}")
+        #
+        # print(f"\n=== FINAL TOTAL NUTRIENTS FOR RECIPE {self.name} ===")
+        # print(total)
         return total
 
     @property
@@ -150,7 +170,7 @@ class RecipeIngredient(models.Model):
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE, related_name='recipe_ingredient')
     ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
 
-    quantity = models.FloatField(validators=[MinLengthValidator(0.01)])
+    quantity = models.FloatField(validators=[MinValueValidator(0.01)])
     unit = models.ForeignKey(
         IngredientMeasurementUnit,
         on_delete=models.SET_NULL,
