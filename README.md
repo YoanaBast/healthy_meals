@@ -18,22 +18,10 @@ This project lets you:
 - PostgreSQL 
 
 
-[AI & Tools Used](/docs/ai_tools.md)
+[AI & Tools Used](docs/ai_tools.md) 
 
 
-### 📄 Forms & Views
 
-- CRUD for recipes and fridge items
-- Custom validations and user‑friendly errors
-- Confirmation before deleting objects
-- Views handle GET/POST and redirects after successful submissions
-
-### 🧾 Templates
-
-- At least **10 pages** with dynamic data
-- Base template + reusable partials
-- Navigation & footer on all pages
-- Custom 404 error page
 
 ## 🛠 Installation
 
@@ -44,7 +32,7 @@ This project lets you:
 - Virtual environment tool (recommended)  
 
 **Steps:**
-
+this is to be fixed
 ```bash
 git clone https://github.com/YoanaBast/healthy_meals.git
 cd healthy_meals
