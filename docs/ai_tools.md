@@ -1,21 +1,32 @@
 ### AI used:
 
-- v0:
-  - Prototyped the UI in the very beginning. I've changed a lot, this is the original it provided: 
-  
+- Vercel (v0):
+  - Prototyped the UI at the start; this was the original design before major changes: [original UI](documented_files/dummy_recipe.html)
+
+
 - ChatGPT:
-  - Provided a JSON file and prompted to mirror the data and add more to it.
-  - Made it generate some basic CSS and templates, then I modified them to my liking. 
-  - Got assistance with the JS
+  - Assisted with some CSS and JS
+  - General lazy tasks such as completing JSON files, 
   
+
 - ClickUp Brain:
-- Generated images:
+  - Generated images:
 
-<img src="./documented_files/tomato.png" alt="Tomato" width="200" />
+    <img src="./documented_files/tomato.png" alt="Tomato" width="200" />
+    <img src="./documented_files/basil.png" alt="Basil" width="200" />
+    <img src="./documented_files/cucumber.png" alt="Cucumber" width="200" />
+    <img src="./documented_files/herb.png" alt="Herb" width="200" />
+    <img src="./documented_files/fridge.png" alt="Fridge" width="200" />
 
+  
+  
 ### Other tools used:
 
-Relationships include:
+- https://www.canva.com/
+- https://www.remove.bg/
+- https://boxy-svg.com/
+- https://www.stickerit.co/tools/vectoriser
+- https://svgcrop.com/
+- https://vectorizer.com/
+- https://prismic.io/blog/css-text-animations
 
-- **Many‑to‑one**: Ingredient → Category, IngredientMeasurementUnit → Ingredient/Unit, Recipe → Category, Fridge → Ingredient/Unit/UserFridge  
-- **Many‑to‑many**: Ingredient ↔ DietaryTag, Recipe ↔ Ingredient (through `RecipeIngredient`)
