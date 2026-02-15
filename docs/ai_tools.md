@@ -11,7 +11,7 @@
 - ClickUp Brain:
 - Generated images:
 
-<img src="./docs/tomato.png" alt="Tomato" width="200" />
+<img src="./documented_files/tomato.png" alt="Tomato" width="200" />
 
 ### Other tools used:
 
