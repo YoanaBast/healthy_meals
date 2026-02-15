@@ -17,7 +17,7 @@
         <div class="section-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem;">
             <div>
                 <h2 class="section-title">Manage Ingredients</h2>
-                <p class="section-description">Manage your ingredient database.</p>
+                <p class="section-description">What ingredients do you want to use? Manage them here!</p>
             </div>
             <a href="#addIngredientModal" class="btn">Add New Ingredient</a>
         </div>
@@ -50,12 +50,15 @@
                                 <td data-label="Dietary Information"> {{ ing.dietary_info|default:"-" }}</td>
                                 <td data-label="Default Unit">{{ ing.default_unit }}</td>
                                 <td data-label="Actions">
-                                <a href="{% url 'ingredient_details' ing.id %}" class="btn btn-secondary btn-small">See Details</a>
-                                <a href="{% url 'edit_ingredient' ing.id %}" class="btn btn-secondary btn-small">Edit</a>
-
-                                <button class="btn btn-danger" onclick="openDeleteModal('ingredient', {{ ing.id }}, '{{ ing.name|escapejs }}')">Delete</button>
-
-                            </td>
+                                    <div class="action-buttons">
+                                        <a href="{% url 'ingredient_details' ing.id %}" class="btn btn-secondary btn-small">Details</a>
+                                        <a href="{% url 'edit_ingredient' ing.id %}" class="btn btn-secondary btn-small">Edit</a>
+                                        <button class="btn btn-danger btn-small"
+                                                onclick="openDeleteModal('ingredient', {{ ing.id }}, '{{ ing.name|escapejs }}')">
+                                            Delete
+                                        </button>
+                                    </div>
+                                </td>
 
 
                             {% empty %}

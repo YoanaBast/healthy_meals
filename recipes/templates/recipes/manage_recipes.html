@@ -20,7 +20,7 @@
                 <p class="section-description">Introduce the Foodganizer to new tasty recipes!</p>
             </div>
 
-                <a href="{% url 'add_recipe' %}" class="btn btn-secondary btn-small">Add Recipe</a>
+                <a href="{% url 'add_recipe' %}" class="btn">Add New Recipe</a>
 
         </div>
 
@@ -54,14 +54,16 @@
                                 <td data-label="Servings">{{ rec.servings|default:"-"  }}</td>
 
                                 <td data-label="Actions">
-                                <a href="{% url 'recipe_detail' rec.id %}" class="btn btn-secondary btn-small">See Details</a>
-                                <a href="{% url 'edit_recipe' rec.id %}" class="btn btn-secondary btn-small">Edit</a>
+                                    <div class="action-buttons">
+                                        <a href="{% url 'recipe_detail' rec.id %}" class="btn btn-secondary btn-small">Details</a>
+                                        <a href="{% url 'edit_recipe' rec.id %}" class="btn btn-secondary btn-small">Edit</a>
+                                        <button class="btn btn-danger btn-small"
+                                                onclick="openDeleteModal('recipe', {{ rec.id }}, '{{ rec.name|escapejs }}')">
+                                            Delete
+                                        </button>
+                                    </div>
+                                </td>
 
-
-                                <button class="btn btn-danger" onclick="openDeleteModal('recipe', {{ rec.id }}, '{{ rec.name|escapejs }}')">Delete</button>
-
-
-                            </td>
 
 
                             {% empty %}
