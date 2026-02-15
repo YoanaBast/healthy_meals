@@ -72,3 +72,7 @@ favicon.ico
 add all units to recipe details
 
 fix undefined in delete from edit on ingredients
+
+fix ui for clock
+
+add select boxes and select all with option to delete all ?

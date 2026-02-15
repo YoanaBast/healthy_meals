@@ -1,10 +1,65 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Edit Recipe{% endblock %}
 
-</body>
-</html>
+{% block content %}
+
+<h2>Edit Recipe</h2>
+<form method="post" action="{% url 'edit_recipe' recipe.pk %}">
+    {% csrf_token %}
+    {{ recipe_form.as_p }}
+    {{ ingredient_formset.management_form }}
+
+    <h3>Ingredients</h3>
+    <div id="ingredientsContainer">
+        {% for form in ingredient_formset.forms %}
+            <div class="ingredient-line">
+                {{ form.id }}
+                {{ form.ingredient.label_tag }} {{ form.ingredient }}
+                {{ form.quantity.label_tag }} {{ form.quantity }}
+                {{ form.unit.label_tag }} {{ form.unit }}
+                {% if form.instance.pk %}
+                    {{ form.DELETE }} <label>Delete</label>
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
+
+    <button type="button" id="addIngredientBtn" class="btn btn-primary">+ Add Ingredient</button>
+
+    <br><br>
+    <button type="submit" class="btn btn-success">Save Recipe</button>
+    <a href="{{ request.META.HTTP_REFERER|default:default_url }}" class="btn btn-secondary">Cancel</a>
+</form>
+
+<!-- Optional modal for adding new ingredients dynamically -->
+<div id="ingredientModal" class="recipe-modal">
+    <div class="recipe-modal-content">
+        <h4>Add Ingredient</h4>
+
+        <select id="ingredientSelect" onchange="loadUnits()">
+            <option value="">Select ingredient</option>
+            {% for ing in ingredients %}
+                <option value="{{ ing.id }}"
+                        data-units='[
+                        {% for mu in ing.measurement_units.all %}
+                            {"id": "{{ mu.id }}", "name": "{{ mu.name_for_quantity_singular }}"}
+                            {% if not forloop.last %},{% endif %}
+                        {% endfor %}]'>
+                    {{ ing.name }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <br><br>
+        <input type="number" id="quantityInput" step="0.01" min="0.01" placeholder="Quantity">
+        <br><br>
+        <select id="unitSelect"></select>
+        <br><br>
+        <button type="button" onclick="addIngredient()">Add</button>
+        <button type="button" onclick="closeModal()">Cancel</button>
+    </div>
+</div>
+
+<script src="{% static 'js/add_recipe_handler.js' %}"></script>
+{% endblock %}

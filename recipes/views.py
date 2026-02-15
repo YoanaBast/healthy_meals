@@ -1,9 +1,9 @@
 from django.shortcuts import render, get_object_or_404, redirect
+from django.urls import reverse
 
 from ingredients.models import Ingredient
 from .forms import RecipeForm, RecipeIngredientForm, RecipeIngredientFormSet
 from .models import Recipe, RecipeCategory, RecipeIngredient
-
 
 # Create your views here.
 
@@ -22,26 +22,42 @@ def manage_recipes(request):
 
     return render(request, 'recipes/manage_recipes.html', context)
 
+
 def recipe_detail(request, pk):
     recipe = get_object_or_404(Recipe, pk=pk)
     return render(request, 'recipes/recipe_detail.html', {'recipe': recipe})
 
 
-from django.shortcuts import render, redirect
-from .forms import RecipeForm, RecipeIngredientForm
-from .models import Recipe, RecipeIngredient
-
-
 def add_recipe(request):
-    recipe_form = RecipeForm()
-    ingredient_formset = RecipeIngredientFormSet()
-    ingredients = Ingredient.objects.prefetch_related('measurement_units__unit').all()  # <- all ingredients with units
+    ingredients = Ingredient.objects.prefetch_related('measurement_units__unit').all()
+
+    if request.method == 'POST':
+        print(request.POST)
+
+        recipe_form = RecipeForm(request.POST)
+        ingredient_formset = RecipeIngredientFormSet(request.POST)
+
+        if recipe_form.is_valid() and ingredient_formset.is_valid():
+            print(f"debug: recipe form \n{recipe_form.cleaned_data}")
+            print(f"debug: ingredient_formset form \n{ingredient_formset.cleaned_data}")
+
+            recipe = recipe_form.save()
+            ingredient_formset.instance = recipe
+            ingredient_formset.save()
+            return redirect('manage_recipes')
+
+    else:
+        recipe_form = RecipeForm()
+        ingredient_formset = RecipeIngredientFormSet()
 
     return render(request, 'recipes/add_recipe.html', {
         'recipe_form': recipe_form,
         'ingredient_formset': ingredient_formset,
-        'ingredients': ingredients,  # pass to template
+        'ingredients': ingredients,
     })
+
+
+
 
 def delete_recipe(request, pk):
     recipe = get_object_or_404(Recipe, pk=pk)
@@ -50,12 +66,29 @@ def delete_recipe(request, pk):
 
 
 def edit_recipe(request, pk):
+    default_url = reverse('manage_recipes')
     recipe = get_object_or_404(Recipe, pk=pk)
+    ingredients = Ingredient.objects.prefetch_related('measurement_units__unit').all()
+
     if request.method == 'POST':
-        form = RecipeForm(request.POST, instance=recipe)
-        if form.is_valid():
-            form.save()
-            return redirect('recipe_detail', recipe_id=recipe.id)
+        recipe_form = RecipeForm(request.POST, instance=recipe)
+        ingredient_formset = RecipeIngredientFormSet(request.POST, instance=recipe)
+
+        if recipe_form.is_valid() and ingredient_formset.is_valid():
+            recipe_form.save()
+            ingredient_formset.save()
+            return redirect('recipe_detail', pk=recipe.pk)
+
     else:
-        form = RecipeForm(instance=recipe)
-    return render(request, 'recipes/edit_recipe.html', {'form': form, 'recipe': recipe})
+        recipe_form = RecipeForm(instance=recipe)
+        ingredient_formset = RecipeIngredientFormSet(instance=recipe)
+
+    context = {
+        'recipe_form': recipe_form,
+        'ingredient_formset': ingredient_formset,
+        'ingredients': ingredients,
+        'recipe': recipe,
+        'default_url': default_url,
+    }
+
+    return render(request, 'recipes/edit_recipe.html', context)

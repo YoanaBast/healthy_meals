@@ -5,6 +5,10 @@
 {% block content %}
 <div class="container-home" style="max-width: 800px; margin: 2rem auto;">
     <a href="{% url 'manage_recipes' %}" class="btn" style="margin-bottom: 1rem;">&larr; Back to Recipes</a>
+    <a href="{% url 'edit_recipe' recipe.pk %}" class="btn" style="margin-bottom: 1rem;"> Edit </a>
+<button class="btn btn-danger" onclick="openDeleteModal('recipe', {{ recipe.pk }}, '{{ recipe.name|escapejs }}')">Delete </button>
+        <!-- DELETE POPUP -->
+        {% include 'recipes/delete_recipe_modal.html' %}
 
     <h1>{{ recipe.name }}</h1>
     <p><strong>Category:</strong> {{ recipe.category|default:"-" }}</p>
@@ -15,14 +19,13 @@
 
 
     <h2>Ingredients</h2>
-    <ul>
-      {% for ing, qty, unit_name in recipe.quantity_ingredients_list %}
-          <li>{{ ing.name }} — {{ qty }} {{ unit_name }}</li>
-      {% empty %}
-          <li>No ingredients added.</li>
-      {% endfor %}
-
-    </ul>
+        <ul>
+          {% for ing, qtys in recipe.quantity_ingredients_list_all_units %}
+              <li>{{ ing.name }} — {{ qtys }}</li>
+          {% empty %}
+              <li>No ingredients added.</li>
+          {% endfor %}
+        </ul>
     <h2>Instructions</h2>
     <p>{{ recipe.instructions|linebreaks }}</p>
 
@@ -51,4 +54,7 @@
     ul { list-style: disc; padding-left: 2rem; }
     .btn { display: inline-block; padding: 0.5rem 1rem; background: #333; color: #fff; border-radius: 4px; text-decoration: none; }
 </style>
+
+<script src="{% static 'js/delete_popup.js' %}"></script>
+
 {% endblock %}
