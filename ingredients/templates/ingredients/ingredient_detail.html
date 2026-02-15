@@ -1,6 +1,8 @@
 {% extends 'base.html' %}
 {% load static %}
-{% block title %}Ingredient Details{% endblock %}
+{% load recipe_extras %}
+
+{% block title %}{{ ingredient.name }} Details{% endblock %}
 
 {% block content %}
 
@@ -10,7 +12,7 @@
 
     <div class="section-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem;">
         <div>
-            <h2 class="section-title">Ingredient Details - {{ ingredient.name }} </h2>
+            <h1 class="section-title">{{ ingredient.name }} </h1>
             <p class="section-description">View detailed information about this ingredient.</p>
         </div>
         <div>
@@ -28,10 +30,7 @@
     <!-- Details Table -->
     <table class="data-table">
         <tbody>
-            <tr>
-                <th>Name</th>
-                <td>{{ ingredient.name }}</td>
-            </tr>
+
             <tr>
                 <th>Category</th>
                 <td>{{ ingredient.category|default:"-" }}</td>
@@ -56,47 +55,73 @@
         Nutrients for {{ quantity }} {{ unit_name }}:
     </h4>
 
+<form method="post" class="styled-form">
+    {% csrf_token %}
+
+    {{ form.as_p }}
+
+    <div class="form-group">
+        <label>Measurement unit:</label>
+        <select name="unit">
+            {% for mu in ingredient.measurement_units.all %}
+                <option value="{{ mu.id }}">{{ mu.unit }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="form-group">
+        <input type="number" name="quantity" step="0.01" required placeholder="Quantity">
+    </div>
+
+    <button type="submit" class="btn btn-secondary btn-small">Update</button>
+</form>
 
 
-        <form method="post">
-            {% csrf_token %}
 
-            {{ form.as_p }}
-
-            <label>Measurement unit:</label>
-            <select name="unit">
-                {% for mu in ingredient.measurement_units.all %}
-                    <option value="{{ mu.id }}">
-                        {{ mu.unit }}
-                    </option>
-                {% endfor %}
-            </select>
-            <input type="number" name="quantity" step="0.01" required>
-
-            <button type="submit">Save</button>
-        </form>
-
-
-    <table class="data-table" style="margin-top:1rem;">
+<div class="nutrients-tables">
+    <table class="nutrients-table">
         <thead>
-            <tr>
-                <th>Nutrient</th>
-                <th>Amount</th>
-            </tr>
+            <tr><th>Nutrient</th><th>Amount</th></tr>
         </thead>
         <tbody>
             {% for n, value in nutrients.items %}
-            <tr>
-                <td>{{ n|upper }}</td>
-                <td>{{ value }}</td>
-            </tr>
+                <tr>
+                    <td>{{ n|nice_name }}</td>
+                    <td>{{ value }}</td>
+                </tr>
+            {% empty %}
+                <tr><td colspan="2">No nutrient info.</td></tr>
             {% endfor %}
-
         </tbody>
     </table>
-
 </div>
 
+
+</div>
+<style>
+.nutrients-tables {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    margin-left: 0;   /* left-align the table */
+    max-width: 500px;      /* adjust width */
+}
+
+.nutrients-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #111;
+    color: #fff;
+}
+.nutrients-table th, .nutrients-table td {
+    border: 1px solid #444;
+    padding: 0.5rem 1rem;
+    text-align: left;
+}
+.nutrients-table th { background: #222; }
+
+
+</style>
 <script src="{% static 'js/delete_popup.js' %}"></script>
 
 {% endblock %}
