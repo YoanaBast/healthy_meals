@@ -22,7 +22,6 @@ This project lets you:
 
 
 
-
 ## 🛠 Installation
 
 **Requirements:**
