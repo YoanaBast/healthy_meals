@@ -69,6 +69,7 @@ def edit_ingredient(request, ingredient_id):
 
 
 def ingredient_detail(request, ingredient_id):
+
     ingredient = get_object_or_404(Ingredient, pk=ingredient_id)
     unit_name = ingredient.default_unit
 

@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load custom_filters %}
 
 {% block title %}Manage Fridge{% endblock %}
 
@@ -32,7 +33,7 @@
                 <tr>
                     <th>Ingredient</th>
                     <th>Quantity</th>
-                    <th>Unit</th>
+<!--                    <th>Unit</th>-->
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -40,11 +41,28 @@
                 {% for item in fridge %}
                 <tr>
                     <td data-label="Ingredient">{{ item.ingredient.name }}</td>
-                    <td data-label="Quantity">{{ item.quantity }}</td>
-                    <td data-label="Unit">{{ item.unit }}</td>
+
+<td data-label="Quantity">
+    {% with item.ingredient.measurement_units|get_unit:item.unit as ing_unit %}
+        {{ item.quantity|smart_float }} {{ ing_unit|name_for_quantity:item.quantity|lower }}
+        {% with merge_explanations|get:item.ingredient.id as expl_list %}
+            {% if expl_list %}
+                <span title="{% for expl in expl_list %}{{ expl }}{% if not forloop.last %}\n{% endif %}{% endfor %}">🛈</span>
+            {% endif %}
+        {% endwith %}
+    {% endwith %}
+</td>
+
+
+<!--                    <td data-label="Unit">{{ item.unit }}</td>-->
+
                     <td data-label="Actions">
                         <div class="action-buttons">
+
                             <a href="{% url 'edit_fridge_item' item.id %}" class="btn btn-secondary btn-small">Edit</a>
+
+                            <a href="{% url 'ingredient_details' item.ingredient.id %}" class="btn btn-secondary btn-small">Details</a>
+
                             <button class="btn btn-danger btn-small"
                                     onclick="openDeleteModal('fridge', {{ item.id }}, '{{ item.ingredient.name|escapejs }}')">
                                 Delete
