@@ -21,6 +21,7 @@
                     <th>Match</th>
                     <th>Status</th>
                     <th>Details</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -50,6 +51,15 @@
                         {% else %}
                             —
                         {% endif %}
+                    </td>
+
+                    <td>
+                        <a href="{% url 'recipe_detail' s.recipe.id %}" class="btn btn-secondary btn-small">View</a>
+
+                        <form action="{% url 'make_recipe' s.recipe.id %}" method="post" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-secondary btn-small">Make</button>
+                        </form>
                     </td>
                 </tr>
                 {% endfor %}

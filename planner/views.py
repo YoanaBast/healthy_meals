@@ -148,6 +148,12 @@ def add_fridge_item(request):
 
 
 
+from django.contrib.auth.models import User
+from django.shortcuts import render, get_object_or_404, redirect
+from ingredients.models import Ingredient, MeasurementUnit, IngredientMeasurementUnit
+from planner.models import UserFridge
+from recipes.models import Recipe, RecipeIngredient
+
 def get_meal_suggestions(request):
     user = User.objects.get(username="default")
     fridge_items = UserFridge.objects.filter(user=user)
@@ -163,19 +169,17 @@ def get_meal_suggestions(request):
 
         for ri in recipe_ingredients:
             fridge_item = fridge_items.filter(ingredient=ri.ingredient).first()
-
             fridge_qty = 0
+
             if fridge_item:
                 if fridge_item.unit == ri.unit.unit:
                     fridge_qty = fridge_item.quantity
                 else:
                     try:
-                        # convert fridge quantity to recipe unit
-                        fridge_conv = IngredientMeasurementUnit.objects.get(
-                            ingredient=ri.ingredient,
-                            unit=fridge_item.unit
+                        conv_fridge = IngredientMeasurementUnit.objects.get(
+                            ingredient=ri.ingredient, unit=fridge_item.unit
                         )
-                        qty_in_base = fridge_item.quantity * fridge_conv.conversion_to_base
+                        qty_in_base = fridge_item.quantity * conv_fridge.conversion_to_base
                         fridge_qty = qty_in_base / ri.unit.conversion_to_base
                     except IngredientMeasurementUnit.DoesNotExist:
                         fridge_qty = 0
@@ -184,8 +188,7 @@ def get_meal_suggestions(request):
                 matched += 1
             else:
                 missing_qty = round(max(ri.quantity - fridge_qty, 0), 2)
-                unit_code = ri.unit.unit.code  # e.g., g, L
-                missing.append(f"{missing_qty}{unit_code} {ri.ingredient.name}")
+                missing.append(f"{missing_qty:g}{ri.unit.unit.code} {ri.ingredient.name}")
 
         match_percent = int((matched / total) * 100) if total else 0
         suggestions.append({
@@ -195,9 +198,38 @@ def get_meal_suggestions(request):
             "missing_ingredients": missing
         })
 
-    # sort best matches first
     suggestions.sort(key=lambda x: x["match_percent"], reverse=True)
 
     return render(request, "planner/get_meal_suggestions.html", {
         "suggestions": suggestions
     })
+
+
+def make_recipe(request, id):
+    if request.method == 'POST':
+        recipe = get_object_or_404(Recipe, id=id)
+        user = User.objects.get(username="default")  # match fridge user
+        user_fridge_items = UserFridge.objects.filter(user=user)
+
+        for ri in RecipeIngredient.objects.filter(recipe=recipe):
+            fridge_item = user_fridge_items.filter(ingredient=ri.ingredient).first()
+            if fridge_item:
+                # convert if needed
+                qty_to_subtract = ri.quantity
+                if fridge_item.unit != ri.unit.unit:
+                    try:
+                        conv_fridge = IngredientMeasurementUnit.objects.get(
+                            ingredient=ri.ingredient, unit=fridge_item.unit
+                        )
+                        qty_in_base = qty_to_subtract * ri.unit.conversion_to_base
+                        qty_to_subtract = qty_in_base / conv_fridge.conversion_to_base
+                    except IngredientMeasurementUnit.DoesNotExist:
+                        continue
+
+                fridge_item.quantity -= qty_to_subtract
+                if fridge_item.quantity <= 0:
+                    fridge_item.delete()
+                else:
+                    fridge_item.save()
+
+    return redirect('get_meal_suggestions')
