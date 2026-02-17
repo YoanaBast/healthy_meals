@@ -1,10 +1,29 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends 'base.html' %}
+{% load static %}
 
-</body>
-</html>
+{% block title %}Edit Fridge{% endblock %}
+
+{% block content %}
+<div class="container-home">
+      <h2>{{ item.ingredient.name }} Stock: </h2>
+
+<form method="post">
+
+    {% csrf_token %}
+
+    {{ form.quantity.label_tag }}
+    {{ form.quantity }}
+
+    <br><br>
+
+    {{ form.unit.label_tag }}
+    {{ form.unit }}
+
+    <br><br>
+
+    <button type="submit" class="btn btn-success">Save</button>
+    <a href="{% url 'manage_fridge' %}" class="btn btn-secondary">Cancel</a>
+</form>
+</div>
+
+{% endblock %}
