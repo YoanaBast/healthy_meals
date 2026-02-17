@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block title %}Meal Suggestions{% endblock %}
+
+{% block content %}
+
+    {% include 'tab_nav.html' with active_tab='manage-fridge' %}
+<div class="container-home">
+
+    <h2>Meal Suggestions</h2>
+    <p>Based on what’s currently in your fridge.</p>
+
+    <br>
+
+    {% if suggestions %}
+
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Recipe</th>
+                    <th>Match</th>
+                    <th>Status</th>
+                    <th>Details</th>
+                </tr>
+            </thead>
+            <tbody>
+
+                {% for s in suggestions %}
+                <tr>
+                    <td>{{ s.recipe.name }}</td>
+
+                    <td>{{ s.match_percent }}%</td>
+
+                    <td>
+                        {% if s.can_make %}
+                            <span style="color:lightgreen;">✔ Can Make</span>
+                        {% else %}
+                            <span style="color:#ff6b6b;">Missing Items</span>
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        {% if not s.can_make %}
+                            <small>
+                                Missing:
+                                {% for m in s.missing_ingredients %}
+                                    {{ m }}{% if not forloop.last %}, {% endif %}
+                                {% endfor %}
+                            </small>
+                        {% else %}
+                            —
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+
+            </tbody>
+        </table>
+
+    {% else %}
+        <p>No suggestions available.</p>
+    {% endif %}
+
+</div>
+{% endblock %}

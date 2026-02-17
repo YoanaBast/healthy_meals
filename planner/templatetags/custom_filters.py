@@ -23,3 +23,7 @@ def smart_float(value):
         return int(f) if f == int(f) else f
     except (ValueError, TypeError):
         return value
+
+@register.filter
+def split(value, delimiter=" "):
+    return value.split(delimiter)

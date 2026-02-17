@@ -4,7 +4,7 @@
 <div class="tab-nav">
     <div class="tab-nav-upper">
         <a href="{% url 'homepage' %}" class="tab-button {% if request.resolver_match.url_name == 'homepage' %}active{% endif %}">Generate Grocery List</a>
-        <a href="{% url 'homepage' %}" class="tab-button {% if request.resolver_match.url_name == 'homepage' %}active{% endif %}">Get Meal Suggestions</a>
+        <a href="{% url 'meal_suggestions' %}" class="tab-button {% if request.resolver_match.url_name == 'meal_suggestions' %}active{% endif %}">Get Meal Suggestions</a>
         <a href="{% url 'manage_fridge' %}" class="tab-button {% if request.resolver_match.url_name == 'manage_fridge' %}active{% endif %}">Update your Fridge</a>
     </div>
 
