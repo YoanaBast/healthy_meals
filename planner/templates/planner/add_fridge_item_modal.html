@@ -1,0 +1,62 @@
+<!-- ADD FRIDGE ITEM MODAL -->
+<div id="addFridgeItemModal" class="recipe-modal" style="display:none;">
+    <div class="recipe-modal-content">
+        <h4>Add to Fridge</h4>
+
+        <form id="addFridgeItemForm" method="post" action="{% url 'add_fridge_item' %}">
+            {% csrf_token %}
+
+            <!-- Ingredient Dropdown -->
+            <label for="ingredientSelect">Ingredient</label>
+            <select id="ingredientSelect" name="ingredient_id" onchange="loadUnits()">
+                <option value="">Select ingredient</option>
+                {% for ing in ingredients %}
+                    <option value="{{ ing.id }}"
+                        data-units='[
+                            {% for mu in ing.measurement_units.all %}
+                                {"id": "{{ mu.id }}", "name": "{{ mu.name_for_quantity_singular }}"}
+                                {% if not forloop.last %},{% endif %}
+                            {% endfor %}
+                        ]'
+                    >{{ ing.name }}</option>
+                {% endfor %}
+            </select>
+
+            <br><br>
+
+            <!-- Quantity -->
+            <label for="quantityInput">Quantity</label>
+            <input type="number" id="quantityInput" name="quantity" step="0.01" min="0.01" placeholder="Quantity">
+
+            <br><br>
+
+            <!-- Unit Dropdown -->
+            <label for="unitSelect">Unit</label>
+            <select id="unitSelect" name="unit"></select>
+
+            <br><br>
+
+            <button type="submit" class="btn btn-success">Add to Fridge</button>
+            <button type="button" onclick="closeModal()" class="btn btn-secondary">Cancel</button>
+        </form>
+    </div>
+</div>
+
+<script>
+function loadUnits() {
+    const select = document.getElementById('ingredientSelect');
+    const unitSelect = document.getElementById('unitSelect');
+    unitSelect.innerHTML = '';
+
+    const selectedOption = select.options[select.selectedIndex];
+    if (!selectedOption) return;
+
+    const units = JSON.parse(selectedOption.getAttribute('data-units') || '[]');
+    units.forEach(u => {
+        const opt = document.createElement('option');
+        opt.value = u.id;  // <--- send the ID
+        opt.textContent = u.name;
+        unitSelect.appendChild(opt);
+    });
+}
+</script>

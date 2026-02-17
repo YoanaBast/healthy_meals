@@ -1,60 +1,62 @@
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand
 from pathlib import Path
 import json
-from planner.models import Fridge, UserFridge
-from ingredients.models import Ingredient
+
+from planner.models import UserFridge
+from ingredients.models import Ingredient, MeasurementUnit
+
 
 class Command(BaseCommand):
-    help = 'Populate fridge with ingredients from JSON'
+    help = "Populate user fridge from JSON"
 
     def handle(self, *args, **kwargs):
+        User = get_user_model()
+
         # Ensure default user exists
         default_user, created = User.objects.get_or_create(
-            id=1,
-            defaults={'username': 'default', 'is_superuser': True, 'is_staff': True}
+            username="default",
+            defaults={"is_superuser": True, "is_staff": True},
         )
+
         if created:
-            default_user.set_password('defaultpassword')
+            default_user.set_password("defaultpassword")
             default_user.save()
-            self.stdout.write(self.style.SUCCESS("Created default superuser with ID=1"))
+            self.stdout.write(self.style.SUCCESS("Created default superuser"))
 
-        # Ensure UserFridge exists
-        user_fridge, _ = UserFridge.objects.get_or_create(user=default_user)
-
-        json_path = Path(__file__).resolve().parent.parent / 'dummy_data' / 'dummy_fridge.json'
-        self.stdout.write(f"DEBUG: Looking for JSON at {json_path}")
+        json_path = Path(__file__).resolve().parent.parent / "dummy_data" / "dummy_fridge.json"
 
         if not json_path.exists():
-            self.stdout.write(self.style.ERROR("ERROR: File not found!"))
+            self.stdout.write(self.style.ERROR("File not found"))
             return
 
-        with open(json_path, 'r') as f:
+        with open(json_path, "r") as f:
             data = json.load(f)
 
-        for item in data.get('fridge_items', []):
-            ing_name = item['name']
-            qty = item['quantity']
-            unit = item['unit']
+        for item in data.get("fridge_items", []):
+            name = item["name"]
+            qty = item["quantity"]
+            unit_code = item["unit"]
 
-            ingredient = Ingredient.objects.filter(name=ing_name).first()
+            ingredient = Ingredient.objects.filter(name=name).first()
             if not ingredient:
-                self.stdout.write(self.style.WARNING(f"Skipping missing ingredient: {ing_name}"))
+                self.stdout.write(self.style.WARNING(f"Skipping missing ingredient: {name}"))
                 continue
 
-            valid_units = [u.unit for u in ingredient.measurement_units.all()]
-            if unit not in valid_units:
-                self.stdout.write(self.style.WARNING(
-                    f"Unit '{unit}' not valid for {ing_name}, defaulting to '{ingredient.default_unit}'"
-                ))
+            unit = MeasurementUnit.objects.filter(code=unit_code).first()
+            if not unit:
+                self.stdout.write(self.style.WARNING(f"Invalid unit '{unit_code}' for {name}, using default"))
                 unit = ingredient.default_unit
 
-            fridge_item, _ = Fridge.objects.update_or_create(
-                user_fridge=user_fridge,
+            UserFridge.objects.update_or_create(
+                user=default_user,
                 ingredient=ingredient,
-                defaults={'quantity': qty, 'unit': unit}
+                defaults={
+                    "quantity": qty,
+                    "unit": unit,
+                },
             )
 
-            self.stdout.write(f"DEBUG: Added {qty} {unit} of {ing_name} to {default_user.username}'s fridge")
+            self.stdout.write(f"Added {qty} {unit} of {name}")
 
-        self.stdout.write(self.style.SUCCESS("\nFridge populated successfully!"))
+        self.stdout.write(self.style.SUCCESS("Fridge populated successfully"))

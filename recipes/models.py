@@ -1,5 +1,6 @@
 from datetime import time
 
+from django.conf import settings
 from django.core.validators import MinValueValidator
 from django.db import models
 
@@ -26,6 +27,12 @@ class Recipe(models.Model):
     ingredients = models.ManyToManyField(Ingredient, through='RecipeIngredient', related_name='recipes')
     category = models.ForeignKey(RecipeCategory, null=True, on_delete=models.SET_NULL, related_name='ingredient')
     instructions = models.TextField()
+
+    favourited_by = models.ManyToManyField(
+        settings.AUTH_USER_MODEL,
+        related_name="favourite_recipes",
+        blank=True
+    ) #user.favourite_recipes.all(), recipe.favourited_by.add(user),recipe.favourited_by.remove(user)
 
     @property
     def dietary_info(self):
