@@ -13,9 +13,8 @@
                 {% for ing in ingredients %}
                     <option value="{{ ing.id }}"
                         data-units='[
-                            {% for mu in ing.measurement_units.all %}
-                                {"id": "{{ mu.id }}", "name": "{{ mu.name_for_quantity_singular }}"}
-                                {% if not forloop.last %},{% endif %}
+                            {% for rel in ing.measurement_units.all %}
+                                {"id": "{{ rel.unit.id }}", "name": "{{ rel.unit.name_singular|escapejs }}"}{% if not forloop.last %},{% endif %}
                             {% endfor %}
                         ]'
                     >{{ ing.name }}</option>
@@ -46,17 +45,34 @@
 function loadUnits() {
     const select = document.getElementById('ingredientSelect');
     const unitSelect = document.getElementById('unitSelect');
+
+    // Clear completely
     unitSelect.innerHTML = '';
+    unitSelect.value = '';
 
     const selectedOption = select.options[select.selectedIndex];
-    if (!selectedOption) return;
+    if (!selectedOption || !selectedOption.value) return;
 
-    const units = JSON.parse(selectedOption.getAttribute('data-units') || '[]');
-    units.forEach(u => {
+    const unitsData = selectedOption.getAttribute('data-units');
+
+    if (!unitsData) return;
+
+    const units = JSON.parse(unitsData);
+
+    units.forEach((u, index) => {
         const opt = document.createElement('option');
-        opt.value = u.id;  // <--- send the ID
+        opt.value = u.id;
         opt.textContent = u.name;
         unitSelect.appendChild(opt);
     });
+
+    // Force first unit selected
+    if (unitSelect.options.length > 0) {
+        unitSelect.selectedIndex = 0;
+    }
+
+    console.log("Units loaded:", units);
+    console.log("Selected unit:", unitSelect.value);
 }
 </script>
+
