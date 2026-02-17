@@ -53,7 +53,6 @@ make add ing popup grid for PC
 
 add favourites table for recipe + user
 
-add View option to recipes dashboard
 
 remove attrs={'class':
 
@@ -63,9 +62,6 @@ use exclude in the form
 
 add search boxes
 
-add documentation, redme and nested files in docs
-
-add AI used and what zi learned in docs
 
 favicon.ico
 
@@ -78,3 +74,7 @@ fix ui for clock
 add select boxes and select all with option to delete all ?
 
 change the delete button to a tarsh can icon
+
+default serving should be 1
+
+fix grid on add ing popup
