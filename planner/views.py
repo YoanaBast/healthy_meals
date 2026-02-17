@@ -2,6 +2,7 @@ from django.contrib.auth.models import User
 from django.shortcuts import render, get_object_or_404, redirect
 
 from ingredients.models import Ingredient, MeasurementUnit
+from planner.forms import UserFridgeForm
 from planner.models import UserFridge
 
 
@@ -22,18 +23,39 @@ def manage_fridge(request):
 
 
 def edit_fridge_item(request, item_id):
-    item = get_object_or_404(UserFridge, id=item_id)
+    user = User.objects.get(username="default")
+    item = get_object_or_404(UserFridge, id=item_id, user=user)
+
+    print("ITEM:", item)
+    print("INGREDIENT:", item.ingredient)
+
+    related_units = item.ingredient.measurement_units.all()
+    print("IngredientMeasurementUnit objects:", related_units)
+
+    units = [rel.unit for rel in related_units]
+    print("UNITS:", units)
 
     if request.method == "POST":
-        item.quantity = request.POST.get("quantity", item.quantity)
-        item.unit = request.POST.get("unit", item.unit)
-        item.save()
-        return redirect('manage_fridge')
+        form = UserFridgeForm(request.POST, instance=item)
+        if form.is_valid():
+            form.save()
+            return redirect('manage_fridge')
+    else:
+        form = UserFridgeForm(instance=item)
 
-    context = {
-        'item': item,
-    }
-    return render(request, 'planner/edit_fridge_item.html', context)
+    form.fields['unit'].queryset = MeasurementUnit.objects.filter(
+        id__in=[u.id for u in units]
+    )
+
+    print("FORM UNIT QUERYSET:", form.fields['unit'].queryset)
+
+    return render(request, 'planner/edit_fridge_item.html', {
+        'form': form,
+        'item': item
+    })
+
+
+
 
 
 def delete_fridge_item(request, fridge_id):
