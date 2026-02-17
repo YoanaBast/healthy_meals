@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Manage Fridge{% endblock %}
+
+{% block content %}
+
+<div class="container-home">
+    <!-- Tabs -->
+    {% include 'tab_nav.html' with active_tab='manage-fridge' %}
+
+    <div id="manage-fridge" class="tab-content active">
+
+        <!-- Title + Button Row -->
+        <div class="section-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem;">
+            <div>
+                <h2 class="section-title">Manage Your Fridge</h2>
+                <p class="section-description">View and update the ingredients in your fridge here.</p>
+            </div>
+        <a href="#" id="openAddFridgeModal" class="btn">Add New Item</a>
+        </div>
+
+        <!-- ADD POPUP -->
+        {% include 'planner/add_fridge_item_modal.html' %}
+
+        <!-- DELETE POPUP -->
+        {% include 'planner/delete_fridge_item_modal.html' %}
+
+        <!-- Table with fridge items -->
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Ingredient</th>
+                    <th>Quantity</th>
+                    <th>Unit</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in fridge %}
+                <tr>
+                    <td data-label="Ingredient">{{ item.ingredient.name }}</td>
+                    <td data-label="Quantity">{{ item.quantity }}</td>
+                    <td data-label="Unit">{{ item.unit }}</td>
+                    <td data-label="Actions">
+                        <div class="action-buttons">
+                            <a href="{% url 'edit_fridge_item' item.id %}" class="btn btn-secondary btn-small">Edit</a>
+                            <button class="btn btn-danger btn-small"
+                                    onclick="openDeleteModal('fridge', {{ item.id }}, '{{ item.ingredient.name|escapejs }}')">
+                                Delete
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" style="text-align: center; padding: 2rem;">
+                        <h2 style="margin: 0;">No items in your fridge yet...</h2>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <!-- END OF Table -->
+
+    </div>
+</div>
+
+<!-- Scripts -->
+<script src="{% static 'js/zero_inputt_handler.js' %}"></script>
+<script src="{% static 'js/delete_popup.js' %}"></script>
+
+<script>
+const modal = document.getElementById('addFridgeItemModal');
+const openBtn = document.getElementById('openAddFridgeModal');
+
+openBtn.addEventListener('click', function(e) {
+    e.preventDefault();
+    modal.style.display = 'block';
+});
+
+// Close modal when clicking outside or with a close button
+window.addEventListener('click', function(e) {
+    if (e.target == modal) {
+        modal.style.display = 'none';
+    }
+});
+</script>
+
+{% endblock %}
