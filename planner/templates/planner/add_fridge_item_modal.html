@@ -74,5 +74,12 @@ function loadUnits() {
     console.log("Units loaded:", units);
     console.log("Selected unit:", unitSelect.value);
 }
+
+function closeModal() {
+    const modal = document.getElementById('addFridgeItemModal');
+    modal.style.display = 'none';
+    document.body.style.overflow = 'auto'; // if you disabled scrolling when opening
+}
+
 </script>
 
