@@ -1,9 +1,10 @@
 from django.contrib.auth.models import User
 from django.shortcuts import render, get_object_or_404, redirect
 
-from ingredients.models import Ingredient, MeasurementUnit
+from ingredients.models import Ingredient, MeasurementUnit, IngredientMeasurementUnit
 from planner.forms import UserFridgeForm
 from planner.models import UserFridge
+from recipes.models import Recipe, RecipeIngredient
 
 
 # Create your views here.
@@ -146,3 +147,57 @@ def add_fridge_item(request):
     return redirect("manage_fridge")
 
 
+
+def get_meal_suggestions(request):
+    user = User.objects.get(username="default")
+    fridge_items = UserFridge.objects.filter(user=user)
+    recipes = Recipe.objects.all()
+
+    suggestions = []
+
+    for recipe in recipes:
+        recipe_ingredients = RecipeIngredient.objects.filter(recipe=recipe)
+        total = recipe_ingredients.count()
+        matched = 0
+        missing = []
+
+        for ri in recipe_ingredients:
+            fridge_item = fridge_items.filter(ingredient=ri.ingredient).first()
+
+            fridge_qty = 0
+            if fridge_item:
+                if fridge_item.unit == ri.unit.unit:
+                    fridge_qty = fridge_item.quantity
+                else:
+                    try:
+                        # convert fridge quantity to recipe unit
+                        fridge_conv = IngredientMeasurementUnit.objects.get(
+                            ingredient=ri.ingredient,
+                            unit=fridge_item.unit
+                        )
+                        qty_in_base = fridge_item.quantity * fridge_conv.conversion_to_base
+                        fridge_qty = qty_in_base / ri.unit.conversion_to_base
+                    except IngredientMeasurementUnit.DoesNotExist:
+                        fridge_qty = 0
+
+            if fridge_qty >= ri.quantity:
+                matched += 1
+            else:
+                missing_qty = round(max(ri.quantity - fridge_qty, 0), 2)
+                unit_code = ri.unit.unit.code  # e.g., g, L
+                missing.append(f"{missing_qty}{unit_code} {ri.ingredient.name}")
+
+        match_percent = int((matched / total) * 100) if total else 0
+        suggestions.append({
+            "recipe": recipe,
+            "match_percent": match_percent,
+            "can_make": matched == total and total > 0,
+            "missing_ingredients": missing
+        })
+
+    # sort best matches first
+    suggestions.sort(key=lambda x: x["match_percent"], reverse=True)
+
+    return render(request, "planner/get_meal_suggestions.html", {
+        "suggestions": suggestions
+    })
