@@ -1,0 +1,85 @@
+<!-- ADD FRIDGE ITEM MODAL -->
+<div id="addFridgeItemModal" class="recipe-modal" style="display:none;">
+    <div class="recipe-modal-content">
+        <h4>Add to Fridge</h4>
+
+        <form id="addFridgeItemForm" method="post" action="{% url 'add_fridge_item' %}">
+            {% csrf_token %}
+
+            <!-- Ingredient Dropdown -->
+            <label for="ingredientSelect">Ingredient</label>
+            <select id="ingredientSelect" name="ingredient_id" onchange="loadUnits()">
+                <option value="">Select ingredient</option>
+                {% for ing in ingredients %}
+                    <option value="{{ ing.id }}"
+                        data-units='[
+                            {% for rel in ing.measurement_units.all %}
+                                {"id": "{{ rel.unit.id }}", "name": "{{ rel.unit.name_singular|escapejs }}"}{% if not forloop.last %},{% endif %}
+                            {% endfor %}
+                        ]'
+                    >{{ ing.name }}</option>
+                {% endfor %}
+            </select>
+
+            <br><br>
+
+            <!-- Quantity -->
+            <label for="quantityInput">Quantity</label>
+            <input type="number" id="quantityInput" name="quantity" step="0.01" min="0.01" placeholder="Quantity">
+
+            <br><br>
+
+            <!-- Unit Dropdown -->
+            <label for="unitSelect">Unit</label>
+            <select id="unitSelect" name="unit"></select>
+
+            <br><br>
+
+            <button type="submit" class="btn btn-success">Add to Fridge</button>
+            <button type="button" onclick="closeModal()" class="btn btn-secondary">Cancel</button>
+        </form>
+    </div>
+</div>
+
+<script>
+function loadUnits() {
+    const select = document.getElementById('ingredientSelect');
+    const unitSelect = document.getElementById('unitSelect');
+
+    // Clear completely
+    unitSelect.innerHTML = '';
+    unitSelect.value = '';
+
+    const selectedOption = select.options[select.selectedIndex];
+    if (!selectedOption || !selectedOption.value) return;
+
+    const unitsData = selectedOption.getAttribute('data-units');
+
+    if (!unitsData) return;
+
+    const units = JSON.parse(unitsData);
+
+    units.forEach((u, index) => {
+        const opt = document.createElement('option');
+        opt.value = u.id;
+        opt.textContent = u.name;
+        unitSelect.appendChild(opt);
+    });
+
+    // Force first unit selected
+    if (unitSelect.options.length > 0) {
+        unitSelect.selectedIndex = 0;
+    }
+
+    console.log("Units loaded:", units);
+    console.log("Selected unit:", unitSelect.value);
+}
+
+function closeModal() {
+    const modal = document.getElementById('addFridgeItemModal');
+    modal.style.display = 'none';
+    document.body.style.overflow = 'auto'; // if you disabled scrolling when opening
+}
+
+</script>
+
