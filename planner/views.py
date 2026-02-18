@@ -247,3 +247,46 @@ def make_recipe(request, id):
         messages.success(request, f"{recipe.name} was made successfully!")
 
     return redirect('meal_suggestions')
+
+
+def generate_grocery_list(request):
+    user = User.objects.get(username="default")  # temporary default
+    recipes = Recipe.objects.all()
+
+    # mark favourites
+    for rec in recipes:
+        rec.is_fav = rec.favourited_by.filter(id=user.id).exists()
+
+    selected_recipes = []
+    grocery_list = {}
+
+    if request.method == "POST":
+        recipe_ids = request.POST.getlist('recipes')
+        selected_recipes = Recipe.objects.filter(id__in=recipe_ids)
+
+        # gather all recipe ingredients
+        needed = {}
+        for rec in selected_recipes:
+            for ri in rec.recipe_ingredient.all():
+                name = ri.ingredient.name
+                qty = ri.quantity
+                unit = ri.unit.name_for_quantity_singular if ri.unit else ''
+                if name in needed:
+                    needed[name]['quantity'] += qty
+                else:
+                    needed[name] = {'quantity': qty, 'unit': unit}
+
+        # subtract fridge ingredients
+        fridge_ingredients = Ingredient.objects.filter(userfridge__user=user)
+        for ing in fridge_ingredients:
+            if ing.name in needed:
+                del needed[ing.name]
+
+        grocery_list = needed
+
+    context = {
+        'recipes': recipes,
+        'grocery_list': grocery_list,
+        'selected_recipes': [int(r.id) for r in selected_recipes],
+    }
+    return render(request, 'planner/generate_grocery_list.html', context)
