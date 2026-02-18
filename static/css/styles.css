@@ -1111,3 +1111,19 @@ label {
     background-color: #3d1f1f;
     color: #ff6b6b;
 }
+
+.heart-icon {
+    width: 24px;
+    height: 24px;
+}
+.btn-heart {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+}
+.btn-heart img {
+    width: 24px;
+    height: 24px;
+    display: block;
+}

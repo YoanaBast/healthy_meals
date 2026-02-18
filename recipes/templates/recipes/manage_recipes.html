@@ -53,28 +53,35 @@
                                 <td data-label="Kcal per Serving">{{ rec.kcal_per_serving|default:"-"  }}</td>
                                 <td data-label="Servings">{{ rec.servings|default:"-"  }}</td>
 
+<!-- Actions -->
                                 <td data-label="Actions">
                                     <div class="action-buttons">
+
+                                    <!-- Favourite -->
+                                        <button class="btn-heart" onclick="toggleFav({{ rec.id }}, this)">
+                                            {% if rec.is_fav %}
+                                                <img src="{% static 'images/full_heart.svg' %}" alt="fav" />
+                                            {% else %}
+                                                <img src="{% static 'images/empty_heart.svg' %}" alt="fav" />
+                                            {% endif %}
+                                        </button>
+
+                                    <!-- Details -->
                                         <a href="{% url 'recipe_detail' rec.id %}" class="btn btn-secondary btn-small">Details</a>
+
+                                    <!-- Edit -->
                                         <a href="{% url 'edit_recipe' rec.id %}" class="btn btn-secondary btn-small">Edit</a>
+
+                                    <!-- Delete -->
                                         <button class="btn btn-danger btn-small"
                                                 onclick="openDeleteModal('recipe', {{ rec.id }}, '{{ rec.name|escapejs }}')">
                                             Delete
                                         </button>
 
-                                                <!-- Favourite heart -->
-                                        <button class="btn-heart" onclick="toggleFav({{ rec.id }}, this)">
-                                            {% if rec.is_fav %}
-                                                ❤️
-                                            {% else %}
-                                                🤍
-                                            {% endif %}
-                                        </button>
                                     </div>
                                 </td>
 
-
-
+ <!-- empty -->
                             {% empty %}
                             <tr>
                                 <td colspan="5" style="text-align: center; padding: 2rem;">
@@ -84,8 +91,6 @@
                             {% endfor %}
                         </tbody>
                 </table>
-        <!-- END OFTable with all ingredients -->
-
 
     </div>
 </div>
@@ -105,9 +110,11 @@ function toggleFav(recipeId, btn) {
     })
     .then(res => res.json())
     .then(data => {
-        btn.textContent = data.favourited ? '❤️' : '🤍';
+        btn.innerHTML = data.favourited
+            ? '<img src="{% static "images/full_heart.svg" %}" alt="fav" class="heart-icon" />'
+            : '<img src="{% static "images/empty_heart.svg" %}" alt="fav" class="heart-icon" />';
     });
-}
+    }
 
 // helper to get csrf token
 function getCookie(name) {

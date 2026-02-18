@@ -10,7 +10,11 @@ from .models import Recipe, RecipeCategory, RecipeIngredient
 # Create your views here.
 
 def manage_recipes(request):
+    user = User.objects.get(username="default")  # temporary default, later will use user = request.user
     recipes = Recipe.objects.all()
+
+    for rec in recipes:
+        rec.is_fav = rec.favourited_by.filter(id=user.id).exists()
 
     # Forms for the add modal
     recipe_form = RecipeForm()
@@ -95,10 +99,12 @@ def edit_recipe(request, pk):
 
     return render(request, 'recipes/edit_recipe.html', context)
 
-def toggle_favourite(request, id):
-    user = User.objects.get(username="default")
-    recipe = Recipe.objects.get(id=id)
 
+def toggle_favourite(request, id):
+    user = get_object_or_404(User, username="default")
+    recipe = get_object_or_404(Recipe, id=id)
+
+    # toggle
     if recipe.favourited_by.filter(id=user.id).exists():
         recipe.favourited_by.remove(user)
         status = False
