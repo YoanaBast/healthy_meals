@@ -82,3 +82,5 @@ fix grid on add ing popup
 fix edit on fridge, convert automatically
 
 fix DETAILS on suggestions, it is currently showing only recipe ingr quantity
+
+min servigns is 0

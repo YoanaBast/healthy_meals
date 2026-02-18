@@ -221,7 +221,24 @@ def make_recipe(request, id):
 
         for ri in RecipeIngredient.objects.filter(recipe=recipe):
             fridge_item = user_fridge_items.filter(ingredient=ri.ingredient).first()
-            fridge_item.quantity -= ri.quantity
+
+            # Convert recipe quantity to BASE
+            recipe_qty_in_base = ri.quantity * ri.unit.conversion_to_base
+
+            # Get fridge unit conversion
+            try:
+                fridge_mu = IngredientMeasurementUnit.objects.get(
+                    ingredient=ri.ingredient,
+                    unit=fridge_item.unit
+                )
+            except IngredientMeasurementUnit.DoesNotExist:
+                continue
+
+            # Convert base → fridge unit
+            qty_to_subtract = recipe_qty_in_base / fridge_mu.conversion_to_base
+
+            fridge_item.quantity -= qty_to_subtract
+
             if fridge_item.quantity <= 0:
                 fridge_item.delete()
             else:
