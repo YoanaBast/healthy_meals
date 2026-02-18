@@ -1,10 +1,51 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends 'base.html' %}
+{% load static %}
 
-</body>
-</html>
+{% block title %}Generate Grocery List{% endblock %}
+
+{% block content %}
+<div class="container-home">
+    <h2>Select Recipes</h2>
+    <form method="POST">
+        {% csrf_token %}
+        <div style="margin-bottom:1rem;">
+            <label>
+                <input type="checkbox" id="filter-fav" onchange="filterFav()"> Show only favourites
+            </label>
+        </div>
+
+        <div>
+            {% for rec in recipes %}
+                <div class="recipe-checkbox" data-fav="{{ rec.is_fav|yesno:'1,0' }}">
+                    <label>
+                        <input type="checkbox" name="recipes" value="{{ rec.id }}"
+                        {% if rec.id in selected_recipes %}checked{% endif %}>
+                        {{ rec.name }} {% if rec.is_fav %}★{% endif %}
+                    </label>
+                </div>
+            {% endfor %}
+        </div>
+
+        <button type="submit" class="btn">Generate Grocery List</button>
+    </form>
+
+    {% if grocery_list %}
+        <h3>Ingredients to Buy:</h3>
+        <ul>
+            {% for name, data in grocery_list.items %}
+                <li>{{ name }}: {{ data.quantity }} {{ data.unit }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+</div>
+
+<script>
+function filterFav() {
+    const showFav = document.getElementById('filter-fav').checked;
+    document.querySelectorAll('.recipe-checkbox').forEach(div => {
+        const fav = div.dataset.fav === "1";
+        div.style.display = showFav && !fav ? 'none' : 'block';
+    });
+}
+</script>
+{% endblock %}

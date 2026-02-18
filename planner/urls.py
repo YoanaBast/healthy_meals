@@ -8,6 +8,7 @@ urlpatterns = [
     path('add/', views.add_fridge_item, name='add_fridge_item'),
     path('<int:fridge_id>/delete/', views.delete_fridge_item, name='delete_fridge_item'),
     path('suggestions/', views.get_meal_suggestions, name='meal_suggestions'),
-    path('recipes/<int:id>/make/', views.make_recipe, name='make_recipe')
+    path('recipes/<int:id>/make/', views.make_recipe, name='make_recipe'),
+    path('generate_grocery_list/', views.generate_grocery_list, name='generate_grocery_list'),
 
 ]
