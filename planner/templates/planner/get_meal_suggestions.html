@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 
 {% block title %}Meal Suggestions{% endblock %}
+{% load custom_filters %}
 
 {% block content %}
 
@@ -56,7 +57,12 @@
                                 {% endfor %}
                             </small>
                         {% else %}
-                            —
+                        <small>
+                            {% for ri in s.recipe.recipe_ingredient.all %}
+                                {{ ri.quantity|smart_float }}{{ ri.unit.unit.code }} {{ ri.ingredient.name }}
+                                {% if not forloop.last %}, {% endif %}
+                            {% endfor %}
+                        </small>
                         {% endif %}
                     </td>
 
