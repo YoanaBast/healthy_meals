@@ -1,3 +1,5 @@
+from django.contrib.auth.models import User
+from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 
@@ -92,3 +94,16 @@ def edit_recipe(request, pk):
     }
 
     return render(request, 'recipes/edit_recipe.html', context)
+
+def toggle_favourite(request, id):
+    user = User.objects.get(username="default")
+    recipe = Recipe.objects.get(id=id)
+
+    if recipe.favourited_by.filter(id=user.id).exists():
+        recipe.favourited_by.remove(user)
+        status = False
+    else:
+        recipe.favourited_by.add(user)
+        status = True
+
+    return JsonResponse({"favourited": status})
