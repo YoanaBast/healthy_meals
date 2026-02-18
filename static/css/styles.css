@@ -1096,3 +1096,18 @@ label {
     min-width: 80px;
 }
 
+.message {
+    padding: 10px;
+    margin-bottom: 15px;
+    border-radius: 6px;
+}
+
+.message.success {
+    background-color: #1f3d2b;
+    color: #4cff88;
+}
+
+.message.error {
+    background-color: #3d1f1f;
+    color: #ff6b6b;
+}
