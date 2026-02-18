@@ -33,7 +33,7 @@ when deleting a category i want the ingredients to set null and display as uncat
 
 fix the nav menu for mobile -> make resposnive in general
 
-check if i can make guide
+check if i can make a guide
 
 check if i can make day/night widget
 
@@ -51,8 +51,6 @@ add weight to ingredients and recipes (total weight to be split to portions?)
 
 make add ing popup grid for PC
 
-add favourites table for recipe + user
-
 
 remove attrs={'class':
 
@@ -62,10 +60,8 @@ use exclude in the form
 
 add search boxes
 
-
 favicon.ico
 
-add all units to recipe details
 
 fix undefined in delete from edit on ingredients
 
@@ -81,6 +77,3 @@ fix grid on add ing popup
 
 fix edit on fridge, convert automatically
 
-fix DETAILS on suggestions, it is currently showing only recipe ingr quantity
-
-min servigns is 0
