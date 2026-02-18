@@ -13,7 +13,7 @@ from .models import Recipe, RecipeIngredient, RecipeCategory
 class RecipeAdmin(admin.ModelAdmin):
     form = RecipeFormAdmin
 
-    list_display = ('name', 'category', 'cooking_duration', 'servings', 'display_ingredients', 'display_nutrients', 'instructions')
+    list_display = ('name', 'category', 'cooking_duration', 'servings', 'display_ingredients', 'display_nutrients', 'instructions', 'display_favourites')
     search_fields = ('name',)
 
     def display_ingredients(self, obj):
@@ -25,6 +25,9 @@ class RecipeAdmin(admin.ModelAdmin):
         return mark_safe("<br>".join(f"{k.capitalize()}: {v}" for k, v in nutrients.items()))
     display_nutrients.short_description = "Nutrients"
 
+    def display_favourites(self, obj):
+        return ", ".join([user.username for user in obj.favourited_by.all()]) or "-"
+    display_favourites.short_description = "Favourited By"
 
 @admin.register(RecipeCategory)
 class RecipeCategoryAdmin(admin.ModelAdmin):
