@@ -9,6 +9,13 @@
 
     <h2>Meal Suggestions</h2>
     <p>Based on what’s currently in your fridge.</p>
+        {% if messages %}
+            {% for message in messages %}
+                <div class="message {{ message.tags }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
 
     <br>
 
@@ -56,10 +63,12 @@
                     <td>
                         <a href="{% url 'recipe_detail' s.recipe.id %}" class="btn btn-secondary btn-small">View</a>
 
-                        <form action="{% url 'make_recipe' s.recipe.id %}" method="post" style="display:inline;">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-secondary btn-small">Make</button>
-                        </form>
+                    {% if s.can_make %}
+                    <form action="{% url 'make_recipe' s.recipe.id %}" method="post" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-secondary btn-small">Make</button>
+                    </form>
+                    {% endif %}
                     </td>
                 </tr>
                 {% endfor %}

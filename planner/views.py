@@ -5,7 +5,12 @@ from ingredients.models import Ingredient, MeasurementUnit, IngredientMeasuremen
 from planner.forms import UserFridgeForm
 from planner.models import UserFridge
 from recipes.models import Recipe, RecipeIngredient
-
+from django.contrib import messages
+from django.contrib.auth.models import User
+from django.shortcuts import render, get_object_or_404, redirect
+from ingredients.models import Ingredient, MeasurementUnit, IngredientMeasurementUnit
+from planner.models import UserFridge
+from recipes.models import Recipe, RecipeIngredient
 
 # Create your views here.
 
@@ -148,11 +153,7 @@ def add_fridge_item(request):
 
 
 
-from django.contrib.auth.models import User
-from django.shortcuts import render, get_object_or_404, redirect
-from ingredients.models import Ingredient, MeasurementUnit, IngredientMeasurementUnit
-from planner.models import UserFridge
-from recipes.models import Recipe, RecipeIngredient
+
 
 def get_meal_suggestions(request):
     user = User.objects.get(username="default")
@@ -188,6 +189,7 @@ def get_meal_suggestions(request):
                 matched += 1
             else:
                 missing_qty = round(max(ri.quantity - fridge_qty, 0), 2)
+                # print(ri.ingredient.name, ri.quantity,fridge_qty)
                 missing.append(f"{missing_qty:g}{ri.unit.unit.code} {ri.ingredient.name}")
 
         match_percent = int((matched / total) * 100) if total else 0
@@ -208,28 +210,23 @@ def get_meal_suggestions(request):
 def make_recipe(request, id):
     if request.method == 'POST':
         recipe = get_object_or_404(Recipe, id=id)
-        user = User.objects.get(username="default")  # match fridge user
+        user = User.objects.get(username="default")
         user_fridge_items = UserFridge.objects.filter(user=user)
 
         for ri in RecipeIngredient.objects.filter(recipe=recipe):
             fridge_item = user_fridge_items.filter(ingredient=ri.ingredient).first()
-            if fridge_item:
-                # convert if needed
-                qty_to_subtract = ri.quantity
-                if fridge_item.unit != ri.unit.unit:
-                    try:
-                        conv_fridge = IngredientMeasurementUnit.objects.get(
-                            ingredient=ri.ingredient, unit=fridge_item.unit
-                        )
-                        qty_in_base = qty_to_subtract * ri.unit.conversion_to_base
-                        qty_to_subtract = qty_in_base / conv_fridge.conversion_to_base
-                    except IngredientMeasurementUnit.DoesNotExist:
-                        continue
+            if not fridge_item or fridge_item.quantity < ri.quantity:
+                messages.error(request, "You don’t have enough ingredients.")
+                return redirect('meal_suggestions')
 
-                fridge_item.quantity -= qty_to_subtract
-                if fridge_item.quantity <= 0:
-                    fridge_item.delete()
-                else:
-                    fridge_item.save()
+        for ri in RecipeIngredient.objects.filter(recipe=recipe):
+            fridge_item = user_fridge_items.filter(ingredient=ri.ingredient).first()
+            fridge_item.quantity -= ri.quantity
+            if fridge_item.quantity <= 0:
+                fridge_item.delete()
+            else:
+                fridge_item.save()
 
-    return redirect('get_meal_suggestions')
+        messages.success(request, f"{recipe.name} was made successfully!")
+
+    return redirect('meal_suggestions')
