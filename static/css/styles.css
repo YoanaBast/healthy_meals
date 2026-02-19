@@ -189,6 +189,17 @@ nav {
     margin-right: auto;
 }
 
+.container-content {
+    max-width: 800px;
+    position: relative;
+    z-index: 2; /* above hero image */
+    margin: 2rem auto;
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
 @media screen and (max-width: 768px) {
     /* 1. Add breathing room around the entire table */
     .container-home {
@@ -300,7 +311,7 @@ nav {
 .section-title {
     font-size: 2rem;
     font-weight: 700;
-    margin-bottom: 1.5rem;
+    margin-bottom: 0rem;
     letter-spacing: -0.02em;
 }
 
@@ -313,14 +324,20 @@ nav {
 
 
 /* Button */
-.btn {
-  display: inline-block;
-  padding: 0.5rem 1rem;
-  background: #333;
-  color: #fff;
-  border-radius: 4px;
-  text-decoration: none;
-  margin-right: 0.5rem;
+.btn, button {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    background: #333;
+    color: #fff;
+    border-radius: 4px;
+    text-decoration: none;
+    margin-right: 0.5rem;
+    border: none;
+    outline: none;
+    box-shadow: none;
+    font-size: 1rem;           /* set readable size */
+    line-height: 1.4;          /* prevents squashing text */
+    vertical-align: middle;
 }
 
 
@@ -341,7 +358,7 @@ nav {
 
 /* Form Elements */
 .form-group {
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
 }
 
 .form-label {
@@ -892,6 +909,8 @@ body:has(.modal-overlay:target) {
     border-radius: 0.5rem;
     background: var(--bg-secondary);
     font-size: 0.875rem;
+    color: var(--text-primary);
+
 }
 
 .styled-form input:focus,
@@ -1170,6 +1189,7 @@ label {
     grid-template-columns: repeat(4, 1fr);
     gap: 10px;
     margin-top: 10px;
+
 }
 
 .nutrient-item {
@@ -1206,6 +1226,7 @@ label {
 }
 
 
+/* CLOCK RENDER FOR COOK TIME*/
 
 .time-inputs {
     display: flex;
@@ -1235,4 +1256,47 @@ label {
 
 .container-home.action-bar button {
     margin-left: auto; /* delete button on right */
+}
+
+
+
+td[data-label="Ingredient Name"] {
+    color: #4CAF50;        /* medium green, readable on black */
+    font-weight: 600;
+
+}
+
+td[data-label="Ingredient Name"]:hover {
+    color: #81C784;        /* lighter green on hover */
+    cursor: pointer;
+}
+
+td[data-label="Ingredient"] {
+    color: #4CAF50;        /* medium green, readable on black */
+    font-weight: 600;
+
+}
+
+td[data-label="Ingredient"]:hover {
+    color: #81C784;        /* lighter green on hover */
+    cursor: pointer;
+}
+
+
+.grid-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+.grid-item {
+    background: #111; /* optional for better separation */
+    padding: 1rem;
+    border-radius: 6px;
+}
+
+@media (max-width: 768px) {
+    .grid-container {
+        grid-template-columns: 1fr;
+    }
 }

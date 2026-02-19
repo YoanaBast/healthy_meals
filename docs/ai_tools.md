@@ -31,4 +31,5 @@
 - https://prismic.io/blog/css-text-animations
 - https://www.svgrepo.com/vectors/
 - https://cloudconvert.com/png-to-ico
+- https://www.figma.com/
 

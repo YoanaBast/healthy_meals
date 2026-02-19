@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 {% load form_extras %}
+{% load core_filters %}
 
 {% block title %}Manage Recipes{% endblock %}
 
@@ -46,7 +47,7 @@
                         <tbody>
                             {% for rec in recipes %}
                             <tr>
-                                <td data-label="Ingredient Name">{{ rec.name }}</td>
+                                <td data-label="Ingredient Name">{{ rec.name|title_except  }}</td>
                                 <td data-label="Category">{{ rec.category|default:"-" }}</td>
                                 <td data-label="Dietary Information"> {{ rec.dietary_info|default:"-" }}</td>
                                 <td data-label="Cooking Duration">{{ rec.cooking_duration|default:"-"  }}</td>

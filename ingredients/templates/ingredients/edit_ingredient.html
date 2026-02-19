@@ -4,18 +4,20 @@
 
 {% block content %}
 
-<div class="container-home">
+<div class="container-content">
+    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+        <a href="javascript:history.back()" class="btn">Back</a>
+    </div>
+</div>
+
+
+<div class="container-content">
+    <div class="grid-container">
+        <div class="grid-item info">
 
     <div class="section-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem;">
-        <div>
             <h2 class="section-title">Edit Ingredient</h2>
-            <p class="section-description">Update information about this ingredient.</p>
-        </div>
-        <div>
-        <a href="{{ request.META.HTTP_REFERER|default:default_url }}" class="btn btn-secondary">Back</a>
 
-
-        </div>
     </div>
 
     <form method="POST">
@@ -26,12 +28,21 @@
             {{ form.name.label_tag }} {{ form.name }}
             {{ form.category.label_tag }} {{ form.category }}
             {{ form.dietary_tag.label_tag }} {{ form.dietary_tag }}
+      </div>
+        </div>
+        <div class="grid-item info">
+
+            <div class="basic-fields">
+
             {{ form.base_quantity.label_tag }} {{ form.base_quantity }}
             {{ form.default_unit.label_tag }} {{ form.default_unit }}
         </div>
+        </div>
+        </div>
 
-        <!-- Nutrients editable -->
-        <h4 style="margin-top: 2rem;">Nutrients (per base quantity)</h4>
+<!-- Nutrients editable -->
+
+        <h2 style="margin-top: 2rem;">Nutrients (per base quantity)</h2>
         <div class="nutrients-grid" style="display:grid; grid-template-columns: repeat(4, 1fr); gap:1rem;">
             {% for field in form.visible_fields %}
                 {% if "base_quantity_" in field.name %}
@@ -43,8 +54,8 @@
             {% endfor %}
 
         </div>
-
-        <button type="submit" class="btn btn-primary" style="margin-top:1rem;">Save Changes</button>
+        <button type="submit" class="btn" >Save</button>
+        <a href="javascript:history.back()" class="btn btn-danger">Cancel</a>
     </form>
 
 </div>
