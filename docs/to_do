@@ -39,7 +39,6 @@ check if i can make day/night widget
 
 add calorie tracker
 
-
 clean up css and move to different files(?) - the project breaks when I try to import css and I'm not sure why yet
 
 add unique=true where applicable, make sure measure units are transformed dynamically
@@ -56,11 +55,7 @@ use exclude in the form
 
 add search boxes
 
-fix ui for clock
-
 add select boxes and select all with option to delete all ?
-
-default serving should be 1
 
 fix edit on fridge, convert automatically
 

@@ -3,11 +3,38 @@
 {% block title %}Edit Recipe{% endblock %}
 
 {% block content %}
-  <div class="container-home">
+
+
+<div class="container-home">
+
+<div class="container-home" style="max-width: 800px; margin: 2rem auto; display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center;">
+    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+        <a href="{% url 'manage_recipes' %}" class="btn">&larr; Back to Recipes</a>
+        <a href="{% url 'edit_recipe' recipe.pk %}" class="btn">Edit</a>
+    </div>
+    <button class="btn btn-danger" style="margin-left: auto;" onclick="openDeleteModal('recipe', {{ recipe.pk }}, '{{ recipe.name|escapejs }}')">Delete</button>
+</div>
+
+
+<div class="container-home">
 <h2>Edit Recipe</h2>
 <form method="post" action="{% url 'edit_recipe' recipe.pk %}">
     {% csrf_token %}
-    {{ recipe_form.as_p }}
+<p>{{ recipe_form.name.label_tag }} {{ recipe_form.name }}</p>
+<p>{{ recipe_form.category.label_tag }} {{ recipe_form.category }}</p>
+
+<p>
+    <label>Cooking Time:</label>
+    <span class="time-inputs">
+        {{ recipe_form.hours }} h
+        {{ recipe_form.minutes }} m
+    </span>
+</p>
+
+<p>{{ recipe_form.servings.label_tag }} {{ recipe_form.servings }}</p>
+<p>{{ recipe_form.instructions.label_tag }} {{ recipe_form.instructions }}</p>
+
+
     {{ ingredient_formset.management_form }}
 
     <h3>Ingredients</h3>
@@ -65,6 +92,9 @@
         <button type="button" onclick="closeModal()">Cancel</button>
     </div>
 </div>
+</div>
 
 <script src="{% static 'js/add_recipe_handler.js' %}"></script>
+<script src="{% static 'js/zero_inputt_handler.js' %}"></script>
+
 {% endblock %}

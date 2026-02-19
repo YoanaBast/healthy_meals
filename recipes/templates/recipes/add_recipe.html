@@ -8,14 +8,32 @@
 
     <form method="post" action="{% url 'add_recipe' %}">
         {% csrf_token %}
-        {{ recipe_form.as_p }}
+
+        <!-- Recipe fields -->
+        <p>{{ recipe_form.name.label_tag }} {{ recipe_form.name }}</p>
+        <p>{{ recipe_form.category.label_tag }} {{ recipe_form.category }}</p>
+                <!-- Cooking time as hh:mm -->
+            <p>
+                <label>Cooking Time:</label>
+                <span class="time-inputs">
+                    {{ recipe_form.hours|default:"0" }} h
+                    {{ recipe_form.minutes|default:"0" }} m
+                </span>
+            </p>
+
+
+        <p>{{ recipe_form.servings.label_tag }} {{ recipe_form.servings }}</p>
+        <p>{{ recipe_form.instructions.label_tag }} {{ recipe_form.instructions }}</p>
+
+
         {{ ingredient_formset.management_form }}
 
         <h3>Ingredients</h3>
         <div id="ingredientsContainer"></div>
 
-        <button type="button" id="addIngredientBtn" class="btn btn-primary">
-            + Add Ingredient
+
+        <button type="button" id="addIngredientBtn" class="btn btn-secondary">
+            <img src="{% static 'images/plus_icon.svg' %}" alt="+ Add" width="30" height="30">
         </button>
 
         <br><br>
@@ -24,6 +42,7 @@
         <a href="{% url 'manage_recipes' %}" class="btn btn-secondary">Cancel</a>
     </form>
 </div>
+
 
 <!-- MODAL -->
 <div id="ingredientModal" class="recipe-modal">
@@ -62,6 +81,7 @@
 </div>
 
 <script src="{% static 'js/add_recipe_handler.js' %}"></script>
+<script src="{% static 'js/zero_inputt_handler.js' %}"></script>
 
 
 {% endblock %}
