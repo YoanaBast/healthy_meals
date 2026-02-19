@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 {% load form_extras %}
+{% load core_filters %}
 
 {% block title %}Manage Ingredients{% endblock %}
 
@@ -44,7 +45,7 @@
                         <tbody>
                             {% for ing in ingredients %}
                             <tr>
-                                <td data-label="Ingredient Name">{{ ing.name }}</td>
+                                <td data-label="Ingredient Name">{{ ing.name|title_except }}</td>
                                 <td data-label="Category">{{ ing.category|default:"-" }}</td>
                                 <td data-label="Dietary Information"> {{ ing.dietary_info|default:"-" }}</td>
                                 <td data-label="Default Unit">{{ ing.default_unit }}</td>

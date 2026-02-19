@@ -1,0 +1,29 @@
+
+<div id="ingredientModal" class="recipe-modal">
+    <div class="recipe-modal-content">
+        <h4>Add Ingredient</h4>
+
+        <select id="ingredientSelect" onchange="loadUnits()">
+            <option value="">Select ingredient</option>
+            {% for ing in ingredients %}
+                <option value="{{ ing.id }}"
+                        data-units='[
+                        {% for mu in ing.measurement_units.all %}
+                            {"id": "{{ mu.id }}", "name": "{{ mu.name_for_quantity_singular }}"}
+                            {% if not forloop.last %},{% endif %}
+                        {% endfor %}]'>
+                    {{ ing.name }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <br><br>
+        <input type="number" id="quantityInput" step="0.01" min="0.01" placeholder="Quantity">
+        <br><br>
+        <select id="unitSelect"></select>
+        <br><br>
+        <button type="button" onclick="addIngredient()">Add</button>
+        <button type="button" onclick="closeModal()">Cancel</button>
+    </div>
+</div>
+</div>

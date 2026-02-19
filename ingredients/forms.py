@@ -1,5 +1,5 @@
 from django import forms
-from .models import Ingredient, IngredientDietaryTag
+from .models import Ingredient, IngredientDietaryTag, IngredientMeasurementUnit
 
 NUTRIENTS = [
     'kcal', 'protein', 'carbs', 'fat', 'fiber', 'sugar', 'salt', 'cholesterol',
@@ -45,11 +45,17 @@ class IngredientFormBase(forms.ModelForm):
 
 
 
-
-
 class IngredientAddForm(IngredientFormBase):
-    ...
-
+    def save(self, commit=True):
+        ingredient = super().save(commit=commit)
+        if commit:
+            # create measurement unit for the default unit
+            IngredientMeasurementUnit.objects.get_or_create(
+                ingredient=ingredient,
+                unit=ingredient.default_unit,
+                conversion_to_base=ingredient.base_quantity
+            )
+        return ingredient
 
 class IngredientEditForm(IngredientFormBase):
     ...
