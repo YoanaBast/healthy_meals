@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Add Recipe{% endblock %}
+{% load static %}
+
+{% block content %}
+
+<div class="container-home">
+    <h2>Add Ingredient</h2>
+
+<form method="post" action="{% url 'add_ingredient' %}">
+    {% csrf_token %}
+
+    <!-- normal fields -->
+    {{ form.name.label_tag }} {{ form.name }}
+    {{ form.category.label_tag }} {{ form.category }}
+    {{ form.dietary_tag.label_tag }} {{ form.dietary_tag }}
+    {{ form.base_quantity.label_tag }} {{ form.base_quantity }}
+    {{ form.default_unit.label_tag }} {{ form.default_unit }}
+
+    <!-- Nutrients in grid -->
+    <div class="nutrients-grid">
+        {% for nutrient in form %}
+                {% if "base_quantity_" in nutrient.name and nutrient.name != "base_quantity" %}
+                <div class="nutrient-item">
+                    {{ nutrient.label_tag }} {{ nutrient }}
+                </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+
+    <div class="form-actions" style="margin-top:20px;">
+        <button type="submit" class="btn btn-success">Save</button>
+        <a href="{% url 'manage_ingredients' %}" class="btn btn-secondary">Cancel</a>
+    </div>
+</form>
+
+</div>
+
+<script src="{% static 'js/zero_inputt_handler.js' %}"></script>
+{% endblock %}
