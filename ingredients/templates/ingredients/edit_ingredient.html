@@ -6,8 +6,6 @@
 
 <div class="container-home">
 
-    {% include 'ingredients/delete_ingredient_modal.html' %}
-
     <div class="section-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem;">
         <div>
             <h2 class="section-title">Edit Ingredient</h2>
@@ -16,11 +14,7 @@
         <div>
         <a href="{{ request.META.HTTP_REFERER|default:default_url }}" class="btn btn-secondary">Back</a>
 
-            <button class="btn btn-danger"
-                    type="button"
-                    onclick="openDeleteModal({{ ingredient.id }}, '{{ ingredient.name }}')">
-                Delete
-            </button>
+
         </div>
     </div>
 
@@ -54,7 +48,5 @@
     </form>
 
 </div>
-
-<script src="{% static 'js/delete_popup.js' %}"></script>
 
 {% endblock %}

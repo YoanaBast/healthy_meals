@@ -53,10 +53,13 @@
                                     <div class="action-buttons">
                                         <a href="{% url 'ingredient_details' ing.id %}" class="btn btn-secondary btn-small">Details</a>
                                         <a href="{% url 'edit_ingredient' ing.id %}" class="btn btn-secondary btn-small">Edit</a>
-                                        <button class="btn btn-danger btn-small"
-                                                onclick="openDeleteModal('ingredient', {{ ing.id }}, '{{ ing.name|escapejs }}')">
-                                            Delete
-                                        </button>
+<button type="button"
+        class="icon-delete-btn"
+        onclick="openDeleteModal('ingredient', {{ ing.id }}, '{{ ing.name|escapejs }}')">
+
+    <img src="{% static 'images/delete-trash.svg' %}"
+         alt="Delete">
+</button>
                                     </div>
                                 </td>
 
