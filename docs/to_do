@@ -39,7 +39,6 @@ check if i can make day/night widget
 
 add calorie tracker
 
-make the 2026 function to take current year -> not sure if this is creation year or current year, maybe remove it altohgether
 
 clean up css and move to different files(?) - the project breaks when I try to import css and I'm not sure why yet
 
@@ -49,9 +48,6 @@ later I plan to have a check that allows edit/delete only on fields created by a
 
 add weight to ingredients and recipes (total weight to be split to portions?)
 
-make add ing popup grid for PC
-
-
 remove attrs={'class':
 
 fix DRY for the form in edit_ingredient_popup (? no idea what i meant here, check if calling form twice is optimal)
@@ -60,17 +56,11 @@ use exclude in the form
 
 add search boxes
 
-favicon.ico
-
-
-
 fix ui for clock
 
 add select boxes and select all with option to delete all ?
 
-
 default serving should be 1
-
 
 fix edit on fridge, convert automatically
 
