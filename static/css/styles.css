@@ -1112,6 +1112,8 @@ label {
     color: #ff6b6b;
 }
 
+/* HEART ICON FOR FAVOURITE BUTTON + SVG IMAGE SIZE */
+
 .heart-icon {
     width: 24px;
     height: 24px;
@@ -1123,6 +1125,24 @@ label {
     cursor: pointer;
 }
 .btn-heart img {
+    width: 24px;
+    height: 24px;
+    display: block;
+}
+
+/* TRASH CAN ICON FOR DELETE BUTTON + SVG IMAGE SIZE */
+.icon-delete-btn {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.icon-delete-btn img {
     width: 24px;
     height: 24px;
     display: block;

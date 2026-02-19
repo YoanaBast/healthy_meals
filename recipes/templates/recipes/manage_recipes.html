@@ -73,9 +73,12 @@
                                         <a href="{% url 'edit_recipe' rec.id %}" class="btn btn-secondary btn-small">Edit</a>
 
                                     <!-- Delete -->
-                                        <button class="btn btn-danger btn-small"
-                                                onclick="openDeleteModal('recipe', {{ rec.id }}, '{{ rec.name|escapejs }}')">
-                                            Delete
+                                       <button type="button"
+                                            class="icon-delete-btn"
+                                            onclick="openDeleteModal('recipe', {{ rec.id }}, '{{ rec.name|escapejs }}')">
+
+                                        <img src="{% static 'images/delete-trash.svg' %}"
+                                             alt="Delete">
                                         </button>
 
                                     </div>
