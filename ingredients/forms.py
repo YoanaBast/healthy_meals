@@ -24,9 +24,9 @@ class IngredientFormBase(forms.ModelForm):
             }),
             'name': forms.TextInput(attrs={'class': 'form-input'}),
             'category': forms.Select(attrs={'class': 'form-select'}),
-            'dietary_tag': forms.CheckboxSelectMultiple(),  # multiple choice
-            'default_unit': forms.Select(attrs={'class': 'form-select'}),
-            'base_quantity': forms.NumberInput(attrs={'class': 'form-input', 'value': 100, 'min': 0}, ),
+            'dietary_tag': forms.CheckboxSelectMultiple(attrs={'class': 'dietary-tags'}),
+            'default_unit': forms.Select(attrs={'class': 'form-select', 'style': 'width: 50%;'}),
+            'base_quantity': forms.NumberInput(attrs={'class': 'form-input', 'style': 'width: 50%;', 'value': 100, 'min': 0}, ),
         }
 
     def __init__(self, *args, **kwargs):

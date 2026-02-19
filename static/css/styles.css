@@ -1162,3 +1162,47 @@ label {
     height: 24px;
     display: block;
 }
+
+
+
+/* ADD ITEMS  NUTRIENTS COL SPLIT */
+
+.nutrients-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.nutrient-item {
+    display: flex;
+    flex-direction: column;
+}
+
+@media (max-width: 768px) {
+    .nutrients-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+
+
+.dietary-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.dietary-tags label {
+    display: flex;
+    align-items: center;
+    margin-right: 10px;
+}
+
+.dietary-tags input[type="checkbox"] {
+    margin-right: 4px; /* space between checkbox and text */
+    accent-color: green; /* makes checkbox green instead of default blue */
+
+}
+

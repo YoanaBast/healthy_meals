@@ -19,12 +19,11 @@
                 <h2 class="section-title">Manage Ingredients</h2>
                 <p class="section-description">What ingredients do you want to use? Manage them here!</p>
             </div>
-            <a href="#addIngredientModal" class="btn">Add New Ingredient</a>
+
+        <a href="{% url 'add_ingredient' %}" class="btn">Add Ingredient</a>
+
         </div>
 
-
-        <!-- ADD POPUP -->
-        {% include 'ingredients/add_ingredient_modal.html' %}
 
 
         <!-- DELETE POPUP -->
