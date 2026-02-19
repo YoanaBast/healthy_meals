@@ -25,7 +25,12 @@
         {% endfor %}
     </div>
 
-    <button type="button" id="addIngredientBtn" class="btn btn-secondary">+ Add Ingredient</button>
+
+<button type="button" id="addIngredientBtn" class="btn btn-secondary">
+    <img src="{% static 'images/plus_icon.svg' %}" alt="+ Add" width="30" height="30">
+</button>
+
+
 
     <br><br>
     <button type="submit" class="btn btn-success">Save Recipe</button>
@@ -59,7 +64,6 @@
         <button type="button" onclick="addIngredient()">Add</button>
         <button type="button" onclick="closeModal()">Cancel</button>
     </div>
-</div>
 </div>
 
 <script src="{% static 'js/add_recipe_handler.js' %}"></script>
