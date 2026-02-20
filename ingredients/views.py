@@ -30,17 +30,10 @@ def add_ingredient(request):
 
     if request.method == 'POST' and form.is_valid():
         form.save()
-        return redirect('manage_ingredients')  # reloads the page after save
+        return redirect('manage_ingredients')
 
-    context = {
-        'form': form,
-        'ingredients': Ingredient.objects.select_related('category', 'default_unit')
-                                         .prefetch_related('dietary_tag')
-                                         .all()
-                                         .order_by('name')
-    }
+    return render(request, 'ingredients/add_ingredient.html', {'form': form})
 
-    return render(request, 'ingredients/manage_ingredients.html', context)
 
 
 

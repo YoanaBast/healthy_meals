@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Add Recipe{% endblock %}
+{% load static %}
+
+{% block content %}
+<div class="container-content">
+    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+        <a href="javascript:history.back()" class="btn">Back</a>
+    </div>
+</div>
+
+<div class="container-content">
+    <div class="grid-container">
+        <div class="grid-item info">
+            <h2>Add Ingredient</h2>
+
+                <form method="post" action="{% url 'add_ingredient' %}">
+                    {% csrf_token %}
+
+                    <!-- normal fields -->
+                    {{ form.name.label_tag }} {{ form.name }}
+                    {{ form.category.label_tag }} {{ form.category }}
+                    {{ form.dietary_tag.label_tag }} {{ form.dietary_tag }}
+        </div>
+
+        <div class="grid-item info">
+
+            {{ form.base_quantity.label_tag }} {{ form.base_quantity }}
+            {{ form.default_unit.label_tag }} {{ form.default_unit }}
+        </div>
+    </div>
+
+    <!-- Nutrients in grid -->
+
+    <div class="nutrients-grid">
+        {% for nutrient in form %}
+                {% if "base_quantity_" in nutrient.name and nutrient.name != "base_quantity" %}
+                <div class="nutrient-item">
+                    {{ nutrient.label_tag }} {{ nutrient }}
+                </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+
+
+
+    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: flex-start;">
+        <button type="submit" class="btn">Save</button>
+        <a href="{% url 'manage_ingredients' %}" class="btn btn-danger">Cancel</a>
+    </div>
+
+
+</form>
+
+</div>
+
+<script src="{% static 'js/zero_inputt_handler.js' %}"></script>
+{% endblock %}

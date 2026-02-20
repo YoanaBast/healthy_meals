@@ -38,20 +38,14 @@ def add_recipe(request):
     ingredients = Ingredient.objects.prefetch_related('measurement_units__unit').all()
 
     if request.method == 'POST':
-        print(request.POST)
-
         recipe_form = RecipeForm(request.POST)
         ingredient_formset = RecipeIngredientFormSet(request.POST)
 
         if recipe_form.is_valid() and ingredient_formset.is_valid():
-            print(f"debug: recipe form \n{recipe_form.cleaned_data}")
-            print(f"debug: ingredient_formset form \n{ingredient_formset.cleaned_data}")
-
-            recipe = recipe_form.save()
-            ingredient_formset.instance = recipe
-            ingredient_formset.save()
+            recipe = recipe_form.save()  # save recipe first
+            ingredient_formset.instance = recipe  # link formset to recipe
+            ingredient_formset.save()  # save ingredients
             return redirect('manage_recipes')
-
     else:
         recipe_form = RecipeForm()
         ingredient_formset = RecipeIngredientFormSet()

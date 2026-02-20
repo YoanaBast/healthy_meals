@@ -39,8 +39,6 @@ check if i can make day/night widget
 
 add calorie tracker
 
-make the 2026 function to take current year -> not sure if this is creation year or current year, maybe remove it altohgether
-
 clean up css and move to different files(?) - the project breaks when I try to import css and I'm not sure why yet
 
 add unique=true where applicable, make sure measure units are transformed dynamically
@@ -48,9 +46,6 @@ add unique=true where applicable, make sure measure units are transformed dynami
 later I plan to have a check that allows edit/delete only on fields created by a specific user (user cannot delete public ingredients made by other users)
 
 add weight to ingredients and recipes (total weight to be split to portions?)
-
-make add ing popup grid for PC
-
 
 remove attrs={'class':
 
@@ -60,20 +55,20 @@ use exclude in the form
 
 add search boxes
 
-favicon.ico
-
-
-fix undefined in delete from edit on ingredients
-
-fix ui for clock
-
 add select boxes and select all with option to delete all ?
-
-change the delete button to a tarsh can icon
-
-default serving should be 1
-
-fix grid on add ing popup
 
 fix edit on fridge, convert automatically
 
+fix make recipe
+
+add other units to imngredient details
+
+
+fix add ingredietns to recipes on add recipe, it works on edit
+
+check make
+add nothing to buy msg
+
+ad make to grocery list
+
+fix on edit to only show ingredients not already shown

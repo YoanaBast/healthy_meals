@@ -1,14 +1,15 @@
 {% extends 'base.html' %}
 {% load static %}
 {% load form_extras %}
+{% load core_filters %}
 
 {% block title %}Manage Ingredients{% endblock %}
 
 {% block content %}
 
+{% include 'tab_nav.html' with active_tab='manage-fridge' %}
+
 <div class="container-home">
-<!-- Tabs -->
-{% include 'tab_nav.html' with active_tab='manage-ingredients' %}
 
     <div id="manage-ingredients" class="tab-content active">
 
@@ -19,12 +20,11 @@
                 <h2 class="section-title">Manage Ingredients</h2>
                 <p class="section-description">What ingredients do you want to use? Manage them here!</p>
             </div>
-            <a href="#addIngredientModal" class="btn">Add New Ingredient</a>
+
+        <a href="{% url 'add_ingredient' %}" class="btn">Add Ingredient</a>
+
         </div>
 
-
-        <!-- ADD POPUP -->
-        {% include 'ingredients/add_ingredient_modal.html' %}
 
 
         <!-- DELETE POPUP -->
@@ -45,7 +45,7 @@
                         <tbody>
                             {% for ing in ingredients %}
                             <tr>
-                                <td data-label="Ingredient Name">{{ ing.name }}</td>
+                                <td data-label="Ingredient Name">{{ ing.name|title_except }}</td>
                                 <td data-label="Category">{{ ing.category|default:"-" }}</td>
                                 <td data-label="Dietary Information"> {{ ing.dietary_info|default:"-" }}</td>
                                 <td data-label="Default Unit">{{ ing.default_unit }}</td>
@@ -53,10 +53,13 @@
                                     <div class="action-buttons">
                                         <a href="{% url 'ingredient_details' ing.id %}" class="btn btn-secondary btn-small">Details</a>
                                         <a href="{% url 'edit_ingredient' ing.id %}" class="btn btn-secondary btn-small">Edit</a>
-                                        <button class="btn btn-danger btn-small"
-                                                onclick="openDeleteModal('ingredient', {{ ing.id }}, '{{ ing.name|escapejs }}')">
-                                            Delete
-                                        </button>
+<button type="button"
+        class="icon-delete-btn"
+        onclick="openDeleteModal('ingredient', {{ ing.id }}, '{{ ing.name|escapejs }}')">
+
+    <img src="{% static 'images/delete-trash.svg' %}"
+         alt="Delete">
+</button>
                                     </div>
                                 </td>
 

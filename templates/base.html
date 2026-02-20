@@ -9,6 +9,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Foodganizer{% endblock %}</title>
 <link rel="stylesheet" href="{% static 'css/styles.css' %}"></head>
+<link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
 
 <body>
     <header>
@@ -59,7 +60,7 @@
         </div>
 
         <div class="footer-bottom">
-            © 2026 Foodganizer. All rights reserved.
+            © {% now "Y" %} Foodganizer. All rights reserved.
         </div>
     </footer>
 

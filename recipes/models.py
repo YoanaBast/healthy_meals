@@ -23,7 +23,7 @@ class RecipeCategory(models.Model):
 class Recipe(models.Model):
     name = models.CharField(max_length=200, unique=True)
     cooking_time = models.TimeField(null=True, blank=True)
-    servings = models.PositiveIntegerField(default=1)
+    servings = models.PositiveIntegerField(default=1, validators=[MinValueValidator(1)])
     ingredients = models.ManyToManyField(Ingredient, through='RecipeIngredient', related_name='recipes')
     category = models.ForeignKey(RecipeCategory, null=True, on_delete=models.SET_NULL, related_name='ingredient')
     instructions = models.TextField()

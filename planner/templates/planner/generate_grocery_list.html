@@ -4,7 +4,13 @@
 {% block title %}Generate Grocery List{% endblock %}
 
 {% block content %}
+
+
+    {% include 'tab_nav.html' with active_tab='manage-fridge' %}
+
 <div class="container-home">
+    <!-- Tabs -->
+
     <h2>Select Recipes</h2>
     <form method="POST">
         {% csrf_token %}

@@ -3,19 +3,51 @@
 {% load static %}
 {% block content %}
 
+<div class="container-home" style="padding-top: 2rem; padding-bottom: 2rem;">
+    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+        <a href="javascript:history.back()" class="btn">Back</a>
+    </div>
+</div>
+
 <div class="container-home">
+        <div class="grid-container">
+        <div class="grid-item info">
     <h2>Add Recipe</h2>
 
     <form method="post" action="{% url 'add_recipe' %}">
         {% csrf_token %}
-        {{ recipe_form.as_p }}
+
+        <!-- Recipe fields -->
+        <p>{{ recipe_form.name.label_tag }} {{ recipe_form.name }}</p>
+        <p>{{ recipe_form.category.label_tag }} {{ recipe_form.category }}</p>
+
+
+        <p>{{ recipe_form.servings.label_tag }} {{ recipe_form.servings }}</p>
+        </div>
+        <div class="grid-item info">
+                <!-- Cooking time as hh:mm -->
+            <p>
+                <label>Cooking Time:</label>
+                <span class="time-inputs">
+                    {{ recipe_form.hours|default:"0" }} h
+                    {{ recipe_form.minutes|default:"0" }} m
+                </span>
+            </p>
+
+
+        <p>{{ recipe_form.instructions.label_tag }} {{ recipe_form.instructions }}</p>
+
+        </div>         </div>
+
+
         {{ ingredient_formset.management_form }}
 
         <h3>Ingredients</h3>
         <div id="ingredientsContainer"></div>
 
-        <button type="button" id="addIngredientBtn" class="btn btn-primary">
-            + Add Ingredient
+
+        <button type="button" id="addIngredientBtn" class="btn btn-secondary">
+            <img src="{% static 'images/plus_icon.svg' %}" alt="+ Add" width="30" height="30">
         </button>
 
         <br><br>
@@ -25,43 +57,12 @@
     </form>
 </div>
 
-<!-- MODAL -->
-<div id="ingredientModal" class="recipe-modal">
-    <div class="recipe-modal-content">
-        <h4>Add Ingredient</h4>
 
-        <select id="ingredientSelect" onchange="loadUnits()">
-            <option value="">Select ingredient</option>
-                {% for ing in ingredients %}
-                    <option value="{{ ing.id }}"
-                        data-units='[
-                            {% for mu in ing.measurement_units.all %}
-                                {"id": "{{ mu.id }}", "name": "{{ mu.name_for_quantity_singular }}"}
-                                {% if not forloop.last %},{% endif %}
-                            {% endfor %}
-                        ]'
-
-                    >{{ ing.name }}</option>
-                {% endfor %}
-
-        </select>
-
-        <br><br>
-
-        <input type="number" id="quantityInput" step="0.01" min="0.01" placeholder="Quantity">
-
-        <br><br>
-
-        <select id="unitSelect"></select>
-
-        <br><br>
-
-        <button type="button" onclick="addIngredient()">Add</button>
-        <button type="button" onclick="closeModal()">Cancel</button>
-    </div>
-</div>
+<!--  modal for adding new ingredients dynamically -->
+{% include 'recipes/add_ingredients_to_recipe_modal.html' %}
 
 <script src="{% static 'js/add_recipe_handler.js' %}"></script>
+<script src="{% static 'js/zero_inputt_handler.js' %}"></script>
 
 
 {% endblock %}

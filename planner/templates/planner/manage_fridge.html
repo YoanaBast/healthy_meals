@@ -1,14 +1,14 @@
 {% extends 'base.html' %}
 {% load static %}
 {% load custom_filters %}
+{% load core_filters %}
 
 {% block title %}Manage Fridge{% endblock %}
 
 {% block content %}
+    {% include 'tab_nav.html' with active_tab='manage-fridge' %}
 
 <div class="container-home">
-    <!-- Tabs -->
-    {% include 'tab_nav.html' with active_tab='manage-fridge' %}
 
     <div id="manage-fridge" class="tab-content active">
 
@@ -33,28 +33,32 @@
                 <tr>
                     <th>Ingredient</th>
                     <th>Quantity</th>
-<!--                    <th>Unit</th>-->
+                    <th>Category</th>
+                    <th>Dietary Tags</th>
                     <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
                 {% for item in fridge %}
                 <tr>
-                    <td data-label="Ingredient">{{ item.ingredient.name }}</td>
-
-<td data-label="Quantity">
-    {% with item.ingredient.measurement_units|get_unit:item.unit as ing_unit %}
-        {{ item.quantity|smart_float }} {{ ing_unit|name_for_quantity:item.quantity|lower }}
-        {% with merge_explanations|get:item.ingredient.id as expl_list %}
-            {% if expl_list %}
-                <span title="{% for expl in expl_list %}{{ expl }}{% if not forloop.last %}\n{% endif %}{% endfor %}">🛈</span>
-            {% endif %}
-        {% endwith %}
-    {% endwith %}
-</td>
 
 
-<!--                    <td data-label="Unit">{{ item.unit }}</td>-->
+                    <td data-label="Ingredient">{{ item.ingredient.name|title_except  }}</td>
+
+                    <td data-label="Quantity">
+                        {% with item.ingredient.measurement_units|get_unit:item.unit as ing_unit %}
+                            {{ item.quantity|smart_float }} {{ ing_unit|name_for_quantity:item.quantity|lower }}
+                            {% with merge_explanations|get:item.ingredient.id as expl_list %}
+                                {% if expl_list %}
+                                    <span title="{% for expl in expl_list %}{{ expl }}{% if not forloop.last %}\n{% endif %}{% endfor %}">🛈</span>
+                                {% endif %}
+                            {% endwith %}
+                        {% endwith %}
+                    </td>
+
+                    <td data-label="Category">{{ item.ingredient.category  }}</td>
+
+                    <td data-label="Dietary Tags">{{ item.ingredient.dietary_info }}</td>
 
                     <td data-label="Actions">
                         <div class="action-buttons">
@@ -62,11 +66,14 @@
                             <a href="{% url 'edit_fridge_item' item.id %}" class="btn btn-secondary btn-small">Edit</a>
 
                             <a href="{% url 'ingredient_details' item.ingredient.id %}" class="btn btn-secondary btn-small">Details</a>
-
-                            <button class="btn btn-danger btn-small"
+                            <button type="button"
+                                    class="icon-delete-btn"
                                     onclick="openDeleteModal('fridge', {{ item.id }}, '{{ item.ingredient.name|escapejs }}')">
-                                Delete
+
+                                <img src="{% static 'images/delete-trash.svg' %}"
+                                     alt="Delete">
                             </button>
+
                         </div>
                     </td>
                 </tr>

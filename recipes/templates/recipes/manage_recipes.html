@@ -1,14 +1,15 @@
 {% extends 'base.html' %}
 {% load static %}
 {% load form_extras %}
+{% load core_filters %}
 
 {% block title %}Manage Recipes{% endblock %}
 
 {% block content %}
 
+{% include 'tab_nav.html' with active_tab='manage-fridge' %}
+
 <div class="container-home">
-<!-- Tabs -->
-{% include 'tab_nav.html' with active_tab='manage-ingredients' %}
 
     <div id="manage-ingredients" class="tab-content active">
 
@@ -46,7 +47,7 @@
                         <tbody>
                             {% for rec in recipes %}
                             <tr>
-                                <td data-label="Ingredient Name">{{ rec.name }}</td>
+                                <td data-label="Ingredient Name">{{ rec.name|title_except  }}</td>
                                 <td data-label="Category">{{ rec.category|default:"-" }}</td>
                                 <td data-label="Dietary Information"> {{ rec.dietary_info|default:"-" }}</td>
                                 <td data-label="Cooking Duration">{{ rec.cooking_duration|default:"-"  }}</td>
@@ -73,9 +74,12 @@
                                         <a href="{% url 'edit_recipe' rec.id %}" class="btn btn-secondary btn-small">Edit</a>
 
                                     <!-- Delete -->
-                                        <button class="btn btn-danger btn-small"
-                                                onclick="openDeleteModal('recipe', {{ rec.id }}, '{{ rec.name|escapejs }}')">
-                                            Delete
+                                       <button type="button"
+                                            class="icon-delete-btn"
+                                            onclick="openDeleteModal('recipe', {{ rec.id }}, '{{ rec.name|escapejs }}')">
+
+                                        <img src="{% static 'images/delete-trash.svg' %}"
+                                             alt="Delete">
                                         </button>
 
                                     </div>
