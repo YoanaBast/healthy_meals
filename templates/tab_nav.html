@@ -2,14 +2,9 @@
 <link rel="stylesheet" href="{% static 'css/styles.css' %}">
 
 <div class="tab-nav">
-    <div class="tab-nav-upper">
-        <a href="{% url 'generate_grocery_list' %}" class="tab-button {% if request.resolver_match.url_name == 'generate_grocery_list' %}active{% endif %}">Generate Grocery List</a>
-        <a href="{% url 'meal_suggestions' %}" class="tab-button {% if request.resolver_match.url_name == 'meal_suggestions' %}active{% endif %}">Get Meal Suggestions</a>
-        <a href="{% url 'manage_fridge' %}" class="tab-button {% if request.resolver_match.url_name == 'manage_fridge' %}active{% endif %}">Update your Fridge</a>
-    </div>
-
-    <div class="tab-nav-lower">
-        <a href="{% url 'manage_recipes' %}" class="tab-button {% if request.resolver_match.url_name == 'manage_recipes' %}active{% endif %}">Manage Recipes</a>
-        <a href="{% url 'manage_ingredients' %}" class="tab-button {% if request.resolver_match.url_name == 'manage_ingredients' %}active{% endif %}">Manage Ingredients</a>
-    </div>
+    <a href="{% url 'generate_grocery_list' %}" class="tab-button {% if request.resolver_match.url_name == 'generate_grocery_list' %}active{% endif %}"><span>Generate Grocery List</span></a>
+    <a href="{% url 'meal_suggestions' %}" class="tab-button {% if request.resolver_match.url_name == 'meal_suggestions' %}active{% endif %}"><span>Get Meal Suggestions</span></a>
+    <a href="{% url 'manage_fridge' %}" class="tab-button {% if request.resolver_match.url_name == 'manage_fridge' %}active{% endif %}"><span>Update your Fridge</span></a>
+    <a href="{% url 'manage_recipes' %}" class="tab-button {% if request.resolver_match.url_name == 'manage_recipes' %}active{% endif %}"><span>Manage Recipes</span></a>
+    <a href="{% url 'manage_ingredients' %}" class="tab-button {% if request.resolver_match.url_name == 'manage_ingredients' %}active{% endif %}"><span>Manage Ingredients</span></a>
 </div>

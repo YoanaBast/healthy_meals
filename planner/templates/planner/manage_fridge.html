@@ -6,10 +6,9 @@
 {% block title %}Manage Fridge{% endblock %}
 
 {% block content %}
+    {% include 'tab_nav.html' with active_tab='manage-fridge' %}
 
 <div class="container-home">
-    <!-- Tabs -->
-    {% include 'tab_nav.html' with active_tab='manage-fridge' %}
 
     <div id="manage-fridge" class="tab-content active">
 
