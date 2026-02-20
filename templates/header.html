@@ -1,0 +1,28 @@
+{% load static %}
+<header class="main-header">
+
+    <div class="tab-nav">
+            <nav class="container">
+                <div class="logo">
+                    <a href="{% url 'homepage' %}">
+                        <img class="header-logo" src="{% static 'images/simple_logo.svg' %}" alt="logo"/>
+                    </a>
+                </div>
+            </nav>
+
+        <a href="{% url 'generate_grocery_list' %}" class="tab-button {% if request.resolver_match.url_name == 'generate_grocery_list' %}active{% endif %}"><span>Generate Grocery List</span></a>
+        <a href="{% url 'meal_suggestions' %}" class="tab-button {% if request.resolver_match.url_name == 'meal_suggestions' %}active{% endif %}"><span>Get Meal Suggestions</span></a>
+        <a href="{% url 'manage_fridge' %}" class="tab-button {% if request.resolver_match.url_name == 'manage_fridge' %}active{% endif %}"><span>Update your Fridge</span></a>
+        <a href="{% url 'manage_recipes' %}" class="tab-button {% if request.resolver_match.url_name == 'manage_recipes' %}active{% endif %}"><span>Manage Recipes</span></a>
+        <a href="{% url 'manage_ingredients' %}" class="tab-button {% if request.resolver_match.url_name == 'manage_ingredients' %}active{% endif %}"><span>Manage Ingredients</span></a>
+
+        <ul class="nav-links">
+            <li>
+                <a href="{% url 'homepage' %}">
+                    <img src="{% static 'images/home.svg' %}" alt="Home" width="24" height="24">
+                </a>
+            </li>
+        </ul>
+    </div>
+
+</header>

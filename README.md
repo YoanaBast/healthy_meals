@@ -20,6 +20,7 @@ This project lets you:
 
 [AI & Tools Used](docs/ai_tools.md) 
 
+[TO-DO List](docs/to_do.md) 
 
 
 ## 🛠 Installation
