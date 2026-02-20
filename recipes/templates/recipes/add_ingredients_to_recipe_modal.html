@@ -5,7 +5,7 @@
 
         <select id="ingredientSelect" onchange="loadUnits()">
             <option value="">Select ingredient</option>
-            {% for ing in ingredients %}
+                {% for ing in ingredients %}
                 <option value="{{ ing.id }}"
                         data-units='[
                         {% for mu in ing.measurement_units.all %}

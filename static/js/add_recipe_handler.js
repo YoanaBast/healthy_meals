@@ -1,96 +1,162 @@
-document.addEventListener("DOMContentLoaded", function () {
+const meta = document.getElementById('recipe-meta');
+const mode = meta.dataset.mode;
 
-    const prefix = "recipe_ingredient";
+const addIngredientUrl = mode === 'edit' ? meta.dataset.addIngredientUrl : null;
+const csrftoken = document.cookie.split('; ')
+    .find(row => row.startsWith('csrftoken='))
+    ?.split('=')[1];
 
-    const totalFormsInput = document.querySelector(
-        `[name="${prefix}-TOTAL_FORMS"]`
-    );
+// Open/close modal
+document.getElementById('addIngredientBtn').addEventListener('click', function () {
+    document.getElementById('ingredientModal').style.display = 'flex';
+});
 
-    if (!totalFormsInput) {
-        console.error("Management form not found");
+function closeModal() {
+    document.getElementById('ingredientModal').style.display = 'none';
+    document.getElementById('ingredientSelect').value = '';
+    document.getElementById('quantityInput').value = '';
+    document.getElementById('unitSelect').innerHTML = '';
+}
+
+function loadUnits() {
+    const select = document.getElementById('ingredientSelect');
+    const selected = select.options[select.selectedIndex];
+    const units = JSON.parse(selected.dataset.units || '[]');
+    const unitSelect = document.getElementById('unitSelect');
+
+    unitSelect.innerHTML = units.map(u =>
+        `<option value="${u.id}">${u.name}</option>`
+    ).join('');
+}
+
+function addIngredient() {
+    const ingredient_id = document.getElementById('ingredientSelect').value;
+    const quantity = parseFloat(document.getElementById('quantityInput').value);
+    const unit_id = document.getElementById('unitSelect').value;
+    const ingredient_name = document.getElementById('ingredientSelect').options[
+        document.getElementById('ingredientSelect').selectedIndex
+    ].text;
+    const unit_name = document.getElementById('unitSelect').options[
+        document.getElementById('unitSelect').selectedIndex
+    ].text;
+
+    if (!ingredient_id || !quantity || !unit_id) {
+        alert('Please fill in all fields.');
         return;
     }
 
-    let formIndex = parseInt(totalFormsInput.value);
+    if (mode === 'edit') {
+        fetch(addIngredientUrl, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": csrftoken,
+            },
+            body: JSON.stringify({ingredient_id, quantity, unit_id})
+        })
+        .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    // Remove the added ingredient from the dropdown
+                    const ingredientSelect = document.getElementById('ingredientSelect');
+                    const selectedOption = ingredientSelect.options[ingredientSelect.selectedIndex];
+                    selectedOption.remove();
 
-    const addBtn = document.getElementById("addIngredientBtn");
-    const modal = document.getElementById("ingredientModal");
+                    appendIngredientLine(
+                        data.ingredient_name,
+                        data.quantity,
+                        data.unit_name,
+                        data.ingredient_id,
+                        data.unit_id
+                    );
+                    closeModal();
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            });
 
-    addBtn.addEventListener("click", function () {
-        modal.style.display = "block";
-    });
+        } else {
+            const container = document.getElementById('ingredientsContainer');
+            const totalForms = document.getElementById('id_recipe_ingredient-TOTAL_FORMS');
+            const formIndex = parseInt(totalForms.value);
 
-    window.closeModal = function () {
-        modal.style.display = "none";
-    };
+            // Remove from dropdown immediately
+            const ingredientSelect = document.getElementById('ingredientSelect');
+            const selectedOption = ingredientSelect.options[ingredientSelect.selectedIndex];
+            const removedId = selectedOption.value;
+            const removedName = selectedOption.text;
+            selectedOption.remove();
 
-    window.loadUnits = function () {
-        const ingredientSelect = document.getElementById("ingredientSelect");
-        const unitSelect = document.getElementById("unitSelect");
+            const newRow = document.createElement('div');
+            newRow.classList.add('ingredient-line');
+            newRow.innerHTML = `
+                <input type="hidden" name="recipe_ingredient-${formIndex}-id" value="">
+                <label>Ingredient</label>
+                <select name="recipe_ingredient-${formIndex}-ingredient">
+                    <option value="${removedId}" selected>${removedName}</option>
+                </select>
+                <label>Quantity</label>
+                <input type="number" name="recipe_ingredient-${formIndex}-quantity"
+                       value="${quantity}" step="0.01" min="0.01">
+                <label>Unit</label>
+                <select name="recipe_ingredient-${formIndex}-unit">
+                    <option value="${unit_id}" selected>${unit_name}</option>
+                </select>
+                <input type="checkbox" name="recipe_ingredient-${formIndex}-DELETE"
+                       id="delete_${formIndex}"
+                       data-ingredient-id="${removedId}"
+                       data-ingredient-name="${removedName}"
+                       onchange="handleAddDelete(this)">
+                <label for="delete_${formIndex}">Delete</label>
+            `;
 
-        unitSelect.innerHTML = "";
-
-        const selectedOption =
-            ingredientSelect.options[ingredientSelect.selectedIndex];
-
-        if (!selectedOption?.dataset.units) return;
-
-        const units = JSON.parse(selectedOption.dataset.units);
-
-        units.forEach(u => {
-            const option = document.createElement("option");
-            option.value = u.id;
-            option.text = u.name;
-            unitSelect.add(option);
-        });
-    };
-
-    window.addIngredient = function () {
-
-        const ingredientSelect = document.getElementById("ingredientSelect");
-        const ingredient = ingredientSelect.value;
-        const ingredientText =
-            ingredientSelect.options[ingredientSelect.selectedIndex]?.text;
-
-        const quantity = parseFloat(
-            document.getElementById("quantityInput").value
-        );
-
-        const unitSelect = document.getElementById("unitSelect");
-        const unit = unitSelect.value;
-        const unitText =
-            unitSelect.options[unitSelect.selectedIndex]?.text;
-
-        if (!ingredient || !unit || !quantity || quantity <= 0) {
-            alert("Invalid values");
-            return;
+            container.appendChild(newRow);
+            totalForms.value = formIndex + 1;
+            closeModal();
         }
+}
 
-        const container =
-            document.getElementById("ingredientsContainer");
+function appendIngredientLine(name, quantity, unit_name, ingredient_id, unit_id) {
+    const container = document.getElementById('ingredientsContainer');
+    const div = document.createElement('div');
+    div.classList.add('ingredient-line');
+    div.innerHTML = `
+        <label>Ingredient</label>
+        <select name="new_ingredient">
+            <option value="${ingredient_id}" selected>${name}</option>
+        </select>
+        <label>Quantity</label>
+        <input type="number" value="${quantity}" step="0.01" min="0.01">
+        <label>Unit</label>
+        <select name="new_unit">
+            <option value="${unit_id}" selected>${unit_name}</option>
+        </select>
+        <input type="checkbox" id="delete_${ingredient_id}" onchange="deleteIngredient(${ingredient_id}, this)">
+        <label for="delete_${ingredient_id}">Delete</label>
+    `;
+    container.insertBefore(div, document.getElementById('addIngredientBtn').parentElement);
+}
 
-        container.insertAdjacentHTML("beforeend", `
-            <div class="ingredient-item">
-                <input type="hidden"
-                    name="${prefix}-${formIndex}-ingredient"
-                    value="${ingredient}">
-                <input type="hidden"
-                    name="${prefix}-${formIndex}-quantity"
-                    value="${quantity}">
-                <input type="hidden"
-                    name="${prefix}-${formIndex}-unit"
-                    value="${unit}">
-                <p><strong>${ingredientText}</strong> - ${quantity} ${unitText}</p>
-            </div>
-        `);
+function handleAddDelete(checkbox) {
+    const line = checkbox.closest('.ingredient-line');
+    line.style.opacity = checkbox.checked ? '0.3' : '1';
 
-        formIndex++;
-        totalFormsInput.value = formIndex;
+    const ingredientSelect = document.getElementById('ingredientSelect');
+    const id = checkbox.dataset.ingredientId;
+    const name = checkbox.dataset.ingredientName;
 
-        document.getElementById("quantityInput").value = "";
-        document.getElementById("unitSelect").innerHTML = "";
-
-        modal.style.display = "none";
-    };
-
-});
+    if (checkbox.checked) {
+        // marked for deletion - remove from dropdown
+        const opt = ingredientSelect.querySelector(`option[value="${id}"]`);
+        if (opt) opt.remove();
+    } else {
+        // unchecked - add back to dropdown
+        const alreadyExists = ingredientSelect.querySelector(`option[value="${id}"]`);
+        if (!alreadyExists) {
+            const opt = document.createElement('option');
+            opt.value = id;
+            opt.text = name;
+            ingredientSelect.appendChild(opt);
+        }
+    }
+}

@@ -1,9 +1,11 @@
+import json
+
 from django.contrib.auth.models import User
 from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 
-from ingredients.models import Ingredient
+from ingredients.models import Ingredient, IngredientMeasurementUnit
 from .forms import RecipeForm, RecipeIngredientForm, RecipeIngredientFormSet
 from .models import Recipe, RecipeCategory, RecipeIngredient
 
@@ -45,7 +47,7 @@ def add_recipe(request):
             recipe = recipe_form.save()  # save recipe first
             ingredient_formset.instance = recipe  # link formset to recipe
             ingredient_formset.save()  # save ingredients
-            return redirect('manage_recipes')
+            return redirect('recipe_detail', pk=recipe.pk)
     else:
         recipe_form = RecipeForm()
         ingredient_formset = RecipeIngredientFormSet()
@@ -68,7 +70,6 @@ def delete_recipe(request, pk):
 def edit_recipe(request, pk):
     default_url = reverse('manage_recipes')
     recipe = get_object_or_404(Recipe, pk=pk)
-    ingredients = Ingredient.objects.prefetch_related('measurement_units__unit').all()
 
     if request.method == 'POST':
         recipe_form = RecipeForm(request.POST, instance=recipe)
@@ -83,10 +84,14 @@ def edit_recipe(request, pk):
         recipe_form = RecipeForm(instance=recipe)
         ingredient_formset = RecipeIngredientFormSet(instance=recipe)
 
+    existing_ids = [form.instance.ingredient_id for form in ingredient_formset.forms if form.instance.pk]
+
+    ingredients_add = Ingredient.objects.prefetch_related('measurement_units__unit').exclude(id__in=existing_ids)
+
     context = {
         'recipe_form': recipe_form,
         'ingredient_formset': ingredient_formset,
-        'ingredients': ingredients,
+        'ingredients': ingredients_add,
         'recipe': recipe,
         'default_url': default_url,
     }
@@ -107,3 +112,42 @@ def toggle_favourite(request, id):
         status = True
 
     return JsonResponse({"favourited": status})
+
+
+
+def add_ingredient(request, recipe_id):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+
+            ingredient_id = data.get("ingredient_id")
+            quantity = data.get("quantity")
+            unit_id = data.get("unit_id")
+
+            recipe = Recipe.objects.get(pk=recipe_id)
+            ingredient = Ingredient.objects.get(pk=ingredient_id)
+            unit = IngredientMeasurementUnit.objects.get(pk=unit_id)
+
+            ri, created = RecipeIngredient.objects.get_or_create(
+                recipe=recipe,
+                ingredient=ingredient,
+                defaults={"quantity": quantity, "unit": unit}
+            )
+            if not created:
+                ri.quantity = quantity
+                ri.unit = unit
+                ri.save()
+
+            return JsonResponse({
+                "success": True,
+                "ingredient_name": ingredient.name,
+                "quantity": quantity,
+                "unit_name": unit.name_for_quantity(quantity),
+                "ingredient_id": ingredient.id,
+                "unit_id": unit.id,
+            })
+
+        except Exception as e:
+            return JsonResponse({"success": False, "error": str(e)})
+
+    return JsonResponse({"success": False, "error": "Invalid request method"})

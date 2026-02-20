@@ -4,27 +4,31 @@
 
 {% block content %}
 
+<div id="recipe-meta"
+     data-mode="edit"
+     data-recipe-id="{{ recipe.pk }}"
+     data-add-ingredient-url="{% url 'add_ingredient' recipe.pk %}"
+     style="display:none;">
+</div>
 
 <div class="container-home">
 
-<div class="container-home" style="max-width: 800px; margin: 2rem auto; display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center;">
-    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+    <!-- Back button -->
+    <div style="max-width: 800px; margin: 2rem auto;">
         <a href="{% url 'manage_recipes' %}" class="btn">&larr; Back to Recipes</a>
-        <a href="{% url 'edit_recipe' recipe.pk %}" class="btn">Edit</a>
     </div>
-    <button class="btn btn-danger" style="margin-left: auto;" onclick="openDeleteModal('recipe', {{ recipe.pk }}, '{{ recipe.name|escapejs }}')">Delete</button>
-</div>
 
+    <form method="post" action="{% url 'edit_recipe' recipe.pk %}">
+        {% csrf_token %}
 
-<div class="container-home" style="max-width: 800px; margin: 2rem auto; display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center;">
-    <div class="grid-container">
-        <div class="grid-item info">
-            <h2>Edit Recipe</h2>
-            <form method="post" action="{% url 'edit_recipe' recipe.pk %}">
-                {% csrf_token %}
+        <!-- Recipe fields -->
+        <div style="max-width: 800px; margin: 2rem auto;">
+            <div class="grid-container">
+
+                <div class="grid-item info">
+                    <h2>Edit Recipe</h2>
                     <p>{{ recipe_form.name.label_tag }} {{ recipe_form.name }}</p>
                     <p>{{ recipe_form.category.label_tag }} {{ recipe_form.category }}</p>
-
                     <p>
                         <label>Cooking Time:</label>
                         <span class="time-inputs">
@@ -32,45 +36,56 @@
                             {{ recipe_form.minutes }} m
                         </span>
                     </p>
-        </div>
-        <div class="grid-item info">
+                </div>
 
-            <p>{{ recipe_form.servings.label_tag }} {{ recipe_form.servings }}</p>
-            <p>{{ recipe_form.instructions.label_tag }} {{ recipe_form.instructions }}</p>
+                <div class="grid-item info">
+                    <p>{{ recipe_form.servings.label_tag }} {{ recipe_form.servings }}</p>
+                    <p>{{ recipe_form.instructions.label_tag }} {{ recipe_form.instructions }}</p>
+                </div>
 
-        </div>
-        </div>
-<div class="container-home" style="max-width: 800px; margin: 2rem auto; display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center;">
-
-    {{ ingredient_formset.management_form }}
-
-    <h3>Ingredients</h3>
-    <div id="ingredientsContainer">
-        {% for form in ingredient_formset.forms %}
-            <div class="ingredient-line">
-                {{ form.id }}
-                {{ form.ingredient.label_tag }} {{ form.ingredient }}
-                {{ form.quantity.label_tag }} {{ form.quantity }}
-                {{ form.unit.label_tag }} {{ form.unit }}
-                {% if form.instance.pk %}
-                    {{ form.DELETE }} <label>Delete</label>
-                {% endif %}
             </div>
-        {% endfor %}
-        <button type="button" id="addIngredientBtn" class="btn btn-secondary">
-            <img src="{% static 'images/plus_icon.svg' %}" alt="+ Add" width="30" height="30">
-        </button>
-    </div>
+        </div>
 
-</div>
+        <!-- Ingredients -->
+        <div style="max-width: 800px; margin: 2rem auto;">
+            {{ ingredient_formset.management_form }}
 
-    <br><br>
-    <button type="submit" class="btn btn-success">Save Recipe</button>
-    <a href="{{ request.META.HTTP_REFERER|default:default_url }}" class="btn btn-secondary">Cancel</a>
-</form>
+            <h3>Ingredients</h3>
+            <div id="ingredientsContainer">
+                {% if ingredient_formset.forms %}
+                    {% for form in ingredient_formset.forms %}
+                        <div class="ingredient-line">
+                            {{ form.id }}
+                            {{ form.ingredient.label_tag }} {{ form.ingredient }}
+                            {{ form.quantity.label_tag }} {{ form.quantity }}
+                            {{ form.unit.label_tag }} {{ form.unit }}
+                    {% if form.instance.pk %}
+                        <input type="checkbox" name="{{ form.DELETE.html_name }}"
+                               id="{{ form.DELETE.id_for_label }}"
+                               onchange="this.closest('.ingredient-line').style.opacity = this.checked ? '0.3' : '1'">
+                        <label for="{{ form.DELETE.id_for_label }}">Delete</label>
+                    {% endif %}
 
-<!--  modal for adding new ingredients dynamically -->
-{% include 'recipes/add_ingredients_to_recipe_modal.html' %}
+
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p style="color: var(--text-secondary); font-style: italic;">No ingredients yet.</p>
+                {% endif %}
+
+                {% include 'core/add_button.html' %}
+            </div>
+        </div>
+
+        <!-- Save / Cancel -->
+        <div style="max-width: 800px; margin: 2rem auto;">
+            <button type="submit" class="btn btn-success">Save Recipe</button>
+            <a href="{{ request.META.HTTP_REFERER|default:default_url }}" class="btn btn-secondary">Cancel</a>
+        </div>
+
+    </form>
+
+    {% include 'recipes/add_ingredients_to_recipe_modal.html' %}
 
 </div>
 
