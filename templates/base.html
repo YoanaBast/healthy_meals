@@ -1,68 +1,30 @@
 {% load static %}
 {% load form_extras %}
 
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>{% block title %}Foodganizer{% endblock %}</title>
-<link rel="stylesheet" href="{% static 'css/styles.css' %}"></head>
-<link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
+
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
+
+</head>
+
 
 <body>
-    <header>
-        <nav class="container">
-            <div class="logo">
-                <a href="{% url 'homepage' %}">
-                  <img class="header-logo" src="{% static 'images/simple_logo.svg' %}" alt="logo"/>
-                </a>
-            </div>
-            <ul class="nav-links">
-                <a href="{% url 'homepage' %}">
-                    <img src="{% static 'images/home.svg' %}" alt="Home" width="24" height="24">
-
-                </a>
-
-            </ul>
-        </nav>
-    </header>
+       {% include 'header.html' %}
 
     <main>
         {% block content %}
-
-
         {% endblock %}
     </main>
-    <footer class="footer">
-        <div class="container footer-grid">
-            <div>
-                <h4>Foodganizer</h4>
-                <p>Say "Goodbye" to meal-planning anxiety! </p>
-                <p>Track your favourite recipes and plan your meals in one place!</p>
-            </div>
 
-            <div>
-                <h4>Resources</h4>
-                <ul>
-                    <li><a href="#">How it works</a></li>
-                    <li><a href="#">FAQ</a></li>
-                    <li><a href="#">Tips</a></li>
-                </ul>
-            </div>
-
-            <div>
-                <h4>Contact</h4>
-                <p>Email: support@mealplanner.com</p>
-                <p><a href="https://github.com/YoanaBast/healthy_meals">GitHub</a></p>
-            </div>
-        </div>
-
-        <div class="footer-bottom">
-            © {% now "Y" %} Foodganizer. All rights reserved.
-        </div>
-    </footer>
+       {% include 'footer.html' %}
 
 </body>
+
 </html>
