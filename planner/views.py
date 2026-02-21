@@ -264,7 +264,6 @@ def convert_qty_to_unit(qty, from_unit, to_unit, ingredient):
     try:
         from_conv = IngredientMeasurementUnit.objects.get(ingredient=ingredient, unit=from_unit)
         to_conv = IngredientMeasurementUnit.objects.get(ingredient=ingredient, unit=to_unit)
-        # Convert qty -> base, then base -> target
         qty_in_base = qty * from_conv.conversion_to_base
         qty_in_target = qty_in_base / to_conv.conversion_to_base
         return qty_in_target
@@ -348,24 +347,35 @@ def generate_grocery_list(request):
         for ing_id, data in needed.items():
             ing = data['ingredient']
             needed_qty = data['total_qty']
-            base_unit = data['unit']
+            base_unit = data['unit']  # this is a MeasurementUnit object
 
             fridge_item = fridge_items.filter(ingredient=ing).first()
             available_in_base = 0
 
             if fridge_item:
-                try:
-                    fridge_conv = IngredientMeasurementUnit.objects.get(ingredient=ing, unit=fridge_item.unit)
-                    base_conv = IngredientMeasurementUnit.objects.get(ingredient=ing, unit=base_unit)
-                    available_in_base = (fridge_item.quantity * fridge_conv.conversion_to_base) / base_conv.conversion_to_base
-                except IngredientMeasurementUnit.DoesNotExist:
-                    available_in_base = 0
+                # Convert fridge quantity to base units using convert_qty_to_unit
+                # which handles the same-unit case and uses IngredientMeasurementUnit lookups
+                converted = convert_qty_to_unit(
+                    fridge_item.quantity,
+                    fridge_item.unit,   # MeasurementUnit
+                    base_unit,          # MeasurementUnit
+                    ing
+                )
+                if converted is not None:
+                    available_in_base = converted
+                else:
+                    # Units are incompatible — warn but don't crash
+                    messages.warning(
+                        request,
+                        f"Could not convert fridge units for {ing.name} "
+                        f"({fridge_item.unit} → {base_unit}), ignoring fridge stock."
+                    )
 
             shortfall = needed_qty - available_in_base
             if shortfall > 0:
                 final_needed[ing_id] = {
                     'ingredient': ing,
-                    'quantity': shortfall,
+                    'quantity': round(shortfall, 4),
                     'unit': base_unit,
                     'by_recipe': data['by_recipe'],
                 }
