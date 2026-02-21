@@ -7,9 +7,15 @@
 <div class="container-home">
     <h2>Select Recipes</h2>
 
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+
     <!-- Search & Filter -->
     <div style="margin-bottom: 1rem; display: flex; gap: 1rem; align-items: center;">
-        <input type="text" id="search-box" placeholder="Search by name or ingredient..." oninput="filterRecipes()">
+        <input type="text" id="search-box" placeholder="Search by name..." oninput="filterRecipes()">
         <label>
             <input type="checkbox" id="filter-fav" onchange="filterRecipes()">
             Show only favourites
@@ -22,19 +28,26 @@
         {% for rec in page_obj %}
         <div class="recipe-line"
              data-fav="{{ rec.is_fav|yesno:'1,0' }}"
-             data-name="{{ rec.name|lower }}"
-             data-ingredients="{{ rec.recipe_ingredient.all|join:', '|lower }}">
+             data-name="{{ rec.name|lower }}">
             <label>
-                <input type="checkbox" name="recipes" value="{{ rec.id }}"
-                    {% if rec.id|stringformat:"s" in selected_recipes %}checked{% endif %}>
+                <input type="checkbox"
+                       class="recipe-checkbox"
+                       name="recipes"
+                       value="{{ rec.id }}"
+                    {% if rec.id|stringformat:"s" in selected_recipes %}checked{% endif %}
+                    onchange="updateSelection(this)">
                 {{ rec.name }} {% if rec.is_fav %}<span class="fav-star">★</span>{% endif %}
             </label>
         </div>
         {% endfor %}
 
-        <!-- Preserve selected recipes across pages -->
+        <!--
+            Hidden inputs carry selections from OTHER pages.
+            On load, JS removes any hidden input whose ID matches a visible checkbox on
+            this page (to avoid duplicates), then re-adds one for every pre-checked box.
+        -->
         {% for r in selected_recipes %}
-        <input type="hidden" name="recipes" value="{{ r }}">
+            <input type="hidden" class="hidden-selection" name="recipes" value="{{ r }}">
         {% endfor %}
 
         <button type="submit" class="btn">Generate Grocery List</button>
@@ -61,7 +74,7 @@
     border-radius: 6px;
     display: flex;
     align-items: center;
-    justify-content: flex-start;  /* Changed from space-between to flex-start */
+    justify-content: flex-start;
     margin-bottom: 0.5rem;
 }
 
@@ -70,16 +83,16 @@
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    text-align: left;  /* Explicit left alignment */
+    text-align: left;
 }
 
 .recipe-line input[type="checkbox"] {
-    flex-shrink: 0;  /* Prevent checkbox from shrinking */
+    flex-shrink: 0;
 }
 
 .fav-star {
     color: var(--accent);
-    margin-left: auto;  /* Push star to the right */
+    margin-left: auto;
 }
 
 .pagination {
@@ -91,18 +104,75 @@
     padding: 0.5rem 1rem;
     margin: 0 0.25rem;
 }
-
-.data-table {
-    text-align: left;  /* Ensure tables are left-aligned */
-}
-
-.data-table th,
-.data-table td {
-    text-align: left;
-}
 </style>
 
 <script>
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.getElementById('recipe-form');
+
+    // Collect all visible checkbox values on this page
+    const visibleIds = new Set(
+        Array.from(form.querySelectorAll('.recipe-checkbox')).map(cb => cb.value)
+    );
+
+    // Remove server-rendered hidden inputs that duplicate a visible checkbox.
+    // The real checkbox handles submission for current-page items.
+    form.querySelectorAll('.hidden-selection').forEach(h => {
+        if (visibleIds.has(h.value)) h.remove();
+    });
+
+    // For pre-checked boxes (restored from URL params), re-add hidden inputs
+    // so they survive when the user navigates to another page.
+    form.querySelectorAll('.recipe-checkbox:checked').forEach(cb => {
+        ensureHidden(cb.value);
+    });
+});
+
+function ensureHidden(value) {
+    const form = document.getElementById('recipe-form');
+    const exists = Array.from(form.querySelectorAll('.hidden-selection')).some(h => h.value === value);
+    if (!exists) {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'recipes';
+        input.value = value;
+        input.className = 'hidden-selection';
+        form.appendChild(input);
+    }
+}
+
+function removeHidden(value) {
+    document.getElementById('recipe-form').querySelectorAll('.hidden-selection').forEach(h => {
+        if (h.value === value) h.remove();
+    });
+}
+
+// When user checks/unchecks a box, keep hidden inputs in sync
+// and update pagination links so the selection survives page navigation.
+function updateSelection(checkbox) {
+    if (checkbox.checked) {
+        ensureHidden(checkbox.value);
+    } else {
+        removeHidden(checkbox.value);
+    }
+    updatePaginationLinks();
+}
+
+function updatePaginationLinks() {
+    const form = document.getElementById('recipe-form');
+
+    const checkedIds = Array.from(form.querySelectorAll('.recipe-checkbox:checked')).map(cb => cb.value);
+    const hiddenIds  = Array.from(form.querySelectorAll('.hidden-selection')).map(h => h.value);
+    const allSelected = [...new Set([...checkedIds, ...hiddenIds])];
+
+    document.querySelectorAll('.pagination a').forEach(link => {
+        const url = new URL(link.href);
+        url.searchParams.delete('recipes');
+        allSelected.forEach(id => url.searchParams.append('recipes', id));
+        link.href = url.toString();
+    });
+}
+
 function filterRecipes() {
     const search = document.getElementById('search-box').value.toLowerCase();
     const showFav = document.getElementById('filter-fav').checked;
@@ -110,9 +180,8 @@ function filterRecipes() {
     document.querySelectorAll('.recipe-line').forEach(div => {
         const fav = div.dataset.fav === "1";
         const name = div.dataset.name;
-        const ingredients = div.dataset.ingredients;
 
-        const matchesSearch = name.includes(search) || ingredients.includes(search);
+        const matchesSearch = name.includes(search);
         const matchesFav = !showFav || fav;
 
         div.style.display = (matchesSearch && matchesFav) ? 'flex' : 'none';

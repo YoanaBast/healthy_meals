@@ -5,9 +5,8 @@
 ## PRIORITY 1 FIXES
     - check what happens when i try to save duplicates and render some smg for user
     - make pages for records shown to the rest of the pages and add css for it
-    - fix geenrate grocery list 
-    - fix nothing to buy msg for grocery list
     - make meals list 
+    - generate grocery list needs to subtract what i already have in the fridge
 
 
 ## PRIORITY 2 FIXES

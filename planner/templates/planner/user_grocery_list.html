@@ -7,51 +7,141 @@
 <div class="container-home">
     <h2>My Grocery List</h2>
 
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+
     {% if items %}
+        <form method="POST" action="{% url 'add_all_grocery_to_fridge' %}">
+            {% csrf_token %}
+            <button type="submit" class="btn" style="margin-bottom: 1rem;">Add All to Fridge</button>
+        </form>
 
-    <!-- Add All Button -->
-    <form method="post" action="{% url 'add_all_grocery_to_fridge' %}" style="margin-bottom: 15px;">
-        {% csrf_token %}
-        <button class="btn">Add All To Fridge</button>
-    </form>
-
-    <table class="data-table">
-        <thead>
-            <tr>
-                <th>Ingredient</th>
-                <th>Quantity</th>
-                <th>Unit</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for item in items %}
-            <tr>
-                <td>{{ item.ingredient.name }}</td>
-                <td>{{ item.quantity|floatformat:2 }}</td>
-                <td>{{ item.unit }}</td>
-                <td style="display:flex; gap:5px;">
-
-                    <!-- Add to fridge -->
-                    <form method="post" action="{% url 'add_grocery_to_fridge' item.id %}">
-                        {% csrf_token %}
-                        <button class="btn btn-small">Add</button>
-                    </form>
-
-                    <!-- Delete -->
-                    <form method="post" action="{% url 'delete_grocery_item' item.id %}">
-                        {% csrf_token %}
-                        <button class="btn btn-danger btn-small">Delete</button>
-                    </form>
-
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Ingredient</th>
+                    <th>Quantity</th>
+                    <th>Unit</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                <tr>
+                    <td>{{ item.ingredient.name }}</td>
+                    <td>{{ item.quantity|floatformat:2 }}</td>
+                    <td>{{ item.unit }}</td>
+                    <td style="display: flex; gap: 0.5rem;">
+                        <form method="POST" action="{% url 'add_grocery_to_fridge' item.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm">→ Fridge</button>
+                        </form>
+                        <form method="POST" action="{% url 'delete_grocery_item' item.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     {% else %}
-    <p>No items in your grocery list yet.</p>
+        <p>Your grocery list is empty. <a href="{% url 'generate_grocery_list' %}">Generate one</a> from your favourite recipes.</p>
+    {% endif %}
+
+    {% if history %}
+    <div class="history-section">
+        <h3 style="margin-top: 2rem;">Generation History</h3>
+        <p style="color: var(--text-muted); font-size: 0.9rem;">A log of each time you generated ingredients, grouped by recipe.</p>
+
+        {% for gen in history %}
+        <div class="history-card">
+            <div class="history-header">
+                <span class="history-date">{{ gen.created_at|date:"d M Y, H:i" }}</span>
+            </div>
+
+            {% for recipe_name, ing_items in gen.by_recipe.items %}
+            <div class="history-recipe">
+                <div class="history-recipe-name">{{ recipe_name }}</div>
+                <ul class="history-ingredients">
+                    {% for item in ing_items %}
+                    <li>{{ item.ingredient.name }} — {{ item.quantity|floatformat:2 }} {{ item.unit }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endfor %}
+        </div>
+        {% endfor %}
+
+        {% if history_page_obj.has_other_pages %}
+        <div class="pagination" style="text-align:center; margin-top:1rem;">
+            {% if history_page_obj.has_previous %}
+                <a href="?history_page={{ history_page_obj.previous_page_number }}">« Prev</a>
+            {% endif %}
+            <span>Page {{ history_page_obj.number }} of {{ history_page_obj.paginator.num_pages }}</span>
+            {% if history_page_obj.has_next %}
+                <a href="?history_page={{ history_page_obj.next_page_number }}">Next »</a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
     {% endif %}
 </div>
+
+<style>
+.history-section {
+    margin-top: 2rem;
+}
+
+.history-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 1rem;
+}
+
+.history-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.history-date {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.history-recipe {
+    margin-bottom: 0.75rem;
+}
+
+.history-recipe:last-child {
+    margin-bottom: 0;
+}
+
+.history-recipe-name {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    color: var(--accent);
+}
+
+.history-ingredients {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.history-ingredients li {
+    font-size: 0.9rem;
+    padding: 0.15rem 0;
+    color: var(--text-secondary, inherit);
+}
+</style>
 {% endblock %}
