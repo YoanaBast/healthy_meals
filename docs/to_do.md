@@ -3,7 +3,6 @@
 # TO-DO
 
 ## PRIORITY 1 FIXES
-    - fix make recipe
     
     
 ## PRIORITY 2 FIXES
