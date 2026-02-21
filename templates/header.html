@@ -17,12 +17,34 @@
         <a href="{% url 'manage_ingredients' %}" class="tab-button {% if request.resolver_match.url_name == 'manage_ingredients' %}active{% endif %}"><span>Manage Ingredients</span></a>
 
         <ul class="nav-links">
-            <li>
+            <li class="tooltip">
                 <a href="{% url 'homepage' %}">
                     <img src="{% static 'images/home.svg' %}" alt="Home" width="24" height="24">
                 </a>
+                <span class="tooltip-text">Home</span>
             </li>
         </ul>
+
+        <ul class="nav-links">
+            <li class="tooltip">
+                <a href="{% url 'user_grocery_list' %}">
+                    <img src="{% static 'images/grocery-cart.svg' %}" alt="Home" width="24" height="24">
+                </a>
+                <span class="tooltip-text">Grocery List</span>
+            </li>
+        </ul>
+
+        <ul class="nav-links">
+            <li class="tooltip">
+                <a href="{% url 'homepage' %}">
+                    <img src="{% static 'images/fork_knife.svg' %}" alt="Home" width="24" height="24">
+                </a>
+                <span class="tooltip-text">Meals List</span>
+            </li>
+        </ul>
+
+
+
     </div>
 
 </header>
