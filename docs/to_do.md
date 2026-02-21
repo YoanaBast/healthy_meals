@@ -7,6 +7,7 @@
     - make pages for records shown to the rest of the pages and add css for it
     - make meals list 
     - generate grocery list needs to subtract what i already have in the fridge
+    - add are you sure to the delete in grocery list
 
 
 ## PRIORITY 2 FIXES
