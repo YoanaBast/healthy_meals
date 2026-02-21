@@ -1,6 +1,9 @@
 import json
 
 from django.contrib.auth.models import User
+from django.core.checks import messages
+from django.core.paginator import Paginator
+from django.db import IntegrityError
 from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
@@ -12,13 +15,15 @@ from .models import Recipe, RecipeCategory, RecipeIngredient
 # Create your views here.
 
 def manage_recipes(request):
-    user = User.objects.get(username="default")  # temporary default, later will use user = request.user
-    recipes = Recipe.objects.all()
+    user = User.objects.get(username="default")
+    recipes_qs = Recipe.objects.all().order_by('name')
+    paginator = Paginator(recipes_qs, 10)
+    page_number = request.GET.get('page')
+    recipes = paginator.get_page(page_number)
 
     for rec in recipes:
         rec.is_fav = rec.favourited_by.filter(id=user.id).exists()
 
-    # Forms for the add modal
     recipe_form = RecipeForm()
     ingredient_form = RecipeIngredientForm()
 
@@ -27,7 +32,6 @@ def manage_recipes(request):
         'recipe_form': recipe_form,
         'ingredient_form': ingredient_form,
     }
-
     return render(request, 'recipes/manage_recipes.html', context)
 
 
@@ -44,9 +48,19 @@ def add_recipe(request):
         ingredient_formset = RecipeIngredientFormSet(request.POST)
 
         if recipe_form.is_valid() and ingredient_formset.is_valid():
-            recipe = recipe_form.save()  # save recipe first
+            try:
+
+                recipe = recipe_form.save()  # save recipe first
+            except IntegrityError:
+                messages.error(request, "A recipe with this name already exists.")
+                return render(request, 'recipes/add_recipe.html', {
+                    'recipe_form': recipe_form,
+                    'ingredient_formset': ingredient_formset,
+                    'ingredients': ingredients,
+                })
+
             ingredient_formset.instance = recipe  # link formset to recipe
-            ingredient_formset.save()  # save ingredients
+            ingredient_formset.save()
             return redirect('recipe_detail', pk=recipe.pk)
     else:
         recipe_form = RecipeForm()

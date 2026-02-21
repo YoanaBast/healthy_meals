@@ -3,7 +3,7 @@
 # TO-DO
 
 ## PRIORITY 1 FIXES
-    
+    - check what happens when i try to save duplicates and render some smg for user
     
 ## PRIORITY 2 FIXES
     - clean up css and move to different files(?) - the project breaks when I try to import css and I'm not sure why yet
@@ -12,6 +12,7 @@
     - use exclude in the form (?)
     - add nothing to buy msg
     - make pages for records shown 
+    - add back to recipes next to back on recipe details
     
 ## FEATURES
     - add make option to grocery list

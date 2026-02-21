@@ -1,17 +1,21 @@
-from django.http import JsonResponse
+from django.core.paginator import Paginator
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 
-from .models import Ingredient, IngredientCategory, IngredientMeasurementUnit, MeasurementUnit
+from .models import Ingredient, IngredientMeasurementUnit
 from .forms import IngredientAddForm, IngredientEditForm
 
 
 def manage_ingredients(request):
-    ingredients = Ingredient.objects.select_related(
+    ingredients_qs = Ingredient.objects.select_related(
         'category', 'default_unit'
     ).prefetch_related(
         'dietary_tag'
     ).all().order_by('name')
+
+    paginator = Paginator(ingredients_qs, 10)
+    page_number = request.GET.get('page')
+    ingredients = paginator.get_page(page_number)
 
     add_form = IngredientAddForm()
 
