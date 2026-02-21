@@ -3,11 +3,6 @@
 # TO-DO
 
 ## PRIORITY 1 FIXES
-    - fix on edit recipe to only show ingredients not already added in the dropdown
-    - fix edit on fridge, convert automatically
-    - fix make recipe
-    - fix add ingredients to recipes on add recipe, it works on edit
-    - check make broken
     
     
 ## PRIORITY 2 FIXES
@@ -24,6 +19,7 @@
     - add calorie tracker
     - add search boxes
     - add other units to ingredient details
+    - add all units options for the ingredients in UI
     
     
 ## TEST

@@ -3,66 +3,57 @@
 {% load static %}
 {% block content %}
 
+<div id="recipe-meta"
+     data-mode="add"
+     style="display:none;">
+</div>
+
 <div class="container-home" style="padding-top: 2rem; padding-bottom: 2rem;">
-    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-        <a href="javascript:history.back()" class="btn">Back</a>
-    </div>
+    <a href="javascript:history.back()" class="btn">Back</a>
 </div>
 
 <div class="container-home">
-        <div class="grid-container">
-        <div class="grid-item info">
-    <h2>Add Recipe</h2>
-
     <form method="post" action="{% url 'add_recipe' %}">
         {% csrf_token %}
-
-        <!-- Recipe fields -->
-        <p>{{ recipe_form.name.label_tag }} {{ recipe_form.name }}</p>
-        <p>{{ recipe_form.category.label_tag }} {{ recipe_form.category }}</p>
-
-
-        <p>{{ recipe_form.servings.label_tag }} {{ recipe_form.servings }}</p>
-        </div>
-        <div class="grid-item info">
-                <!-- Cooking time as hh:mm -->
-            <p>
-                <label>Cooking Time:</label>
-                <span class="time-inputs">
-                    {{ recipe_form.hours|default:"0" }} h
-                    {{ recipe_form.minutes|default:"0" }} m
-                </span>
-            </p>
-
-
-        <p>{{ recipe_form.instructions.label_tag }} {{ recipe_form.instructions }}</p>
-
-        </div>         </div>
-
-
         {{ ingredient_formset.management_form }}
+
+        <h2>Add Recipe</h2>
+
+        <div class="grid-container">
+            <div class="grid-item info">
+                <p>{{ recipe_form.name.label_tag }} {{ recipe_form.name }}</p>
+                <p>{{ recipe_form.category.label_tag }} {{ recipe_form.category }}</p>
+                <p>{{ recipe_form.servings.label_tag }} {{ recipe_form.servings }}</p>
+            </div>
+
+            <div class="grid-item info">
+                <p>
+                    <label>Cooking Time:</label>
+                    <span class="time-inputs">
+                        {{ recipe_form.hours }} h
+                        {{ recipe_form.minutes }} m
+                    </span>
+                </p>
+                <p>{{ recipe_form.instructions.label_tag }} {{ recipe_form.instructions }}</p>
+            </div>
+        </div>
 
         <h3>Ingredients</h3>
         <div id="ingredientsContainer"></div>
 
-
-        <button type="button" id="addIngredientBtn" class="btn btn-secondary">
-            <img src="{% static 'images/plus_icon.svg' %}" alt="+ Add" width="30" height="30">
-        </button>
+        {% include 'core/add_button.html' %}
 
         <br><br>
 
         <button type="submit" class="btn btn-success">Save Recipe</button>
         <a href="{% url 'manage_recipes' %}" class="btn btn-secondary">Cancel</a>
+
     </form>
 </div>
 
-
-<!--  modal for adding new ingredients dynamically -->
 {% include 'recipes/add_ingredients_to_recipe_modal.html' %}
 
 <script src="{% static 'js/add_recipe_handler.js' %}"></script>
 <script src="{% static 'js/zero_inputt_handler.js' %}"></script>
-
 
 {% endblock %}
