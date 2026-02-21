@@ -75,6 +75,18 @@
             {% endfor %}
         </div>
         {% endfor %}
+
+        {% if history_page_obj.has_other_pages %}
+        <div class="pagination" style="text-align:center; margin-top:1rem;">
+            {% if history_page_obj.has_previous %}
+                <a href="?history_page={{ history_page_obj.previous_page_number }}">« Prev</a>
+            {% endif %}
+            <span>Page {{ history_page_obj.number }} of {{ history_page_obj.paginator.num_pages }}</span>
+            {% if history_page_obj.has_next %}
+                <a href="?history_page={{ history_page_obj.next_page_number }}">Next »</a>
+            {% endif %}
+        </div>
+        {% endif %}
     </div>
     {% endif %}
 </div>

@@ -427,7 +427,7 @@ def user_grocery_list(request):
     )
 
     # Group items by recipe in Python so the template stays simple
-    history = []
+    history_data = []
     for gen in raw_history:
         by_recipe = OrderedDict()
         for item in gen.items.all():
@@ -435,14 +435,19 @@ def user_grocery_list(request):
             if recipe_name not in by_recipe:
                 by_recipe[recipe_name] = []
             by_recipe[recipe_name].append(item)
-        history.append({
+        history_data.append({
             'created_at': gen.created_at,
             'by_recipe': by_recipe,
         })
 
+    history_paginator = Paginator(history_data, 5)
+    history_page_number = request.GET.get('history_page')
+    history_page_obj = history_paginator.get_page(history_page_number)
+
     context = {
         'items': items,
-        'history': history,
+        'history': history_page_obj,
+        'history_page_obj': history_page_obj,
     }
     return render(request, 'planner/user_grocery_list.html', context)
 
