@@ -3,10 +3,7 @@
 # TO-DO
 
 ## PRIORITY 1 FIXES
-    - check what happens when i try to save duplicates and render some smg for user
-    - make pages for records shown to the rest of the pages and add css for it
     - make meals list 
-    - generate grocery list needs to subtract what i already have in the fridge
     - add are u sure to delete in user gricery list 
 
 
