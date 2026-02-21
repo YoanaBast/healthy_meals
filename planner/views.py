@@ -1,5 +1,5 @@
 from django.core.paginator import Paginator
-
+from django.db.models import Prefetch
 from planner.forms import UserFridgeForm
 from django.contrib import messages
 from django.contrib.auth.models import User
@@ -254,58 +254,106 @@ def make_recipe(request, id):
     return redirect('meal_suggestions')
 
 
+def convert_qty_to_unit(qty, from_unit, to_unit, ingredient):
+    """
+    Convert qty of ingredient FROM from_unit TO to_unit using IngredientMeasurementUnit.
+    Returns converted quantity or None if conversion not possible.
+    """
+    if from_unit == to_unit:
+        return qty
+    try:
+        from_conv = IngredientMeasurementUnit.objects.get(ingredient=ingredient, unit=from_unit)
+        to_conv = IngredientMeasurementUnit.objects.get(ingredient=ingredient, unit=to_unit)
+        # Convert qty -> base, then base -> target
+        qty_in_base = qty * from_conv.conversion_to_base
+        qty_in_target = qty_in_base / to_conv.conversion_to_base
+        return qty_in_target
+    except IngredientMeasurementUnit.DoesNotExist:
+        return None
+
+
 def generate_grocery_list(request):
-    print("=== VIEW CALLED ===")
+    user = request.user  # Use authenticated user instead of hardcoded "default"
 
-    user = User.objects.get(username="default")
-    recipes = Recipe.objects.all()
+    # Annotate recipes with favourite status for current user
+    from django.db.models import Exists, OuterRef
+    recipes = Recipe.objects.annotate(
+        is_fav=Exists(
+            Recipe.favourited_by.through.objects.filter(
+                recipe_id=OuterRef('pk'),
+                user_id=user.id
+            )
+        )
+    ).prefetch_related(
+        Prefetch('recipe_ingredient', queryset=RecipeIngredient.objects.select_related('unit', 'ingredient'))
+    ).all()
 
+    # Pagination
     paginator = Paginator(recipes, 10)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
-    print("Request method:", request.method)
+    # Preserve selected recipes across pages (from both POST and GET)
+    selected_recipes = request.POST.getlist('recipes') or request.GET.getlist('recipes')
 
     if request.method == "POST":
-        print("POST DATA:", request.POST)
-
         recipe_ids = request.POST.getlist('recipes')
-        print("Selected recipe IDs:", recipe_ids)
+        selected_recipes = recipe_ids
 
-        selected_recipes = Recipe.objects.filter(id__in=recipe_ids)
-        print("Found recipes:", list(selected_recipes.values_list('id', flat=True)))
+        if not recipe_ids:
+            messages.warning(request, "No recipes selected!")
+            return render(request, 'planner/generate_grocery_list.html', {
+                'page_obj': page_obj,
+                'recipes': page_obj.object_list,
+                'selected_recipes': selected_recipes,
+            })
 
+        selected_recipes_qs = Recipe.objects.filter(id__in=recipe_ids).prefetch_related(
+            'recipe_ingredient__ingredient',
+            'recipe_ingredient__unit'
+        )
         needed = {}
 
-        for rec in selected_recipes:
-            print("Processing recipe:", rec.id)
+        for rec in selected_recipes_qs:
             for ri in rec.recipe_ingredient.all():
-                print("  Ingredient:", ri.ingredient.name, "Qty:", ri.quantity)
+                ing = ri.ingredient
+                base_unit = ing.default_unit  # Use ingredient's base unit
 
-                name = ri.ingredient.name
-                if name in needed:
-                    needed[name]['quantity'] += ri.quantity
-                else:
-                    needed[name] = {
-                        'ingredient': ri.ingredient,
-                        'quantity': ri.quantity,
-                        'unit': ri.unit.unit if ri.unit else None
+                if ing.id not in needed:
+                    needed[ing.id] = {
+                        'ingredient': ing,
+                        'quantity': 0,
+                        'unit': base_unit,
+                        'im_unit': IngredientMeasurementUnit.objects.get(ingredient=ing, unit=base_unit)
                     }
 
-        print("Needed BEFORE fridge:", needed)
+                # Convert recipe ingredient quantity to base unit
+                try:
+                    converted_qty = convert_qty_to_unit(ri.quantity, ri.unit.unit, base_unit, ing)
+                    if converted_qty is None:
+                        # Fallback if conversion fails
+                        messages.warning(request, f"Cannot convert {ri.unit.unit.code} for {ing.name}")
+                        converted_qty = ri.quantity
+                except IngredientMeasurementUnit.DoesNotExist:
+                    messages.warning(request, f"Cannot convert {ri.unit.unit.code} for {ing.name}")
+                    converted_qty = ri.quantity
 
-        fridge_ingredients = Ingredient.objects.filter(userfridge__user=user)
-        print("Fridge ingredients:", list(fridge_ingredients.values_list('name', flat=True)))
+                needed[ing.id]['quantity'] += converted_qty
 
-        for ing in fridge_ingredients:
-            if ing.name in needed:
-                print("Removing from needed (in fridge):", ing.name)
-                del needed[ing.name]
+        # Remove items already in fridge
+        fridge_ingredients = Ingredient.objects.filter(userfridge__user=user).values_list('id', flat=True)
+        final_needed = {k: v for k, v in needed.items() if k not in fridge_ingredients}
 
-        print("Final needed:", needed)
+        if not final_needed:
+            messages.info(request, "You already have all ingredients in your fridge!")
+            return render(request, 'planner/generate_grocery_list.html', {
+                'page_obj': page_obj,
+                'recipes': page_obj.object_list,
+                'selected_recipes': selected_recipes,
+            })
 
-        for ing_data in needed.values():
-            obj, created = UserGroceryList.objects.update_or_create(
+        for ing_data in final_needed.values():
+            UserGroceryList.objects.update_or_create(
                 user=user,
                 ingredient=ing_data['ingredient'],
                 defaults={
@@ -313,15 +361,13 @@ def generate_grocery_list(request):
                     'unit': ing_data['unit']
                 }
             )
-            print("Saved:", obj, "Created:", created)
-
-        print("Redirecting to grocery list page")
+        messages.success(request, "Grocery list generated successfully!")
         return redirect('user_grocery_list')
 
-    print("Rendering GET page")
     return render(request, 'planner/generate_grocery_list.html', {
         'page_obj': page_obj,
         'recipes': page_obj.object_list,
+        'selected_recipes': selected_recipes,
     })
 
 
