@@ -1382,3 +1382,71 @@ td[data-label="Ingredient"]:hover {
     left: 50%;
     transform: translateX(-50%);
 }
+
+/* =============================================
+   PAGINATION — global styles
+   ============================================= */
+
+.pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.3rem;
+    margin: 1.5rem 0;
+    flex-wrap: wrap;
+}
+
+.pagination a,
+.pagination .page-current,
+.pagination .page-ellipsis,
+.pagination .page-disabled {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2.25rem;
+    height: 2.25rem;
+    padding: 0 0.7rem;
+    border-radius: 6px;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    line-height: 1;
+    text-decoration: none;
+    border: 1px solid var(--border);
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+/* Hover */
+.pagination a:hover {
+    background: var(--accent-hover);
+    border-color: var(--accent-hover);
+    color: #fff;
+}
+
+/* Active / current page */
+.pagination .page-current {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #000;
+    font-weight: 700;
+    cursor: default;
+    pointer-events: none;
+}
+
+/* Ellipsis & disabled prev/next */
+.pagination .page-ellipsis,
+.pagination .page-disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+/* Slightly wider prev/next buttons */
+.pagination .page-prev,
+.pagination .page-next {
+    padding: 0 1rem;
+    letter-spacing: 0.01em;
+}
