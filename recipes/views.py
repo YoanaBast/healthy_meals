@@ -1,7 +1,7 @@
 import json
 
 from django.contrib.auth.models import User
-from django.core.checks import messages
+from django.contrib import messages
 from django.core.paginator import Paginator
 from django.db import IntegrityError
 from django.http import JsonResponse
@@ -49,19 +49,26 @@ def add_recipe(request):
 
         if recipe_form.is_valid() and ingredient_formset.is_valid():
             try:
-
-                recipe = recipe_form.save()  # save recipe first
+                recipe = recipe_form.save(commit=False)
+                recipe.name = recipe.name.strip().lower()
+                recipe.save()
             except IntegrityError:
-                messages.error(request, "A recipe with this name already exists.")
+                messages.error(request, f'"{recipe.name}" already exists.')
                 return render(request, 'recipes/add_recipe.html', {
                     'recipe_form': recipe_form,
                     'ingredient_formset': ingredient_formset,
                     'ingredients': ingredients,
                 })
 
-            ingredient_formset.instance = recipe  # link formset to recipe
+            ingredient_formset.instance = recipe
             ingredient_formset.save()
             return redirect('recipe_detail', pk=recipe.pk)
+        else:
+            # Catch duplicate caught at form validation level
+            name_errors = recipe_form.errors.get('name', [])
+            if any('already exists' in e for e in name_errors):
+                name = request.POST.get('name', '').strip().lower()
+                messages.error(request, f'"{name}" already exists.')
     else:
         recipe_form = RecipeForm()
         ingredient_formset = RecipeIngredientFormSet()
@@ -71,8 +78,6 @@ def add_recipe(request):
         'ingredient_formset': ingredient_formset,
         'ingredients': ingredients,
     })
-
-
 
 
 def delete_recipe(request, pk):
@@ -90,16 +95,24 @@ def edit_recipe(request, pk):
         ingredient_formset = RecipeIngredientFormSet(request.POST, instance=recipe)
 
         if recipe_form.is_valid() and ingredient_formset.is_valid():
-            recipe_form.save()
-            ingredient_formset.save()
-            return redirect('recipe_detail', pk=recipe.pk)
-
+            try:
+                updated_recipe = recipe_form.save(commit=False)
+                updated_recipe.name = updated_recipe.name.strip().lower()
+                updated_recipe.save()
+                ingredient_formset.save()
+                return redirect('recipe_detail', pk=recipe.pk)
+            except IntegrityError:
+                messages.error(request, f'"{updated_recipe.name}" already exists.')
+        else:
+            name_errors = recipe_form.errors.get('name', [])
+            if any('already exists' in e for e in name_errors):
+                name = request.POST.get('name', '').strip().lower()
+                messages.error(request, f'"{name}" already exists.')
     else:
         recipe_form = RecipeForm(instance=recipe)
         ingredient_formset = RecipeIngredientFormSet(instance=recipe)
 
     existing_ids = [form.instance.ingredient_id for form in ingredient_formset.forms if form.instance.pk]
-
     ingredients_add = Ingredient.objects.prefetch_related('measurement_units__unit').exclude(id__in=existing_ids)
 
     context = {
@@ -109,7 +122,6 @@ def edit_recipe(request, pk):
         'recipe': recipe,
         'default_url': default_url,
     }
-
     return render(request, 'recipes/edit_recipe.html', context)
 
 
