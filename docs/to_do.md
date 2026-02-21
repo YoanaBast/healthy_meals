@@ -4,7 +4,6 @@
 
 ## PRIORITY 1 FIXES
     - make meals list 
-    - add are u sure to delete in user gricery list 
 
 
 ## PRIORITY 2 FIXES
@@ -30,7 +29,7 @@
 
     
 ## UI
-    - verify media
+    - make the house, cart, fork on the same row for mobile
 
 ## EXTRA FEATURES
     - check if i can make a guide
