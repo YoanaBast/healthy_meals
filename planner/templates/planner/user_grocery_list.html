@@ -34,16 +34,17 @@
                     <td>{{ item.ingredient.name }}</td>
                     <td>{{ item.quantity|floatformat:2 }}</td>
                     <td>{{ item.unit }}</td>
-                    <td style="display: flex; gap: 0.5rem;">
-                        <form method="POST" action="{% url 'add_grocery_to_fridge' item.id %}">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-sm">→ Fridge</button>
-                        </form>
-                        <form method="POST" action="{% url 'delete_grocery_item' item.id %}">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-sm btn-danger">Delete</button>
-                        </form>
-                    </td>
+<td style="display: flex; gap: 0.5rem;">
+    <form method="POST" action="{% url 'add_grocery_to_fridge' item.id %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-sm">→ Fridge</button>
+    </form>
+    <button type="button"
+            class="btn btn-sm btn-danger"
+            onclick="openGroceryDeleteModal({{ item.id }}, '{{ item.ingredient.name }}')">
+        Delete
+    </button>
+</td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -90,6 +91,23 @@
     </div>
     {% endif %}
 </div>
+
+{% include 'planner/delete_grocery_modal.html' %}
+
+<script src="{% static 'js/delete_popup.js' %}"></script>  {# ← this was removed #}
+
+<script>
+function openGroceryDeleteModal(id, name) {
+    const modal = document.getElementById('deleteModal');
+    const text = document.getElementById('deleteModalText');
+    const form = document.getElementById('deleteForm');
+
+    text.textContent = `Are you sure you want to delete "${name}"?`;
+    form.action = `/fridges/grocery-list/delete/${id}/`;
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
+</script>
 
 <style>
 .history-section {
@@ -144,4 +162,5 @@
     color: var(--text-secondary, inherit);
 }
 </style>
+
 {% endblock %}

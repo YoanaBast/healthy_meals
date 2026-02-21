@@ -3,10 +3,7 @@
 # TO-DO
 
 ## PRIORITY 1 FIXES
-    - check what happens when i try to save duplicates and render some smg for user
-    - make pages for records shown to the rest of the pages and add css for it
     - make meals list 
-    - generate grocery list needs to subtract what i already have in the fridge
 
 
 ## PRIORITY 2 FIXES
@@ -22,6 +19,7 @@
     - add calorie tracker
     - add search boxes
     - add all units options for the ingredients in UI
+    - add more dummy data
     
     
 ## TEST
@@ -31,7 +29,7 @@
 
     
 ## UI
-    - verify media
+    - make the house, cart, fork on the same row for mobile
 
 ## EXTRA FEATURES
     - check if i can make a guide
