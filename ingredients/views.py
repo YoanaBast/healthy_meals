@@ -1,4 +1,6 @@
+from django.contrib import messages
 from django.core.paginator import Paginator
+from django.db import IntegrityError
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 
@@ -32,13 +34,24 @@ def manage_ingredients(request):
 def add_ingredient(request):
     form = IngredientAddForm(request.POST or None)
 
-    if request.method == 'POST' and form.is_valid():
-        form.save()
-        return redirect('manage_ingredients')
+    if request.method == 'POST':
+        if form.is_valid():
+            ingredient = form.save(commit=False)
+            ingredient.name = ingredient.name.strip().lower()
+            try:
+                ingredient.save()
+                form.save_m2m()
+                return redirect('manage_ingredients')
+            except IntegrityError:
+                messages.error(request, f'"{ingredient.name}" already exists.')
+        else:
+            # Form invalid — check if it's specifically a duplicate name error
+            name_errors = form.errors.get('name', [])
+            if any('already exists' in e for e in name_errors):
+                name = request.POST.get('name', '').strip().lower()
+                messages.error(request, f'"{name}" already exists.')
 
     return render(request, 'ingredients/add_ingredient.html', {'form': form})
-
-
 
 
 def edit_ingredient(request, ingredient_id):
@@ -46,13 +59,29 @@ def edit_ingredient(request, ingredient_id):
     ing = get_object_or_404(Ingredient, pk=ingredient_id)
 
     if request.method == "POST":
-        form = IngredientEditForm(request.POST, instance=ing) #instance fills the info from the object to the form, updates instead of creating new obj
+        form = IngredientEditForm(request.POST, instance=ing)
         if form.is_valid():
-            form.save()  # updates, does not create new because of instance
-            return redirect('manage_ingredients')  # reloads page
-
+            ingredient = form.save(commit=False)
+            ingredient.name = ingredient.name.strip().lower()
+            try:
+                ingredient.save()
+                form.save_m2m()
+            except IntegrityError:
+                messages.error(request, f'"{ingredient.name}" already exists.')
+                return render(request, "ingredients/edit_ingredient.html", {
+                    "form": form,
+                    "ingredient": ing,
+                    "nutrients": Ingredient.NUTRIENTS,
+                    'default_url': default_url,
+                })
+            return redirect('manage_ingredients')
+        else:
+            name_errors = form.errors.get('name', [])
+            if any('already exists' in e for e in name_errors):
+                name = request.POST.get('name', '').strip().lower()
+                messages.error(request, f'"{name}" already exists.')
     else:
-        form = IngredientEditForm(instance=ing)  # pre-fill with DB values
+        form = IngredientEditForm(instance=ing)
 
     context = {
         "form": form,
@@ -60,7 +89,6 @@ def edit_ingredient(request, ingredient_id):
         "nutrients": Ingredient.NUTRIENTS,
         'default_url': default_url,
     }
-
     return render(request, "ingredients/edit_ingredient.html", context)
 
 
