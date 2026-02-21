@@ -8,49 +8,97 @@
 
 
 <div class="container-home">
-    <!-- Tabs -->
-
     <h2>Select Recipes</h2>
     <form method="POST">
-        {% csrf_token %}
-        <div style="margin-bottom:1rem;">
+    {% csrf_token %}
+    {% for rec in page_obj %}
+        <div class="recipe-line">
             <label>
-                <input type="checkbox" id="filter-fav" onchange="filterFav()"> Show only favourites
+                <input type="checkbox" name="recipes" value="{{ rec.id }}"
+                    {% if rec.id in selected_recipes %}checked{% endif %}>
+                {{ rec.name }} {% if rec.is_fav %}★{% endif %}
             </label>
         </div>
+    {% endfor %}
 
-        <div>
-            {% for rec in recipes %}
-                <div class="recipe-checkbox" data-fav="{{ rec.is_fav|yesno:'1,0' }}">
-                    <label>
-                        <input type="checkbox" name="recipes" value="{{ rec.id }}"
-                        {% if rec.id in selected_recipes %}checked{% endif %}>
-                        {{ rec.name }} {% if rec.is_fav %}★{% endif %}
-                    </label>
-                </div>
-            {% endfor %}
+    {% for r in selected_recipes %}
+        <input type="hidden" name="recipes" value="{{ r }}">
+    {% endfor %}
+
+    <button type="submit" class="btn">Generate Grocery List</button>
+</form>
+
+
+
+{% if grocery_list %}
+<div class="result-box">
+    <h3>Ingredients to Buy:</h3>
+    <div class="ingredient-list">
+        {% for name, data in grocery_list.items %}
+        <div class="ingredient-item">
+            <span class="ingredient-name">{{ name }}</span>
+            <span class="ingredient-quantity">{{ data.quantity }} {{ data.unit }}</span>
         </div>
-
-        <button type="submit" class="btn">Generate Grocery List</button>
-    </form>
-
-    {% if grocery_list %}
-        <h3>Ingredients to Buy:</h3>
-        <ul>
-            {% for name, data in grocery_list.items %}
-                <li>{{ name }}: {{ data.quantity }} {{ data.unit }}</li>
-            {% endfor %}
-        </ul>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+    {% if page_obj.has_other_pages %}
+        <div class="pagination" style="text-align:center; margin-top:1rem;">
+            {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}">« Prev</a>
+            {% endif %}
+            <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}">Next »</a>
+            {% endif %}
+        </div>
     {% endif %}
 </div>
+
+<style>
+.recipe-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.recipe-line {
+    background: var(--bg-secondary);
+    padding: 1rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.recipe-line label {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+.recipe-name {
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.fav-star {
+    color: var(--accent);
+}
+</style>
 
 <script>
 function filterFav() {
     const showFav = document.getElementById('filter-fav').checked;
-    document.querySelectorAll('.recipe-checkbox').forEach(div => {
+    document.querySelectorAll('.recipe-line').forEach(div => {
         const fav = div.dataset.fav === "1";
-        div.style.display = showFav && !fav ? 'none' : 'block';
+        div.style.display = showFav && !fav ? 'none' : 'flex';
     });
 }
 </script>
+
 {% endblock %}

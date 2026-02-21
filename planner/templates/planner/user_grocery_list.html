@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Grocery List{% endblock %}
+
+{% block content %}
+<div class="container-home">
+    <h2>My Grocery List</h2>
+
+    {% if items %}
+
+    <!-- Add All Button -->
+    <form method="post" action="{% url 'add_all_grocery_to_fridge' %}" style="margin-bottom: 15px;">
+        {% csrf_token %}
+        <button class="btn">Add All To Fridge</button>
+    </form>
+
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Ingredient</th>
+                <th>Quantity</th>
+                <th>Unit</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in items %}
+            <tr>
+                <td>{{ item.ingredient.name }}</td>
+                <td>{{ item.quantity|floatformat:2 }}</td>
+                <td>{{ item.unit }}</td>
+                <td style="display:flex; gap:5px;">
+
+                    <!-- Add to fridge -->
+                    <form method="post" action="{% url 'add_grocery_to_fridge' item.id %}">
+                        {% csrf_token %}
+                        <button class="btn btn-small">Add</button>
+                    </form>
+
+                    <!-- Delete -->
+                    <form method="post" action="{% url 'delete_grocery_item' item.id %}">
+                        {% csrf_token %}
+                        <button class="btn btn-danger btn-small">Delete</button>
+                    </form>
+
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    {% else %}
+    <p>No items in your grocery list yet.</p>
+    {% endif %}
+</div>
+{% endblock %}

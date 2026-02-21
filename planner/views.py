@@ -1,22 +1,28 @@
+from django.core.paginator import Paginator
 
 from planner.forms import UserFridgeForm
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.shortcuts import render, get_object_or_404, redirect
 from ingredients.models import Ingredient, MeasurementUnit, IngredientMeasurementUnit
-from planner.models import UserFridge
+from planner.models import UserFridge, UserGroceryList
 from recipes.models import Recipe, RecipeIngredient
 
 # Create your views here.
 
 def manage_fridge(request):
     user = User.objects.get(username="default")
-    fridge = UserFridge.objects.filter(user=user)
+    fridge_list = UserFridge.objects.filter(user=user).select_related('ingredient__category', 'unit')
     ingredients = Ingredient.objects.all()
 
+    paginator = Paginator(fridge_list, 10)  # 10 items per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
     context = {
-        'fridge': fridge,
+        'fridge': page_obj,  # pass page_obj instead of full queryset
         'ingredients': ingredients,
+        'page_obj': page_obj,  # for pagination controls
     }
 
     return render(request, 'planner/manage_fridge.html', context)
@@ -164,7 +170,6 @@ def get_meal_suggestions(request):
                 matched += 1
             else:
                 missing_qty = round(max(ri.quantity - fridge_qty, 0), 2)
-                # print(ri.ingredient.name, ri.quantity,fridge_qty)
                 missing.append(f"{missing_qty:g}{ri.unit.unit.code} {ri.ingredient.name}")
 
         match_percent = int((matched / total) * 100) if total else 0
@@ -177,8 +182,14 @@ def get_meal_suggestions(request):
 
     suggestions.sort(key=lambda x: x["match_percent"], reverse=True)
 
+    # Pagination
+    paginator = Paginator(suggestions, 10)  # 10 suggestions per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
     return render(request, "planner/get_meal_suggestions.html", {
-        "suggestions": suggestions
+        "suggestions": page_obj,  # page_obj for template
+        "page_obj": page_obj,
     })
 
 
@@ -244,43 +255,124 @@ def make_recipe(request, id):
 
 
 def generate_grocery_list(request):
-    user = User.objects.get(username="default")  # temporary default
+    print("=== VIEW CALLED ===")
+
+    user = User.objects.get(username="default")
     recipes = Recipe.objects.all()
 
-    # mark favourites
-    for rec in recipes:
-        rec.is_fav = rec.favourited_by.filter(id=user.id).exists()
+    paginator = Paginator(recipes, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
 
-    selected_recipes = []
-    grocery_list = {}
+    print("Request method:", request.method)
 
     if request.method == "POST":
+        print("POST DATA:", request.POST)
+
         recipe_ids = request.POST.getlist('recipes')
+        print("Selected recipe IDs:", recipe_ids)
+
         selected_recipes = Recipe.objects.filter(id__in=recipe_ids)
+        print("Found recipes:", list(selected_recipes.values_list('id', flat=True)))
 
-        # gather all recipe ingredients
         needed = {}
-        for rec in selected_recipes:
-            for ri in rec.recipe_ingredient.all():
-                name = ri.ingredient.name
-                qty = ri.quantity
-                unit = ri.unit.name_for_quantity_singular if ri.unit else ''
-                if name in needed:
-                    needed[name]['quantity'] += qty
-                else:
-                    needed[name] = {'quantity': qty, 'unit': unit}
 
-        # subtract fridge ingredients
+        for rec in selected_recipes:
+            print("Processing recipe:", rec.id)
+            for ri in rec.recipe_ingredient.all():
+                print("  Ingredient:", ri.ingredient.name, "Qty:", ri.quantity)
+
+                name = ri.ingredient.name
+                if name in needed:
+                    needed[name]['quantity'] += ri.quantity
+                else:
+                    needed[name] = {
+                        'ingredient': ri.ingredient,
+                        'quantity': ri.quantity,
+                        'unit': ri.unit.unit if ri.unit else None
+                    }
+
+        print("Needed BEFORE fridge:", needed)
+
         fridge_ingredients = Ingredient.objects.filter(userfridge__user=user)
+        print("Fridge ingredients:", list(fridge_ingredients.values_list('name', flat=True)))
+
         for ing in fridge_ingredients:
             if ing.name in needed:
+                print("Removing from needed (in fridge):", ing.name)
                 del needed[ing.name]
 
-        grocery_list = needed
+        print("Final needed:", needed)
 
+        for ing_data in needed.values():
+            obj, created = UserGroceryList.objects.update_or_create(
+                user=user,
+                ingredient=ing_data['ingredient'],
+                defaults={
+                    'quantity': ing_data['quantity'],
+                    'unit': ing_data['unit']
+                }
+            )
+            print("Saved:", obj, "Created:", created)
+
+        print("Redirecting to grocery list page")
+        return redirect('user_grocery_list')
+
+    print("Rendering GET page")
+    return render(request, 'planner/generate_grocery_list.html', {
+        'page_obj': page_obj,
+        'recipes': page_obj.object_list,
+    })
+
+
+def user_grocery_list(request):
+    user = User.objects.get(username="default")
+    items = UserGroceryList.objects.filter(user=user).select_related('ingredient', 'unit')
+    for item in items:
+        print("ITEM:", item.ingredient.name, "UNIT:", item.unit)
     context = {
-        'recipes': recipes,
-        'grocery_list': grocery_list,
-        'selected_recipes': [int(r.id) for r in selected_recipes],
+        'items': items,
     }
-    return render(request, 'planner/generate_grocery_list.html', context)
+    return render(request, 'planner/user_grocery_list.html', context)
+
+def delete_grocery_item(request, item_id):
+    if request.method == "POST":
+        item = get_object_or_404(UserGroceryList, id=item_id)
+        item.delete()
+    return redirect("user_grocery_list")
+
+def add_grocery_to_fridge(request, item_id):
+    if request.method == "POST":
+        item = get_object_or_404(UserGroceryList, id=item_id)
+
+        UserFridge.objects.update_or_create(
+            user=item.user,
+            ingredient=item.ingredient,
+            defaults={
+                "quantity": item.quantity,
+                "unit": item.unit,
+            }
+        )
+
+        item.delete()  # remove from grocery list
+
+    return redirect("user_grocery_list")
+
+
+def add_all_grocery_to_fridge(request):
+    if request.method == "POST":
+        items = UserGroceryList.objects.filter(user=request.user)
+
+        for item in items:
+            UserFridge.objects.update_or_create(
+                user=item.user,
+                ingredient=item.ingredient,
+                defaults={
+                    "quantity": item.quantity,
+                    "unit": item.unit,
+                }
+            )
+
+        items.delete()
+
+    return redirect("user_grocery_list")
