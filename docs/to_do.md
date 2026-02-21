@@ -3,9 +3,7 @@
 # TO-DO
 
 ## PRIORITY 1 FIXES
-    - fix edit on fridge, convert automatically
     - fix make recipe
-    - check make broken
     
     
 ## PRIORITY 2 FIXES
@@ -22,6 +20,7 @@
     - add calorie tracker
     - add search boxes
     - add other units to ingredient details
+    - add all units options for the ingredients in UI
     
     
 ## TEST

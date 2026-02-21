@@ -1083,7 +1083,7 @@ label {
     box-sizing: border-box;
 }
 
-#ingredientsContainer select:focus,
+#ingredientsContainer,  select:focus,
 #ingredientsContainer input[type="number"]:focus {
     outline: none;
     border-color: var(--accent);
@@ -1323,3 +1323,21 @@ td[data-label="Ingredient"]:hover {
 }
 
 
+#quantityInput,
+#unitSelect {
+    width: 50%;
+    padding: 0.6rem 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    font-size: 0.875rem;
+    font-family: inherit;
+    box-sizing: border-box;
+}
+
+#quantityInput:focus,
+#unitSelect:focus {
+    outline: none;
+    border-color: var(--accent);
+}

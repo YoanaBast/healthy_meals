@@ -51,20 +51,23 @@
                         {% if not s.can_make %}
                             <small>
                                 Missing:
-                                {% for m in s.missing_ingredients %}
-                                    {{ m }}{% if not forloop.last %}, {% endif %}
-                                {% endfor %}
+                                {% if s.missing_ingredients %}
+                                    {% for m in s.missing_ingredients %}
+                                        {{ m }}{% if not forloop.last %}, {% endif %}
+                                    {% endfor %}
+                                {% else %}
+                                    -
+                                {% endif %}
                             </small>
                         {% else %}
-                        <small>
-                            {% for ri in s.recipe.recipe_ingredient.all %}
-                                {{ ri.quantity|smart_float }}{{ ri.unit.unit.code }} {{ ri.ingredient.name }}
-                                {% if not forloop.last %}, {% endif %}
-                            {% endfor %}
-                        </small>
+                            <small>
+                                {% for ri in s.recipe.recipe_ingredient.all %}
+                                    {{ ri.quantity|smart_float }}{{ ri.unit.unit.code }} {{ ri.ingredient.name }}
+                                    {% if not forloop.last %}, {% endif %}
+                                {% endfor %}
+                            </small>
                         {% endif %}
                     </td>
-
                     <td>
                         <a href="{% url 'recipe_detail' s.recipe.id %}" class="btn btn-secondary btn-small">View</a>
 

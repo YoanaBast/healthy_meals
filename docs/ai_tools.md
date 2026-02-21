@@ -32,5 +32,5 @@
 - https://www.svgrepo.com/vectors/
 - https://cloudconvert.com/png-to-ico
 - https://www.figma.com/
-- https://uiverse.io/
+- https://uiverse.io/mRcOol7/hot-fox-27
 

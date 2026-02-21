@@ -1,10 +1,5 @@
-from django.contrib.auth.models import User
-from django.shortcuts import render, get_object_or_404, redirect
 
-from ingredients.models import Ingredient, MeasurementUnit, IngredientMeasurementUnit
 from planner.forms import UserFridgeForm
-from planner.models import UserFridge
-from recipes.models import Recipe, RecipeIngredient
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.shortcuts import render, get_object_or_404, redirect
@@ -19,29 +14,18 @@ def manage_fridge(request):
     fridge = UserFridge.objects.filter(user=user)
     ingredients = Ingredient.objects.all()
 
-
     context = {
         'fridge': fridge,
         'ingredients': ingredients,
-
     }
+
     return render(request, 'planner/manage_fridge.html', context)
 
 
 def edit_fridge_item(request, item_id):
-    user = User.objects.get(username="default")
-    item = get_object_or_404(UserFridge, id=item_id, user=user)
+    item = get_object_or_404(UserFridge, pk=item_id)
 
-    print("ITEM:", item)
-    print("INGREDIENT:", item.ingredient)
-
-    related_units = item.ingredient.measurement_units.all()
-    print("IngredientMeasurementUnit objects:", related_units)
-
-    units = [rel.unit for rel in related_units]
-    print("UNITS:", units)
-
-    if request.method == "POST":
+    if request.method == 'POST':
         form = UserFridgeForm(request.POST, instance=item)
         if form.is_valid():
             form.save()
@@ -49,19 +33,13 @@ def edit_fridge_item(request, item_id):
     else:
         form = UserFridgeForm(instance=item)
 
-    form.fields['unit'].queryset = MeasurementUnit.objects.filter(
-        id__in=[u.id for u in units]
-    )
+    ingredient_units = item.ingredient.measurement_units.select_related('unit').all()
 
-    print("FORM UNIT QUERYSET:", form.fields['unit'].queryset)
-
-    return render(request, 'planner/edit_fridge_item.html', {
+    return render(request, 'planner/edit_fridge.html', {
         'form': form,
-        'item': item
+        'item': item,
+        'ingredient_units': ingredient_units,
     })
-
-
-
 
 
 def delete_fridge_item(request, fridge_id):
@@ -70,7 +48,6 @@ def delete_fridge_item(request, fridge_id):
     if request.method == "POST":
         item.delete()
     return redirect('manage_fridge')
-
 
 
 def add_fridge_item(request):
@@ -140,18 +117,16 @@ def add_fridge_item(request):
                 unit=unit
             )
 
-        print("----- ADD FRIDGE DEBUG -----")
-        print(f"POST DATA: {request.POST}")
-        print(f"USER: {user}")
-        print(f"INGREDIENT OBJ: {ingredient}")
-        print(f"UNIT OBJ: {unit}")
-        print(f"TARGET ITEM: {target_item}")
-        print("EXPLANATIONS:", explanations)
-        print("----- END DEBUG -----")
+        # print("----- ADD FRIDGE DEBUG -----")
+        # print(f"POST DATA: {request.POST}")
+        # print(f"USER: {user}")
+        # print(f"INGREDIENT OBJ: {ingredient}")
+        # print(f"UNIT OBJ: {unit}")
+        # print(f"TARGET ITEM: {target_item}")
+        # print("EXPLANATIONS:", explanations)
+        # print("----- END DEBUG -----")
 
     return redirect("manage_fridge")
-
-
 
 
 
@@ -208,43 +183,62 @@ def get_meal_suggestions(request):
 
 
 def make_recipe(request, id):
-    if request.method == 'POST':
-        recipe = get_object_or_404(Recipe, id=id)
-        user = User.objects.get(username="default")
-        user_fridge_items = UserFridge.objects.filter(user=user)
+    if request.method != 'POST':
+        return redirect('meal_suggestions')
 
-        for ri in RecipeIngredient.objects.filter(recipe=recipe):
-            fridge_item = user_fridge_items.filter(ingredient=ri.ingredient).first()
-            if not fridge_item or fridge_item.quantity < ri.quantity:
-                messages.error(request, "You don’t have enough ingredients.")
-                return redirect('meal_suggestions')
+    recipe = get_object_or_404(Recipe, id=id)
+    user = User.objects.get(username="default")
+    fridge_items = UserFridge.objects.filter(user=user)
 
-        for ri in RecipeIngredient.objects.filter(recipe=recipe):
-            fridge_item = user_fridge_items.filter(ingredient=ri.ingredient).first()
+    print("---- MAKE RECIPE DEBUG ----")
+    print(f"Recipe: {recipe.name}")
+    print("User fridge before:", [(f.ingredient.name, f.quantity, f.unit) for f in fridge_items])
 
-            # Convert recipe quantity to BASE
-            recipe_qty_in_base = ri.quantity * ri.unit.conversion_to_base
+    # First, check if user has enough ingredients
+    for ri in recipe.recipe_ingredient.all():
+        fridge_item = fridge_items.filter(ingredient=ri.ingredient).first()
+        required_qty = ri.quantity  # in ri.unit
 
-            # Get fridge unit conversion
+        available_qty = 0
+        if fridge_item:
             try:
-                fridge_mu = IngredientMeasurementUnit.objects.get(
+                fridge_unit_obj = IngredientMeasurementUnit.objects.get(
                     ingredient=ri.ingredient,
                     unit=fridge_item.unit
                 )
+                # convert fridge quantity → recipe unit
+                available_qty = (fridge_item.quantity * fridge_unit_obj.conversion_to_base) / ri.unit.conversion_to_base
             except IngredientMeasurementUnit.DoesNotExist:
-                continue
+                available_qty = 0
 
-            # Convert base → fridge unit
-            qty_to_subtract = recipe_qty_in_base / fridge_mu.conversion_to_base
+        print(f"Processing {ri.ingredient.name}: need {required_qty}{ri.unit.unit.code}, have {available_qty:.2f}{ri.unit.unit.code}")
 
-            fridge_item.quantity -= qty_to_subtract
+        if available_qty < required_qty:
+            messages.error(request, f"Not enough ingredients: {user.username} - {ri.ingredient.name}")
+            return redirect('meal_suggestions')
 
-            if fridge_item.quantity <= 0:
-                fridge_item.delete()
-            else:
-                fridge_item.save()
+    # Subtract ingredients from fridge
+    for ri in recipe.recipe_ingredient.all():
+        fridge_item = fridge_items.get(ingredient=ri.ingredient)
+        fridge_unit_obj = IngredientMeasurementUnit.objects.get(
+            ingredient=ri.ingredient,
+            unit=fridge_item.unit
+        )
 
-        messages.success(request, f"{recipe.name} was made successfully!")
+        # convert recipe quantity → fridge unit
+        qty_to_subtract = (ri.quantity * ri.unit.conversion_to_base) / fridge_unit_obj.conversion_to_base
+        fridge_item.quantity -= qty_to_subtract
+
+        if fridge_item.quantity <= 0:
+            fridge_item.delete()
+        else:
+            fridge_item.save()
+
+    messages.success(request, f"{recipe.name} was made successfully!")
+
+    fridge_after = [(f.ingredient.name, f.quantity, f.unit) for f in UserFridge.objects.filter(user=user)]
+    print("User fridge after:", fridge_after)
+    print("---- END MAKE RECIPE DEBUG ----")
 
     return redirect('meal_suggestions')
 
