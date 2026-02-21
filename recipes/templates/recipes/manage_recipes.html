@@ -94,6 +94,20 @@
                             {% endfor %}
                         </tbody>
                 </table>
+<!-- Pagination -->
+{% if recipes.has_other_pages %}
+<div class="pagination" style="margin-top:1rem; text-align:center;">
+    {% if recipes.has_previous %}
+        <a href="?page={{ recipes.previous_page_number }}">« Previous</a>
+    {% endif %}
+
+    <span>Page {{ recipes.number }} of {{ recipes.paginator.num_pages }}</span>
+
+    {% if recipes.has_next %}
+        <a href="?page={{ recipes.next_page_number }}">Next »</a>
+    {% endif %}
+</div>
+{% endif %}
 
     </div>
 </div>

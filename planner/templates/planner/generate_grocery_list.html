@@ -4,52 +4,118 @@
 {% block title %}Generate Grocery List{% endblock %}
 
 {% block content %}
-
-
-
 <div class="container-home">
-    <!-- Tabs -->
-
     <h2>Select Recipes</h2>
-    <form method="POST">
+
+    <!-- Search & Filter -->
+    <div style="margin-bottom: 1rem; display: flex; gap: 1rem; align-items: center;">
+        <input type="text" id="search-box" placeholder="Search by name or ingredient..." oninput="filterRecipes()">
+        <label>
+            <input type="checkbox" id="filter-fav" onchange="filterRecipes()">
+            Show only favourites
+        </label>
+    </div>
+
+    <form method="POST" id="recipe-form">
         {% csrf_token %}
-        <div style="margin-bottom:1rem;">
+
+        {% for rec in page_obj %}
+        <div class="recipe-line"
+             data-fav="{{ rec.is_fav|yesno:'1,0' }}"
+             data-name="{{ rec.name|lower }}"
+             data-ingredients="{{ rec.recipe_ingredient.all|join:', '|lower }}">
             <label>
-                <input type="checkbox" id="filter-fav" onchange="filterFav()"> Show only favourites
+                <input type="checkbox" name="recipes" value="{{ rec.id }}"
+                    {% if rec.id|stringformat:"s" in selected_recipes %}checked{% endif %}>
+                {{ rec.name }} {% if rec.is_fav %}<span class="fav-star">★</span>{% endif %}
             </label>
         </div>
+        {% endfor %}
 
-        <div>
-            {% for rec in recipes %}
-                <div class="recipe-checkbox" data-fav="{{ rec.is_fav|yesno:'1,0' }}">
-                    <label>
-                        <input type="checkbox" name="recipes" value="{{ rec.id }}"
-                        {% if rec.id in selected_recipes %}checked{% endif %}>
-                        {{ rec.name }} {% if rec.is_fav %}★{% endif %}
-                    </label>
-                </div>
-            {% endfor %}
-        </div>
+        <!-- Preserve selected recipes across pages -->
+        {% for r in selected_recipes %}
+        <input type="hidden" name="recipes" value="{{ r }}">
+        {% endfor %}
 
         <button type="submit" class="btn">Generate Grocery List</button>
     </form>
 
-    {% if grocery_list %}
-        <h3>Ingredients to Buy:</h3>
-        <ul>
-            {% for name, data in grocery_list.items %}
-                <li>{{ name }}: {{ data.quantity }} {{ data.unit }}</li>
-            {% endfor %}
-        </ul>
+    {% if page_obj.has_other_pages %}
+    <div class="pagination" style="text-align:center; margin-top:1rem;">
+        {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}{% for r in selected_recipes %}&recipes={{ r }}{% endfor %}">« Prev</a>
+        {% endif %}
+        <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}{% for r in selected_recipes %}&recipes={{ r }}{% endfor %}">Next »</a>
+        {% endif %}
+    </div>
     {% endif %}
 </div>
 
+<style>
+.recipe-line {
+    background: var(--bg-secondary);
+    padding: 1rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;  /* Changed from space-between to flex-start */
+    margin-bottom: 0.5rem;
+}
+
+.recipe-line label {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-align: left;  /* Explicit left alignment */
+}
+
+.recipe-line input[type="checkbox"] {
+    flex-shrink: 0;  /* Prevent checkbox from shrinking */
+}
+
+.fav-star {
+    color: var(--accent);
+    margin-left: auto;  /* Push star to the right */
+}
+
+.pagination {
+    text-align: center;
+    margin-top: 1rem;
+}
+
+.pagination a {
+    padding: 0.5rem 1rem;
+    margin: 0 0.25rem;
+}
+
+.data-table {
+    text-align: left;  /* Ensure tables are left-aligned */
+}
+
+.data-table th,
+.data-table td {
+    text-align: left;
+}
+</style>
+
 <script>
-function filterFav() {
+function filterRecipes() {
+    const search = document.getElementById('search-box').value.toLowerCase();
     const showFav = document.getElementById('filter-fav').checked;
-    document.querySelectorAll('.recipe-checkbox').forEach(div => {
+
+    document.querySelectorAll('.recipe-line').forEach(div => {
         const fav = div.dataset.fav === "1";
-        div.style.display = showFav && !fav ? 'none' : 'block';
+        const name = div.dataset.name;
+        const ingredients = div.dataset.ingredients;
+
+        const matchesSearch = name.includes(search) || ingredients.includes(search);
+        const matchesFav = !showFav || fav;
+
+        div.style.display = (matchesSearch && matchesFav) ? 'flex' : 'none';
     });
 }
 </script>

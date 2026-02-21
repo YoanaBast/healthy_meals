@@ -1341,3 +1341,44 @@ td[data-label="Ingredient"]:hover {
     outline: none;
     border-color: var(--accent);
 }
+
+/* Tooltip container */
+.tooltip {
+    position: relative;
+    display: inline-block;
+}
+
+/* Tooltip text */
+.tooltip .tooltip-text {
+    visibility: hidden;
+    width: 60px; /* adjust */
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    padding: 4px 6px;
+    border-radius: 4px;
+
+    position: absolute;
+    bottom: 125%; /* above the icon */
+    left: 50%;
+    transform: translateX(-50%);
+
+    opacity: 0;
+    transition: opacity 0.2s;
+    font-size: 12px;
+    pointer-events: none;
+    z-index: 10;
+}
+
+/* Show tooltip on hover */
+.tooltip:hover .tooltip-text {
+    visibility: visible;
+    opacity: 1;
+}
+
+.tooltip .tooltip-text {
+    bottom: auto;       /* reset bottom */
+    top: 125%;          /* show below */
+    left: 50%;
+    transform: translateX(-50%);
+}
