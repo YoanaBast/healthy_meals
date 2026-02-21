@@ -503,3 +503,6 @@ def add_all_grocery_to_fridge(request):
         items.delete()
 
     return redirect("user_grocery_list")
+
+def delete_grocery_item_by_id(request, id):
+    return delete_grocery_item(request, item_id=id)
