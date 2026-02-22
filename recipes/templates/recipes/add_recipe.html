@@ -22,7 +22,16 @@
         <div class="grid-container">
             <div class="grid-item info">
                 <p>{{ recipe_form.name.label_tag }} {{ recipe_form.name }}</p>
-                <p>{{ recipe_form.category.label_tag }} {{ recipe_form.category }}</p>
+
+            <p>
+                {{ recipe_form.category.label_tag }}
+                <div style="display:flex; align-items:center; gap:0.4rem;">
+                    {{ recipe_form.category }}
+                    <button type="button" class="btn btn-small" title="Add new category"
+                        onclick="openQuickModal('Add Recipe Category', '{% url "add_recipe_category_ajax" %}', 'id_category')">+</button>
+                </div>
+            </p>
+
                 <p>{{ recipe_form.servings.label_tag }} {{ recipe_form.servings }}</p>
             </div>
 
@@ -52,6 +61,7 @@
 </div>
 
 {% include 'recipes/add_ingredients_to_recipe_modal.html' %}
+{% include 'core/_quick_add_modal.html' %}
 
 <script src="{% static 'js/add_recipe_handler.js' %}"></script>
 <script src="{% static 'js/zero_inputt_handler.js' %}"></script>

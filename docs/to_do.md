@@ -3,7 +3,10 @@
 # TO-DO
 
 ## PRIORITY 1 FIXES
-
+    - ingredient details capitalize and check measurment units and also add all units and make it redirect to the created ingr
+    - edit ing to aslo redirect to details
+    - fix the dry in recipe urls
+    - recipe details capitalize
 
 ## PRIORITY 2 FIXES
     - clean up css and move to different files(?) - the project breaks when I try to import css and I'm not sure why yet
@@ -11,10 +14,10 @@
     - fix DRY for the form in edit_ingredient_popup (? no idea what i meant here, check if calling form twice is optimal)
     - use exclude in the form (?)
     - add back to recipes next to back on recipe details
+    - move nutrients and stuff outside of models
     
 ## FEATURES
     - add view option to grocery list
-    - add category + tags option right on the dashboards
     - add calorie tracker
     - add search boxes
     - add all units options for the ingredients in UI
