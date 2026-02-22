@@ -24,6 +24,7 @@
                     <th>#</th>
                     <th>Recipe</th>
                     <th>Made At</th>
+                    <th>Kcal</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -39,6 +40,8 @@
                         {% endif %}
                     </td>
                     <td>{{ entry.made_at|date:"Y-m-d H:i" }}</td>
+                    <td>{{  entry.recipe.nutrients_with_units.kcal }}</td>
+
                     <td>
                         {% if entry.recipe %}
                             <a href="{% url 'recipe_detail' entry.recipe.id %}" class="btn btn-secondary btn-small">View</a>
