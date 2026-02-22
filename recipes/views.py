@@ -44,12 +44,18 @@ def add_recipe(request):
     ingredients = Ingredient.objects.prefetch_related('measurement_units__unit').all()
 
     if request.method == 'POST':
+        print("DEBUG: POST data =", request.POST)  # <-- see all form fields
         recipe_form = RecipeForm(request.POST)
         ingredient_formset = RecipeIngredientFormSet(request.POST)
+
+        print("DEBUG: recipe_form.is_valid() =", recipe_form.is_valid())
+        print("DEBUG: recipe_form.errors =", recipe_form.errors)
 
         if recipe_form.is_valid() and ingredient_formset.is_valid():
             try:
                 recipe = recipe_form.save(commit=False)
+                print("DEBUG: recipe.category =", recipe.category)
+
                 recipe.name = recipe.name.strip().lower()
                 recipe.save()
             except IntegrityError:
@@ -125,9 +131,9 @@ def edit_recipe(request, pk):
     return render(request, 'recipes/edit_recipe.html', context)
 
 
-def toggle_favourite(request, id):
+def toggle_favourite(request, pk):
     user = get_object_or_404(User, username="default")
-    recipe = get_object_or_404(Recipe, id=id)
+    recipe = get_object_or_404(Recipe, pk=pk)
 
     # toggle
     if recipe.favourited_by.filter(id=user.id).exists():
@@ -140,8 +146,7 @@ def toggle_favourite(request, id):
     return JsonResponse({"favourited": status})
 
 
-
-def add_ingredient(request, recipe_id):
+def add_ingredient(request, pk):
     if request.method == "POST":
         try:
             data = json.loads(request.body)
@@ -150,7 +155,7 @@ def add_ingredient(request, recipe_id):
             quantity = data.get("quantity")
             unit_id = data.get("unit_id")
 
-            recipe = Recipe.objects.get(pk=recipe_id)
+            recipe = Recipe.objects.get(pk=pk)
             ingredient = Ingredient.objects.get(pk=ingredient_id)
             unit = IngredientMeasurementUnit.objects.get(pk=unit_id)
 
@@ -178,6 +183,7 @@ def add_ingredient(request, recipe_id):
 
     return JsonResponse({"success": False, "error": "Invalid request method"})
 
+
 def add_recipe_category_ajax(request):
     if request.method == 'POST':
         data = json.loads(request.body)
@@ -189,3 +195,75 @@ def add_recipe_category_ajax(request):
             return JsonResponse({'error': f'"{name}" already exists.'}, status=400)
         return JsonResponse({'id': obj.id, 'name': obj.name})
     return JsonResponse({'error': 'Invalid method.'}, status=405)
+
+
+def list_categories_ajax(request):
+    cats = RecipeCategory.objects.all().order_by('name')
+    return JsonResponse({'items': [
+        {
+            'id': c.id,
+            'name': c.name,
+            'edit_url': reverse('edit_recipe_category_ajax', kwargs={'pk': c.id}),
+            'delete_url': reverse('delete_recipe_category_ajax', kwargs={'pk': c.id}),
+            'edit_fields': [
+                {'key': 'name', 'placeholder': 'Name', 'value': c.name},
+            ]
+        }
+        for c in cats
+    ]})
+
+
+def edit_category_ajax(request, pk=None):
+    print("DEBUG: edit_category_ajax called")
+    print("DEBUG: URL pk =", pk)
+    print("DEBUG: POST data =", request.POST)
+
+    if request.method == "POST":
+        if not pk:
+            pk = request.POST.get("pk")
+            print("DEBUG: fallback pk from POST =", pk)
+
+        name = request.POST.get("name", "").strip()
+        print("DEBUG: name =", name)
+
+        if not name:
+            return JsonResponse({"error": "Name required"}, status=400)
+
+        cat = RecipeCategory.objects.filter(pk=pk).first()
+        print("DEBUG: category found =", cat)
+
+        if not cat:
+            return JsonResponse({"error": "Not found"}, status=404)
+
+        cat.name = name
+        cat.save()
+        print("DEBUG: category saved =", cat)
+
+        return JsonResponse({"id": cat.id, "name": cat.name})
+
+    return JsonResponse({"error": "Invalid method"}, status=405)
+
+
+
+def delete_category_ajax(request, pk=None):
+    print("DEBUG: delete_category_ajax called")
+    print("DEBUG: URL pk =", pk)
+    print("DEBUG: POST data =", request.POST)
+
+    if request.method == "POST":
+        if not pk:
+            pk = request.POST.get("pk")
+            print("DEBUG: fallback pk from POST =", pk)
+
+        cat = RecipeCategory.objects.filter(pk=pk).first()
+        print("DEBUG: category found =", cat)
+
+        if not cat:
+            return JsonResponse({"error": "Not found"}, status=404)
+
+        cat.delete()
+        print("DEBUG: category deleted")
+
+        return JsonResponse({"success": True})
+
+    return JsonResponse({"error": "Invalid method"}, status=405)

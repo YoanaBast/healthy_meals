@@ -3,11 +3,8 @@
 # TO-DO
 
 ## PRIORITY 1 FIXES
-    - edit ing to aslo redirect to details
     - fix the dry in recipe urls
     - recipe details capitalize 
-    - add delete category, tag, unit
-    - move save in edit ing up but make it not redirect
     - in meal suggestions i get the sucsses twice 
 
 ## PRIORITY 2 FIXES

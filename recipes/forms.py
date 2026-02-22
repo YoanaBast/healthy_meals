@@ -19,6 +19,11 @@ class RecipeFormAdmin(forms.ModelForm):
         }
 
 class RecipeForm(forms.ModelForm):
+    category = forms.ModelChoiceField(
+        queryset=RecipeCategory.objects.all().order_by('name'),
+        required=False
+    )
+
     hours = forms.IntegerField(min_value=0, max_value=23, required=True, label="Hours", initial=0,
                                widget=forms.NumberInput(attrs={'class': 'form-input', 'style': 'width: 80px;', 'value': 0, 'min': 0}, ))
     minutes = forms.IntegerField(min_value=0, max_value=59, required=True, label="Minutes", initial=0,
@@ -58,14 +63,16 @@ class RecipeForm(forms.ModelForm):
     def save(self, commit=True):
         instance = super().save(commit=False)
 
+        # handle cooking_time
         h = self.cleaned_data.get('hours', 0)
         m = self.cleaned_data.get('minutes', 0)
-
         instance.cooking_time = time(hour=h, minute=m)
+
+        # handle category
+        instance.category = self.cleaned_data.get('category')
 
         if commit:
             instance.save()
-
         return instance
 
 

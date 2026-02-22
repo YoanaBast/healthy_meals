@@ -35,6 +35,8 @@
                                 {{ recipe_form.category }}
                                 <button type="button" class="btn btn-small" title="Add new category"
                                     onclick="openQuickModal('Add Recipe Category', '{% url "add_recipe_category_ajax" %}', 'id_category')">+</button>
+                                <button type="button" class="btn btn-small" title="Manage categories"
+                                    onclick="fetchAndManage('{% url "list_recipe_categories_ajax" %}', 'Manage Categories')">⋯</button>
                             </div>
                         </p>
 
@@ -94,12 +96,21 @@
 
     </form>
 
-    {% include 'recipes/add_ingredients_to_recipe_modal.html' %}
+{% include 'recipes/add_ingredients_to_recipe_modal.html' %}
 {% include 'core/_quick_add_modal.html' %}
+{% include 'core/_manage_list_modal.html' %}
 
 </div>
 
 <script src="{% static 'js/add_recipe_handler.js' %}"></script>
 <script src="{% static 'js/zero_inputt_handler.js' %}"></script>
 
+<script>
+function fetchAndManage(url, title) {
+    fetch(url)
+        .then(r => r.json())
+        .then(d => openManageModal(title, d.items))
+        .catch(e => alert('Failed to load: ' + e));
+}
+</script>
 {% endblock %}

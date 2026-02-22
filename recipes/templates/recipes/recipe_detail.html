@@ -1,6 +1,8 @@
 {% extends 'base.html' %}
 {% load static %}
 {% load recipe_extras %}
+{% load core_filters %}
+
 {% block title %}{{ recipe.name }}{% endblock %}
 
 {% block content %}
@@ -18,7 +20,7 @@
 <div class="container-home" style="max-width: 800px; margin: 2rem auto;">
     <div class="grid-container">
         <div class="grid-item info">
-            <h1>{{ recipe.name }}</h1>
+            <h1>{{ recipe.name|title_except }}</h1>
             <p><strong>Category:</strong> {{ recipe.category|default:"-" }}</p>
             <p><strong>Dietary Info:</strong> {{ recipe.dietary_info|default:"-" }}</p>
             <p><strong>Cooking Duration:</strong> {{ recipe.cooking_duration|default:"-" }}</p>
