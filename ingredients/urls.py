@@ -25,4 +25,7 @@ urlpatterns = [
     path('<int:ingredient_id>/', include(ingredient_detail_patterns)),
     path('ajax/add-category/', views.add_category_ajax, name='add_category_ajax'),
     path('ajax/add-dietary-tag/', views.add_dietary_tag_ajax, name='add_dietary_tag_ajax'),
+    path('ajax/add-measurement-unit/', views.add_measurement_unit_ajax, name='add_measurement_unit_ajax'),
+    path('<int:ingredient_id>/add-unit/', views.add_measurement_unit, name='add_measurement_unit'),
+    path('delete-unit/<int:imu_id>/', views.delete_measurement_unit, name='delete_measurement_unit'),
 ]
