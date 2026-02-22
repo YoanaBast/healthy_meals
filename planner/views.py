@@ -5,7 +5,7 @@ from django.contrib import messages
 from django.contrib.auth.models import User
 from django.shortcuts import render, get_object_or_404, redirect
 from ingredients.models import Ingredient, MeasurementUnit, IngredientMeasurementUnit
-from planner.models import UserFridge, UserGroceryList, GroceryListGeneration, GroceryListGenerationItem
+from planner.models import UserFridge, UserGroceryList, GroceryListGeneration, GroceryListGenerationItem, UserMealList
 from recipes.models import Recipe, RecipeIngredient
 
 # Create your views here.
@@ -201,14 +201,10 @@ def make_recipe(request, id):
     user = User.objects.get(username="default")
     fridge_items = UserFridge.objects.filter(user=user)
 
-    print("---- MAKE RECIPE DEBUG ----")
-    print(f"Recipe: {recipe.name}")
-    print("User fridge before:", [(f.ingredient.name, f.quantity, f.unit) for f in fridge_items])
-
     # First, check if user has enough ingredients
     for ri in recipe.recipe_ingredient.all():
         fridge_item = fridge_items.filter(ingredient=ri.ingredient).first()
-        required_qty = ri.quantity  # in ri.unit
+        required_qty = ri.quantity
 
         available_qty = 0
         if fridge_item:
@@ -217,15 +213,12 @@ def make_recipe(request, id):
                     ingredient=ri.ingredient,
                     unit=fridge_item.unit
                 )
-                # convert fridge quantity → recipe unit
                 available_qty = (fridge_item.quantity * fridge_unit_obj.conversion_to_base) / ri.unit.conversion_to_base
             except IngredientMeasurementUnit.DoesNotExist:
                 available_qty = 0
 
-        print(f"Processing {ri.ingredient.name}: need {required_qty}{ri.unit.unit.code}, have {available_qty:.2f}{ri.unit.unit.code}")
-
         if available_qty < required_qty:
-            messages.error(request, f"Not enough ingredients: {user.username} - {ri.ingredient.name}")
+            messages.error(request, f"Not enough ingredients: {ri.ingredient.name}")
             return redirect('meal_suggestions')
 
     # Subtract ingredients from fridge
@@ -235,8 +228,6 @@ def make_recipe(request, id):
             ingredient=ri.ingredient,
             unit=fridge_item.unit
         )
-
-        # convert recipe quantity → fridge unit
         qty_to_subtract = (ri.quantity * ri.unit.conversion_to_base) / fridge_unit_obj.conversion_to_base
         fridge_item.quantity -= qty_to_subtract
 
@@ -245,12 +236,10 @@ def make_recipe(request, id):
         else:
             fridge_item.save()
 
+    # Save to meal history
+    UserMealList.objects.create(user=user, recipe=recipe)
+
     messages.success(request, f"{recipe.name} was made successfully!")
-
-    fridge_after = [(f.ingredient.name, f.quantity, f.unit) for f in UserFridge.objects.filter(user=user)]
-    print("User fridge after:", fridge_after)
-    print("---- END MAKE RECIPE DEBUG ----")
-
     return redirect('meal_suggestions')
 
 
@@ -506,3 +495,15 @@ def add_all_grocery_to_fridge(request):
 
 def delete_grocery_item_by_id(request, id):
     return delete_grocery_item(request, item_id=id)
+
+def meal_list(request):
+    user = User.objects.get(username="default")
+    meals = UserMealList.objects.filter(user=user).select_related('recipe')
+
+    paginator = Paginator(meals, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    return render(request, "planner/meal_list.html", {
+        "page_obj": page_obj,
+    })
