@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 {% load recipe_extras %}
+{% load core_filters %}
 
 {% block title %}{{ ingredient.name }} Details{% endblock %}
 
@@ -19,7 +20,7 @@
 <div class="container-content">
     <div class="grid-container">
         <div class="grid-item info">
-                <h1 class="section-title">{{ ingredient.name }} </h1>
+                <h1 class="section-title">{{ ingredient.name|title_except }} </h1>
 
 <!-- Details Table -->
                 <table class="data-table">
