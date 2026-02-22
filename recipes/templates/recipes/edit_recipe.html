@@ -14,8 +14,12 @@
 <div class="container-home">
 
     <!-- Back button -->
+
+
     <div style="max-width: 800px; margin: 2rem auto;">
-        <a href="{% url 'manage_recipes' %}" class="btn">&larr; Back to Recipes</a>
+        <a href="javascript:history.back()" class="btn">← Back</a>
+        <a href="{% url 'recipe_detail' recipe.pk %}" class="btn">Details</a>
+        <a href="{% url 'manage_recipes' %}" class="btn">All Recipes</a>
     </div>
 
     <form method="post" action="{% url 'edit_recipe' recipe.pk %}">
@@ -23,10 +27,11 @@
 
         <!-- Recipe fields -->
         <div style="max-width: 800px; margin: 2rem auto;">
+            <h2>Edit Recipe</h2>
+
             <div class="grid-container">
 
                 <div class="grid-item info">
-                    <h2>Edit Recipe</h2>
                     <p>{{ recipe_form.name.label_tag }} {{ recipe_form.name }}</p>
 
                         <p>
