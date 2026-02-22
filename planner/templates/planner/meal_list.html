@@ -7,7 +7,10 @@
 <div class="container-home">
 
     <h2>My Meal History</h2>
-    <p>A log of all the recipes you've made.</p>
+    <p>
+      A log of all the recipes you've made in the
+      <a href="{% url 'meal_suggestions' %}">Meal Suggestions</a>.
+    </p>
 
     {% if messages %}
         {% for message in messages %}

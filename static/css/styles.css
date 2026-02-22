@@ -1461,3 +1461,12 @@ td[data-label="Ingredient"]:hover {
     padding: 0;
     margin: 0;
 }
+
+a {
+  text-decoration: none;
+  color: #4caf50; /* green */
+}
+
+a:hover {
+  color: #66bb6a; /* lighter green on hover */
+}
