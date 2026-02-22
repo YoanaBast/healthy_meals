@@ -141,6 +141,7 @@ class Ingredient(models.Model):
         nutrients = {}
         for n in self.NUTRIENTS:
             nutrient_base_value = getattr(self, f'base_quantity_{n}', 0)
+            # scale nutrient proportionally to quantity
             nutrients[n] = nutrient_base_value * (quantity_in_base_units / self.base_quantity)
 
         return nutrients

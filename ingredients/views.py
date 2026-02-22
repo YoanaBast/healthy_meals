@@ -8,6 +8,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 
 from .models import Ingredient, IngredientMeasurementUnit, IngredientCategory, IngredientDietaryTag, MeasurementUnit
+from .models import Ingredient, IngredientMeasurementUnit, IngredientCategory, IngredientDietaryTag
 from .forms import IngredientAddForm, IngredientEditForm
 
 
@@ -147,6 +148,54 @@ def ingredient_detail(request, ingredient_id):
     })
 
 
+    }
+    return render(request, "ingredients/edit_ingredient.html", context)
+
+
+
+def ingredient_detail(request, ingredient_id):
+
+    ingredient = get_object_or_404(Ingredient, pk=ingredient_id)
+    unit_name = ingredient.default_unit
+
+    quantity = ingredient.base_quantity
+
+    nutrients_dict  = ingredient.get_nutrients_dict(
+        ingredient_unit=ingredient.default_unit,
+        quantity=quantity
+    )
+
+    if request.method == "POST":
+        selected_unit_id = request.POST.get("unit")
+        quantity = float(request.POST.get("quantity", 0))
+
+        if selected_unit_id and quantity:
+            selected_unit = IngredientMeasurementUnit.objects.get(id=selected_unit_id)
+            nutrients_dict  = ingredient.get_nutrients_dict(
+                ingredient_unit=selected_unit,
+                quantity=quantity
+            )
+            # print(f"nutrients {nutrients}") # dict!
+            unit_name = selected_unit.name_for_quantity(quantity)
+
+    nutrients = {
+        n: f"{round(v, 2)} {ingredient.NUTRIENT_UNITS.get(n, '')}"
+        for n, v in nutrients_dict.items()
+    }
+    quantity = int(quantity) if quantity == int(quantity) else quantity
+
+    context = {
+        "ingredient": ingredient,
+        "unit_name": unit_name,
+        'nutrients': nutrients,
+        "quantity": quantity,
+
+    }
+
+    return render(request, "ingredients/ingredient_detail.html", context)
+
+
+
 def delete_ingredient(request, ingredient_id):
     ing = get_object_or_404(Ingredient, pk=ingredient_id)
     if request.method == 'POST':
@@ -217,3 +266,4 @@ def delete_measurement_unit(request, imu_id):
     if request.method == 'POST':
         imu.delete()
     return redirect('edit_ingredient', ingredient_id=ingredient_id)
+    return JsonResponse({'error': 'Invalid method.'}, status=405)

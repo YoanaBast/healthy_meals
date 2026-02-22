@@ -104,6 +104,83 @@
         </table>
     </div>
 </div>
+    </div>
+    <button class="btn btn-danger" style="margin-left: auto;" onclick="openDeleteModal('ingredient', {{ ingredient.id }}, '{{ ingredient.name|escapejs }}')">Delete</button>
+</div>
+
+{% include 'ingredients/delete_ingredient_modal.html' %}
+
+<div class="container-content">
+    <div class="grid-container">
+        <div class="grid-item info">
+                <h1 class="section-title">{{ ingredient.name }} </h1>
+
+<!-- Details Table -->
+                <table class="data-table">
+                    <tbody>
+                        <tr>
+                            <th>Category</th>
+                            <td>{{ ingredient.category|default:"-" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Base Quantity</th>
+                            <td>{{ ingredient.base_quantity }}</td>
+                        </tr>
+                        <tr>
+                            <th>Default Unit</th>
+                            <td>{{ ingredient.default_unit|default:"-" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Dietary Information</th>
+                            <td>{{ ingredient.dietary_info|default:"-" }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+</div>
+
+<!-- Unit Selection  -->
+
+        <div class="grid-item info">
+            <div class="nutrients-section" style="display: flex; flex-direction: column; gap: 1.5rem;">
+                <!-- Form on top -->
+                <form method="post" class="styled-form">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <div class="form-group">
+                        <label>Measurement unit:</label>
+                        <select name="unit">
+                            {% for mu in ingredient.measurement_units.all %}
+                                <option value="{{ mu.id }}">{{ mu.unit }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <input type="number" name="quantity" step="0.01" required placeholder="Quantity">
+                    </div>
+                    <button type="submit" class="btn btn-secondary btn-small">Update</button>
+                </form>
+</div> </div>
+
+<!-- nutrients table -->
+    <div class="nutrients-tables">
+        <h4>Nutrients for {{ quantity }} {{ unit_name }}:</h4>
+        <table class="nutrients-table">
+            <thead>
+                <tr><th>Nutrient</th><th>Amount</th></tr>
+            </thead>
+            <tbody>
+                {% for n, value in nutrients.items %}
+                    <tr>
+                        <td>{{ n|nice_name }}</td>
+                        <td>{{ value }}</td>
+                    </tr>
+                {% empty %}
+                    <tr><td colspan="2">No nutrient info.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
 
 </div>
 
