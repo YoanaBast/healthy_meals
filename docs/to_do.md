@@ -3,7 +3,6 @@
 # TO-DO
 
 ## PRIORITY 1 FIXES
-    - make meals list 
 
 
 ## PRIORITY 2 FIXES
