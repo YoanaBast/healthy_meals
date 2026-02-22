@@ -54,3 +54,15 @@ class GroceryListGenerationItem(models.Model):
 
     def __str__(self):
         return f"{self.ingredient} x{self.quantity} {self.unit}"
+
+
+class UserMealList(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='meal_list')
+    recipe = models.ForeignKey(Recipe, on_delete=models.SET_NULL, null=True)
+    made_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-made_at']
+
+    def __str__(self):
+        return f"{self.user.username} — {self.recipe.name if self.recipe else 'Deleted Recipe'} — {self.made_at.strftime('%Y-%m-%d %H:%M')}"
