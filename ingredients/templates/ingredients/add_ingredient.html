@@ -39,21 +39,20 @@
         <div class="grid-item info">
 
             {{ form.base_quantity.label_tag }} {{ form.base_quantity }}
-{{ form.default_unit.label_tag }}
-<div style="display:flex; align-items:center; gap:0.4rem;">
-    {{ form.default_unit }}
-    <button type="button" class="btn btn-small" title="Create new unit"
-        onclick="openQuickModal(
-            'Create Measurement Unit',
-            '{% url "add_measurement_unit_ajax" %}',
-            'id_default_unit',
-            [{key:'code', placeholder:'Code (e.g. g, ml, pc)'},
-             {key:'name_singular', placeholder:'Singular (e.g. gram)'},
-             {key:'name_plural', placeholder:'Plural (e.g. grams)'}]
-        )">+</button>
-</div>
+            {{ form.default_unit.label_tag }}
+            <div style="display:flex; align-items:center; gap:0.4rem;">
+                {{ form.default_unit }}
+                <button type="button" class="btn btn-small" title="Create new unit"
+                    onclick="openQuickModal(
+                        'Create Measurement Unit',
+                        '{% url "add_measurement_unit_ajax" %}',
+                        'id_default_unit',
+                        [{key:'code', placeholder:'Code (e.g. g, ml, pc)'},
+                         {key:'name_singular', placeholder:'Singular (e.g. gram)'},
+                         {key:'name_plural', placeholder:'Plural (e.g. grams)'}]
+                    )">+</button>
+            </div>
 
-            {{ form.default_unit.label_tag }} {{ form.default_unit }}
         </div>
     </div>
 
