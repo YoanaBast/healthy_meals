@@ -2,6 +2,7 @@
 
 {% block title %}Meal Suggestions{% endblock %}
 {% load custom_filters %}
+{% load core_filters %}
 
 {% block content %}
 
@@ -42,7 +43,7 @@
 
                 {% for s in suggestions %}
                 <tr>
-                    <td>{{ s.recipe.name }}</td>
+                    <td>{{ s.recipe.name|title_except }}</td>
 
                     <td>{{ s.match_percent }}%</td>
 
