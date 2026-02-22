@@ -14,10 +14,10 @@
     - fix DRY for the form in edit_ingredient_popup (? no idea what i meant here, check if calling form twice is optimal)
     - use exclude in the form (?)
     - add back to recipes next to back on recipe details
+    - move nutrients and stuff outside of models
     
 ## FEATURES
     - add view option to grocery list
-    - add category + tags option right on the dashboards
     - add calorie tracker
     - add search boxes
     - add all units options for the ingredients in UI
