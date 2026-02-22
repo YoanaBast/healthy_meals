@@ -26,8 +26,19 @@
         <!-- Basic fields -->
         <div class="basic-fields">
             {{ form.name.label_tag }} {{ form.name }}
-            {{ form.category.label_tag }} {{ form.category }}
-            {{ form.dietary_tag.label_tag }} {{ form.dietary_tag }}
+{{ form.category.label_tag }}
+<div style="display:flex; align-items:center; gap:0.4rem;">
+    {{ form.category }}
+    <button type="button" class="btn btn-small" title="Add new category"
+        onclick="openQuickModal('Add Category', '{% url "add_category_ajax" %}', 'id_category')">+</button>
+</div>
+
+                    <div style="display:flex; align-items:center; gap:0.4rem;">
+                        {{ form.dietary_tag.label_tag }}
+                        <button type="button" class="btn btn-small" title="Add new dietary tag"
+                            onclick="openQuickModal('Add Dietary Tag', '{% url "add_dietary_tag_ajax" %}', 'id_dietary_tag')">+</button>
+                    </div>
+                    {{ form.dietary_tag }}
       </div>
         </div>
         <div class="grid-item info">
@@ -59,5 +70,6 @@
     </form>
 
 </div>
+{% include 'core/_quick_add_modal.html' %}
 
 {% endblock %}

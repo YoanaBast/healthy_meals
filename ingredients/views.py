@@ -1,10 +1,13 @@
+import json
+
 from django.contrib import messages
 from django.core.paginator import Paginator
 from django.db import IntegrityError
+from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 
-from .models import Ingredient, IngredientMeasurementUnit
+from .models import Ingredient, IngredientMeasurementUnit, IngredientCategory, IngredientDietaryTag
 from .forms import IngredientAddForm, IngredientEditForm
 
 
@@ -142,3 +145,26 @@ def delete_ingredient(request, ingredient_id):
         ing.delete()
         return redirect('manage_ingredients')
     return render(request, 'ingredients/ingredient_delete_confirm.html', {'ingredient': ing})
+
+def add_category_ajax(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        name = data.get('name', '').strip().lower()
+        if not name:
+            return JsonResponse({'error': 'Name is required.'}, status=400)
+        obj, created = IngredientCategory.objects.get_or_create(name=name)
+        if not created:
+            return JsonResponse({'error': f'"{name}" already exists.'}, status=400)
+        return JsonResponse({'id': obj.id, 'name': obj.name})
+    return JsonResponse({'error': 'Invalid method.'}, status=405)
+
+
+def add_dietary_tag_ajax(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        name = data.get('name', '').strip().lower()
+        if not name:
+            return JsonResponse({'error': 'Name is required.'}, status=400)
+        obj, created = IngredientDietaryTag.objects.get_or_create(name=name)
+        return JsonResponse({'id': obj.id, 'name': obj.name})  # always 200
+    return JsonResponse({'error': 'Invalid method.'}, status=405)

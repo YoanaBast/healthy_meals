@@ -23,4 +23,6 @@ urlpatterns = [
     path('', views.manage_ingredients, name='manage_ingredients'),
     path('add/', views.add_ingredient, name='add_ingredient'),
     path('<int:ingredient_id>/', include(ingredient_detail_patterns)),
+    path('ajax/add-category/', views.add_category_ajax, name='add_category_ajax'),
+    path('ajax/add-dietary-tag/', views.add_dietary_tag_ajax, name='add_dietary_tag_ajax'),
 ]
