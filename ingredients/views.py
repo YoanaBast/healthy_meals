@@ -166,5 +166,7 @@ def add_dietary_tag_ajax(request):
         if not name:
             return JsonResponse({'error': 'Name is required.'}, status=400)
         obj, created = IngredientDietaryTag.objects.get_or_create(name=name)
-        return JsonResponse({'id': obj.id, 'name': obj.name})  # always 200
+        if not created:
+            return JsonResponse({'error': f'"{name}" already exists.'}, status=400)
+        return JsonResponse({'id': obj.id, 'name': obj.name})
     return JsonResponse({'error': 'Invalid method.'}, status=405)
