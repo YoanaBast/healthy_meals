@@ -64,7 +64,7 @@
 
                             <a href="{% url 'edit_fridge_item' item.id %}" class="btn btn-secondary btn-small">Edit</a>
 
-                            <a href="{% url 'ingredient_details' item.ingredient.id %}" class="btn btn-secondary btn-small">Details</a>
+                            <a href="{% url 'ingredient_detail' item.ingredient.id %}" class="btn btn-secondary btn-small">Details</a>
                             <button type="button"
                                     class="icon-delete-btn"
                                     onclick="openDeleteModal('fridge', {{ item.id }}, '{{ item.ingredient.name|escapejs }}')">

@@ -1,0 +1,206 @@
+<div id="manageListModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:1000; align-items:center; justify-content:center;">
+    <div style="background:#1e1e2e; border:1px solid #444; border-radius:8px; padding:1.5rem; min-width:320px; max-width:480px; width:90%; box-shadow: 0 8px 32px rgba(0,0,0,0.5);">
+        <h3 id="manageListTitle" style="margin-bottom:1rem; margin-top:0;"></h3>
+
+        <!-- feedback message -->
+        <div id="manageListMsg" style="display:none; padding:0.4rem 0.75rem; border-radius:4px; margin-bottom:0.75rem; font-size:0.9rem;"></div>
+
+        <!-- inline edit bar (supports multiple fields) -->
+        <div id="manageListEdit" style="display:none; background:#1a2a1a; border:1px solid #3a3; border-radius:6px; padding:0.75rem; margin-bottom:0.75rem;">
+            <p style="margin:0 0 0.5rem 0; font-size:0.85rem; color:#aaa;">Editing:</p>
+            <div id="manageListEditFields"></div>
+            <div style="display:flex; gap:0.5rem; margin-top:0.5rem;">
+                <button class="btn btn-small" onclick="confirmEditYes()">Save</button>
+                <button class="btn btn-small" onclick="confirmEditNo()">Cancel</button>
+            </div>
+        </div>
+
+        <!-- inline confirm bar -->
+        <div id="manageListConfirm" style="display:none; background:#2a1a1a; border:1px solid #a33; border-radius:6px; padding:0.75rem; margin-bottom:0.75rem;">
+            <p id="manageListConfirmMsg" style="margin:0 0 0.5rem 0; font-size:0.9rem;"></p>
+            <div style="display:flex; gap:0.5rem;">
+                <button class="btn btn-danger btn-small" onclick="confirmDeleteYes()">Delete</button>
+                <button class="btn btn-small" onclick="confirmDeleteNo()">Cancel</button>
+            </div>
+        </div>
+
+        <div id="manageListItems" style="max-height:300px; overflow-y:auto; margin-bottom:1rem;"></div>
+
+        <button class="btn" onclick="closeManageModal()">Close</button>
+    </div>
+</div>
+
+<script>
+let _pendingDeleteFn = null;
+let _pendingEditFn = null;
+let _manageHasChanges = false;
+let _manageSelectId = null;  // which select to update on edit/delete
+
+function showManageMsg(msg, isError) {
+    const el = document.getElementById('manageListMsg');
+    el.textContent = msg;
+    el.style.display = 'block';
+    el.style.background = isError ? '#3a1a1a' : '#1a3a1a';
+    el.style.border = `1px solid ${isError ? '#a33' : '#3a3'}`;
+    el.style.color = isError ? '#f88' : '#8f8';
+    setTimeout(() => { el.style.display = 'none'; }, 3000);
+}
+
+function confirmDeleteYes() {
+    document.getElementById('manageListConfirm').style.display = 'none';
+    if (_pendingDeleteFn) _pendingDeleteFn();
+    _pendingDeleteFn = null;
+}
+
+function confirmDeleteNo() {
+    document.getElementById('manageListConfirm').style.display = 'none';
+    _pendingDeleteFn = null;
+}
+
+function confirmEditYes() {
+    const inputs = document.querySelectorAll('#manageListEditFields input');
+    const data = {};
+    inputs.forEach(input => { data[input.name] = input.value.trim(); });
+    document.getElementById('manageListEdit').style.display = 'none';
+    if (_pendingEditFn) _pendingEditFn(data);
+    _pendingEditFn = null;
+}
+
+function confirmEditNo() {
+    document.getElementById('manageListEdit').style.display = 'none';
+    _pendingEditFn = null;
+}
+
+function askConfirm(msg, fn) {
+    document.getElementById('manageListConfirmMsg').textContent = msg;
+    document.getElementById('manageListConfirm').style.display = 'block';
+    document.getElementById('manageListEdit').style.display = 'none';
+    _pendingDeleteFn = fn;
+}
+
+function askEdit(fields, fn) {
+    const container = document.getElementById('manageListEditFields');
+    container.innerHTML = '';
+
+    fields.forEach((f, i) => {
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.name = f.key;
+        input.placeholder = f.placeholder || f.key;
+        input.value = f.value || '';
+        input.style.cssText = 'width:100%; box-sizing:border-box; margin-bottom:0.4rem;';
+        if (i === 0) setTimeout(() => { input.focus(); input.select(); }, 50);
+        container.appendChild(input);
+    });
+
+    document.getElementById('manageListEdit').style.display = 'block';
+    document.getElementById('manageListConfirm').style.display = 'none';
+    _pendingEditFn = fn;
+}
+
+document.getElementById('manageListEdit').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') confirmEditYes();
+    if (e.key === 'Escape') confirmEditNo();
+});
+
+function openManageModal(title, items, selectId) {
+    _manageHasChanges = false;
+    _manageSelectId = selectId || null;
+    document.getElementById('manageListTitle').textContent = title;
+    document.getElementById('manageListMsg').style.display = 'none';
+    document.getElementById('manageListConfirm').style.display = 'none';
+    document.getElementById('manageListEdit').style.display = 'none';
+    const container = document.getElementById('manageListItems');
+    container.innerHTML = '';
+
+    if (!items || items.length === 0) {
+        container.innerHTML = '<p style="color:#888">Nothing here yet.</p>';
+        document.getElementById('manageListModal').style.display = 'flex';
+        return;
+    }
+
+    items.forEach(item => {
+        const row = document.createElement('div');
+        row.id = `manage-row-${item.id}`;
+        row.style.cssText = 'display:flex; align-items:center; gap:0.5rem; padding:0.4rem 0; border-bottom:1px solid #333;';
+
+        const nameSpan = document.createElement('span');
+        nameSpan.textContent = item.name;
+        nameSpan.style.flex = '1';
+
+        const editBtn = document.createElement('button');
+        editBtn.textContent = '✎';
+        editBtn.className = 'btn btn-small';
+        editBtn.onclick = () => {
+            askEdit(item.edit_fields, (data) => {
+                fetch(item.edit_url, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken'),
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: new URLSearchParams(data)
+                }).then(r => r.json()).then(result => {
+                    if (result.error) showManageMsg(result.error, true);
+                    else {
+                        nameSpan.textContent = result.name;
+                        showManageMsg(`Updated to "${result.name}"`, false);
+                        _manageHasChanges = true;
+                        // Only update the specific select this modal was opened for
+                        if (_manageSelectId) {
+                            const select = document.getElementById(_manageSelectId);
+                            if (select) {
+                                const opt = select.querySelector(`option[value="${item.id}"]`);
+                                if (opt) opt.textContent = result.name;
+                            }
+                        }
+                    }
+                }).catch(() => showManageMsg('Request failed.', true));
+            });
+        };
+
+        const delBtn = document.createElement('button');
+        delBtn.textContent = '🗑';
+        delBtn.className = 'btn btn-danger btn-small';
+        delBtn.onclick = () => {
+            askConfirm(`Delete "${nameSpan.textContent}"?`, () => {
+                fetch(item.delete_url, {
+                    method: 'POST',
+                    headers: {'X-CSRFToken': getCookie('csrftoken')}
+                }).then(r => r.json()).then(result => {
+                    if (result.error) showManageMsg(result.error, true);
+                    else {
+                        document.getElementById(`manage-row-${item.id}`)?.remove();
+                        showManageMsg('Deleted.', false);
+                        _manageHasChanges = true;
+                        // Only remove from the specific select this modal was opened for
+                        if (_manageSelectId) {
+                            const select = document.getElementById(_manageSelectId);
+                            if (select) {
+                                const opt = select.querySelector(`option[value="${item.id}"]`);
+                                if (opt) opt.remove();
+                            }
+                        }
+                    }
+                }).catch(() => showManageMsg('Request failed.', true));
+            });
+        };
+
+        row.appendChild(nameSpan);
+        row.appendChild(editBtn);
+        row.appendChild(delBtn);
+        container.appendChild(row);
+    });
+
+    document.getElementById('manageListModal').style.display = 'flex';
+}
+
+function closeManageModal() {
+    document.getElementById('manageListModal').style.display = 'none';
+    if (_manageHasChanges) location.reload();
+}
+
+document.getElementById('manageListModal').addEventListener('click', function(e) {
+    if (e.target === this) closeManageModal();
+});
+</script>

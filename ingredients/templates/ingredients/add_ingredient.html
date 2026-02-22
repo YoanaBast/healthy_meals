@@ -1,7 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
-{% block title %}Add Recipe{% endblock %}
-{% load static %}
+{% block title %}Add Ingredient{% endblock %}
 
 {% block content %}
 <div class="container-content">
@@ -15,30 +14,36 @@
         <div class="grid-item info">
             <h2>Add Ingredient</h2>
 
-                <form method="post" action="{% url 'add_ingredient' %}">
-                    {% csrf_token %}
+            <form id="add-ingredient-form" method="post" action="{% url 'add_ingredient' %}">
+                {% csrf_token %}
 
-                    <!-- normal fields -->
-                    {{ form.name.label_tag }} {{ form.name }}
-                    {{ form.category.label_tag }}
-                    <div style="display:flex; align-items:center; gap:0.4rem;">
-                        {{ form.category }}
-                        <button type="button" class="btn btn-small" title="Add new category"
-                            onclick="openQuickModal('Add Category', '{% url "add_category_ajax" %}', 'id_category')">+</button>
-                    </div>
+                {{ form.name.label_tag }} {{ form.name }}
 
-                    <div style="display:flex; align-items:center; gap:0.4rem;">
-                        {{ form.dietary_tag.label_tag }}
-                        <button type="button" class="btn btn-small" title="Add new dietary tag"
-                            onclick="openQuickModal('Add Dietary Tag', '{% url "add_dietary_tag_ajax" %}', 'id_dietary_tag')">+</button>
-                    </div>
-                    {{ form.dietary_tag }}
+                {{ form.category.label_tag }}
+                <div style="display:flex; align-items:center; gap:0.4rem; margin-bottom:0.5rem;">
+                    {{ form.category }}
+                    <button type="button" class="btn btn-small" title="Add new category"
+                        onclick="openQuickModal('Add Category', '{% url "add_category_ajax" %}', 'id_category')">+</button>
+                    <button type="button" class="btn btn-small" title="Manage categories"
+                        onclick="fetchAndManage('{% url "list_categories_ajax" %}', 'Manage Categories')">⋯</button>
+                </div>
+
+                <div style="display:flex; align-items:center; gap:0.4rem; margin-bottom:0.25rem;">
+                    {{ form.dietary_tag.label_tag }}
+                    <button type="button" class="btn btn-small" title="Add new dietary tag"
+                        onclick="openQuickModal('Add Dietary Tag', '{% url "add_dietary_tag_ajax" %}', 'id_dietary_tag')">+</button>
+                    <button type="button" class="btn btn-small" title="Manage dietary tags"
+                        onclick="fetchAndManage('{% url "list_dietary_tags_ajax" %}', 'Manage Dietary Tags')">⋯</button>
+                </div>
+                {{ form.dietary_tag }}
 
         </div>
 
         <div class="grid-item info">
 
             {{ form.base_quantity.label_tag }} {{ form.base_quantity }}
+
+
             {{ form.default_unit.label_tag }}
             <div style="display:flex; align-items:center; gap:0.4rem;">
                 {{ form.default_unit }}
@@ -51,35 +56,43 @@
                          {key:'name_singular', placeholder:'Singular (e.g. gram)'},
                          {key:'name_plural', placeholder:'Plural (e.g. grams)'}]
                     )">+</button>
+                <button type="button" class="btn btn-small" title="Manage units"
+                    onclick="fetchAndManage('{% url "list_measurement_units_ajax" %}', 'Manage Units')">⋯</button>
             </div>
 
         </div>
     </div>
 
-    <!-- Nutrients in grid -->
-
     <div class="nutrients-grid">
         {% for nutrient in form %}
-                {% if "base_quantity_" in nutrient.name and nutrient.name != "base_quantity" %}
-                <div class="nutrient-item">
-                    {{ nutrient.label_tag }} {{ nutrient }}
-                </div>
+            {% if "base_quantity_" in nutrient.name and nutrient.name != "base_quantity" %}
+            <div class="nutrient-item">
+                {{ nutrient.label_tag }} {{ nutrient }}
+            </div>
             {% endif %}
         {% endfor %}
     </div>
-
-
 
     <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: flex-start;">
         <button type="submit" class="btn">Save</button>
         <a href="{% url 'manage_ingredients' %}" class="btn btn-danger">Cancel</a>
     </div>
 
-
-</form>
-
+    </form>
 </div>
+
 {% include 'core/_quick_add_modal.html' %}
+{% include 'core/_manage_list_modal.html' %}
 
 <script src="{% static 'js/zero_inputt_handler.js' %}"></script>
+
+<script>
+function fetchAndManage(url, title) {
+    fetch(url)
+        .then(r => r.json())
+        .then(d => openManageModal(title, d.items))
+        .catch(e => alert('Failed to load: ' + e));
+}
+</script>
+
 {% endblock %}
