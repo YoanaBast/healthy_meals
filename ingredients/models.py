@@ -132,11 +132,8 @@ class Ingredient(models.Model):
         return ", ".join(tag.name for tag in self.dietary_tag.all()) or "-"
 
     def get_nutrients_dict(self, ingredient_unit: 'IngredientMeasurementUnit', quantity: float):
-        """
-        Convert nutrients to the selected ingredient measurement unit and quantity
-        """
-        # convert quantity to base units (e.g., grams)
-        if ingredient_unit == self.default_unit:
+        # Compare the underlying MeasurementUnit, not the object itself
+        if ingredient_unit.unit == self.default_unit:
             quantity_in_base_units = quantity
         else:
             quantity_in_base_units = quantity * ingredient_unit.conversion_to_base

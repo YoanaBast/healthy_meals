@@ -5,8 +5,7 @@
         background:#1e1e2e; border:1px solid #444; border-radius:8px;
         padding:2rem; min-width:320px; max-width:420px; width:90%;">
         <h3 id="modal-title" style="margin-top:0;">Add New</h3>
-        <input id="modal-input" type="text" placeholder="Enter name..."
-               style="width:100%; box-sizing:border-box; margin-bottom:1rem;">
+        <div id="modal-fields"></div>
         <div id="modal-error" style="color:#ff6b6b; margin-bottom:0.75rem; display:none;"></div>
         <div style="display:flex; gap:0.5rem; justify-content:flex-end;">
             <button class="btn btn-danger" onclick="closeQuickModal()">Cancel</button>
@@ -18,20 +17,34 @@
 <script>
 let _modalUrl = '';
 let _targetSelect = null;
+let _modalFields = [];
 
 function getCookie(name) {
     const match = document.cookie.match(new RegExp('(^|;\\s*)' + name + '=([^;]*)'));
     return match ? decodeURIComponent(match[2]) : '';
 }
 
-function openQuickModal(title, url, selectId) {
+// fields = [{key, placeholder}]
+function openQuickModal(title, url, selectId, fields) {
     _modalUrl = url;
-    _targetSelect = document.getElementById(selectId);
+    _targetSelect = selectId ? document.getElementById(selectId) : null;
+    _modalFields = fields || [{key: 'name', placeholder: 'Enter name...'}];
+
     document.getElementById('modal-title').textContent = title;
-    document.getElementById('modal-input').value = '';
     document.getElementById('modal-error').style.display = 'none';
+
+    const container = document.getElementById('modal-fields');
+    container.innerHTML = '';
+    _modalFields.forEach((f, i) => {
+        const input = document.createElement('input');
+        input.id = `modal-field-${f.key}`;
+        input.placeholder = f.placeholder || f.key;
+        input.style = 'width:100%; box-sizing:border-box; margin-bottom:0.75rem;';
+        container.appendChild(input);
+    });
+
     document.getElementById('quick-add-modal').style.display = 'flex';
-    setTimeout(() => document.getElementById('modal-input').focus(), 50);
+    setTimeout(() => document.getElementById(`modal-field-${_modalFields[0].key}`).focus(), 50);
 }
 
 function closeQuickModal() {
@@ -39,47 +52,45 @@ function closeQuickModal() {
 }
 
 async function submitQuickModal() {
-    const name = document.getElementById('modal-input').value.trim();
     const errorEl = document.getElementById('modal-error');
-    if (!name) {
-        errorEl.textContent = 'Name cannot be empty.';
-        errorEl.style.display = 'block';
-        return;
+    const body = {};
+    for (const f of _modalFields) {
+        const val = document.getElementById(`modal-field-${f.key}`).value.trim();
+        if (!val) {
+            errorEl.textContent = `${f.placeholder || f.key} cannot be empty.`;
+            errorEl.style.display = 'block';
+            return;
+        }
+        body[f.key] = val;
     }
 
     const res = await fetch(_modalUrl, {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': getCookie('csrftoken')
-        },
-        body: JSON.stringify({ name })
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+        body: JSON.stringify(body)
     });
 
     const data = await res.json();
-
     if (!res.ok) {
         errorEl.textContent = data.error || JSON.stringify(data);
         errorEl.style.display = 'block';
         return;
     }
 
-    if (_targetSelect.tagName === 'SELECT') {
-        const opt = new Option(data.name, data.id, true, true);
-        _targetSelect.add(opt);
-        opt.selected = true;
-    } else {
-        const index = _targetSelect.querySelectorAll('li').length; // next index
-        const li = document.createElement('li');
-        li.innerHTML = `<label for="id_dietary_tag_${index}">
-            <input type="checkbox"
-                   name="dietary_tag"
-                   value="${data.id}"
-                   id="id_dietary_tag_${index}"
-                   checked>
-            ${data.name}
-        </label>`;
-        _targetSelect.appendChild(li);
+    if (_targetSelect) {
+        if (_targetSelect.tagName === 'SELECT') {
+            const opt = new Option(data.name, data.id, true, true);
+            _targetSelect.add(opt);
+            opt.selected = true;
+        } else {
+            const index = _targetSelect.querySelectorAll('li').length;
+            const li = document.createElement('li');
+            li.innerHTML = `<label for="id_dietary_tag_${index}">
+                <input type="checkbox" name="dietary_tag" value="${data.id}" id="id_dietary_tag_${index}" checked>
+                ${data.name}
+            </label>`;
+            _targetSelect.appendChild(li);
+        }
     }
 
     closeQuickModal();
@@ -89,7 +100,9 @@ document.getElementById('quick-add-modal').addEventListener('click', function(e)
     if (e.target === this) closeQuickModal();
 });
 
-document.getElementById('modal-input').addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') submitQuickModal();
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && document.getElementById('quick-add-modal').style.display === 'flex') {
+        submitQuickModal();
+    }
 });
 </script>

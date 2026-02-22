@@ -3,6 +3,11 @@
 # TO-DO
 
 ## PRIORITY 1 FIXES
+    - ingredient details - check measurment units and also add all units and make it redirect to the created ingr
+    - edit ing to aslo redirect to details
+    - fix the dry in recipe urls
+    - recipe details capitalize 
+    - add delete category, tag, unit
     - ingredient details capitalize and check measurment units and also add all units and make it redirect to the created ingr
     - edit ing to aslo redirect to details
     - fix the dry in recipe urls

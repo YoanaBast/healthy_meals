@@ -10,6 +10,139 @@
     </div>
 </div>
 
+<div class="container-content">
+
+    <!-- MAIN EDIT FORM -->
+    <form method="POST" id="edit-ingredient-form">
+        {% csrf_token %}
+
+        <div class="grid-container">
+            <div class="grid-item info">
+                <h2 class="section-title" style="margin-bottom:2rem;">Edit Ingredient</h2>
+
+                {{ form.name.label_tag }}
+                {{ form.name }}
+
+                {{ form.category.label_tag }}
+                <div style="display:flex; align-items:center; gap:0.4rem;">
+                    {{ form.category }}
+                    <button type="button" class="btn btn-small"
+                        onclick="openQuickModal('Add Category', '{% url "add_category_ajax" %}', 'id_category')">+</button>
+                </div>
+
+                <div style="display:flex; align-items:center; gap:0.4rem; margin-top:0.75rem;">
+                    {{ form.dietary_tag.label_tag }}
+                    <button type="button" class="btn btn-small"
+                        onclick="openQuickModal('Add Dietary Tag', '{% url "add_dietary_tag_ajax" %}', 'id_dietary_tag')">+</button>
+                </div>
+                {{ form.dietary_tag }}
+            </div>
+
+            <div class="grid-item info">
+                {{ form.base_quantity.label_tag }}
+                {{ form.base_quantity }}
+
+                {{ form.default_unit.label_tag }}
+                <div style="display:flex; align-items:center; gap:0.4rem;">
+                    {{ form.default_unit }}
+                    <button type="button" class="btn btn-small"
+                        onclick="openQuickModal(
+                            'Create Measurement Unit',
+                            '{% url "add_measurement_unit_ajax" %}',
+                            'id_default_unit',
+                            [{key:'code', placeholder:'Code (e.g. g, ml, pc)'},
+                             {key:'name_singular', placeholder:'Singular (e.g. gram)'},
+                             {key:'name_plural', placeholder:'Plural (e.g. grams)'}]
+                        )">+</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Nutrients -->
+        <div style="margin-top:2rem; padding-top:2rem; border-top:1px solid var(--border);">
+            <h2>Nutrients (per base quantity)</h2>
+            <div class="nutrients-grid" style="display:grid; grid-template-columns: repeat(4, 1fr); gap:1rem; margin-top:1rem;">
+                {% for field in form.visible_fields %}
+                    {% if "base_quantity_" in field.name %}
+                    <div class="form-group">
+                        {{ field.label_tag }}
+                        {{ field }}
+                    </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+
+    </form>
+
+    <!-- ADDITIONAL UNITS -->
+    <div style="margin-top:2rem; padding-top:2rem; border-top:1px solid var(--border);">
+        <h2>Additional Measurement Units</h2>
+        <p style="color:var(--text-secondary); font-size:0.875rem; margin-bottom:1rem;">
+            Optional. Define extra units with their conversion to base (e.g. 1 cup = 120g → conversion = 120).
+        </p>
+
+        {% if ingredient.measurement_units.all %}
+        <table class="data-table" style="max-width:500px; margin-bottom:1rem;">
+            <thead>
+                <tr>
+                    <th>Unit</th>
+                    <th>Conversion to base</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for imu in ingredient.measurement_units.all %}
+                <tr>
+                    <td>{{ imu.unit.name_singular }} ({{ imu.unit.code }})</td>
+                    <td>{{ imu.conversion_to_base }}</td>
+                    <td>
+                        <form method="post" action="{% url 'delete_measurement_unit' imu.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger btn-small">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+            <p style="color:var(--text-secondary); font-style:italic; margin-bottom:1rem;">None added yet.</p>
+        {% endif %}
+
+        <form method="post" action="{% url 'add_measurement_unit' ingredient.id %}">
+            {% csrf_token %}
+            <div style="display:flex; gap:0.75rem; align-items:flex-end; flex-wrap:wrap; max-width:500px;">
+                <div>
+                    <label>Unit</label>
+                    <select name="unit">
+                        {% for mu in all_units %}
+                            <option value="{{ mu.id }}">{{ mu.name_singular }} ({{ mu.code }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label>Conversion to base</label>
+                    <input type="number" name="conversion_to_base" step="0.0001" placeholder="e.g. 120">
+                </div>
+                <button type="submit" class="btn">Add Unit</button>
+            </div>
+        </form>
+    </div>
+
+
+<!-- SAVE / CANCEL at the very bottom -->
+<div style="clear:both; width:100%; margin-top:2rem; padding-top:1.5rem; border-top:1px solid var(--border);">
+    <button type="submit" form="edit-ingredient-form" class="btn">Save</button>
+    <a href="javascript:history.back()" class="btn btn-danger">Cancel</a>
+</div>
+
+
+</div>
+
+{% include 'core/_quick_add_modal.html' %}
+
+{% endblock %}
 
 <div class="container-content">
     <div class="grid-container">
