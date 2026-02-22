@@ -1450,3 +1450,9 @@ td[data-label="Ingredient"]:hover {
     padding: 0 1rem;
     letter-spacing: 0.01em;
 }
+
+#id_dietary_tag {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
