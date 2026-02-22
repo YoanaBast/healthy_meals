@@ -148,7 +148,6 @@ def ingredient_detail(request, ingredient_id):
     })
 
 
-    }
     return render(request, "ingredients/edit_ingredient.html", context)
 
 
