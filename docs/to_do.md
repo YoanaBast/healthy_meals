@@ -3,11 +3,6 @@
 # TO-DO
 
 ## PRIORITY 1 FIXES
-    - edit ing to aslo redirect to details
-    - fix the dry in recipe urls
-    - recipe details capitalize 
-    - add delete category, tag, unit
-    - move save in edit ing up but make it not redirect
     - in meal suggestions i get the sucsses twice 
 
 ## PRIORITY 2 FIXES
@@ -15,14 +10,12 @@
     - remove attrs={'class':
     - fix DRY for the form in edit_ingredient_popup (? no idea what i meant here, check if calling form twice is optimal)
     - use exclude in the form (?)
-    - add back to recipes next to back on recipe details
     - move nutrients and stuff outside of models
     
 ## FEATURES
     - add view option to grocery list
     - add calorie tracker
     - add search boxes
-    - add all units options for the ingredients in UI
     - add more dummy data
     
     

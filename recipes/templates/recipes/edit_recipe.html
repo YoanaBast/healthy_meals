@@ -14,8 +14,12 @@
 <div class="container-home">
 
     <!-- Back button -->
+
+
     <div style="max-width: 800px; margin: 2rem auto;">
-        <a href="{% url 'manage_recipes' %}" class="btn">&larr; Back to Recipes</a>
+        <a href="javascript:history.back()" class="btn">← Back</a>
+        <a href="{% url 'recipe_detail' recipe.pk %}" class="btn">Details</a>
+        <a href="{% url 'manage_recipes' %}" class="btn">All Recipes</a>
     </div>
 
     <form method="post" action="{% url 'edit_recipe' recipe.pk %}">
@@ -23,10 +27,11 @@
 
         <!-- Recipe fields -->
         <div style="max-width: 800px; margin: 2rem auto;">
+            <h2>Edit Recipe</h2>
+
             <div class="grid-container">
 
                 <div class="grid-item info">
-                    <h2>Edit Recipe</h2>
                     <p>{{ recipe_form.name.label_tag }} {{ recipe_form.name }}</p>
 
                         <p>
@@ -35,6 +40,8 @@
                                 {{ recipe_form.category }}
                                 <button type="button" class="btn btn-small" title="Add new category"
                                     onclick="openQuickModal('Add Recipe Category', '{% url "add_recipe_category_ajax" %}', 'id_category')">+</button>
+                                <button type="button" class="btn btn-small" title="Manage categories"
+                                    onclick="fetchAndManage('{% url "list_recipe_categories_ajax" %}', 'Manage Categories')">⋯</button>
                             </div>
                         </p>
 
@@ -94,12 +101,21 @@
 
     </form>
 
-    {% include 'recipes/add_ingredients_to_recipe_modal.html' %}
+{% include 'recipes/add_ingredients_to_recipe_modal.html' %}
 {% include 'core/_quick_add_modal.html' %}
+{% include 'core/_manage_list_modal.html' %}
 
 </div>
 
 <script src="{% static 'js/add_recipe_handler.js' %}"></script>
 <script src="{% static 'js/zero_inputt_handler.js' %}"></script>
 
+<script>
+function fetchAndManage(url, title) {
+    fetch(url)
+        .then(r => r.json())
+        .then(d => openManageModal(title, d.items))
+        .catch(e => alert('Failed to load: ' + e));
+}
+</script>
 {% endblock %}

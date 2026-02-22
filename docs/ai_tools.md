@@ -5,8 +5,15 @@
 
 
 - ChatGPT:
-  - Assisted with some CSS and JS
-  - General lazy tasks such as completing JSON files, 
+  - General lazy tasks such as:
+    - Look at this JSON file. Could you create more ingredients and recipes, mirroring the ones we already have?
+    - I renamed my URLs to all take pk instead of recipe_id, id and so on. Could you read these views and let me know if I failed to update to pk anywhere?
+    
+
+- Claude:
+  - explained to me how ajax works and showed me how to apply it to my views 
+  - Assisted me with questions, such as "Do you think solution X is optimal, or should I do Y. What are the pros and cons of both approaches"
+  - Some CSS suggestions
   
 
 - ClickUp Brain:
