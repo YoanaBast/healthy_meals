@@ -11,9 +11,11 @@
     <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
         <a href="javascript:history.back()" class="btn">Back</a>
         <a href="{% url 'edit_ingredient' ingredient.id %}" class="btn">Edit</a>
+        <a href="{% url 'manage_ingredients' %}" class="btn">All Ingredients</a>
     </div>
     <button class="btn btn-danger" style="margin-left: auto;" onclick="openDeleteModal('ingredient', {{ ingredient.id }}, '{{ ingredient.name|escapejs }}')">Delete</button>
 </div>
+
 
 {% include 'ingredients/delete_ingredient_modal.html' %}
 
@@ -86,7 +88,7 @@
 
 <!-- nutrients table -->
     <div class="nutrients-tables">
-        <h4>Nutrients for {{ quantity }} {{ unit_name }}:</h4>
+        <h2 style="font-size: 18px;">Nutrients for {{ quantity }} {{ unit_name }}:</h2>
         <table class="nutrients-table">
             <thead>
                 <tr><th>Nutrient</th><th>Amount</th></tr>
@@ -102,6 +104,15 @@
                 {% endfor %}
             </tbody>
         </table>
+
+
+
+    </div>
+
+    <br>
+    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+        <a href="javascript:history.back()" class="btn">Back</a>
+        <a href="{% url 'manage_ingredients' %}" class="btn">All Ingredients</a>
     </div>
 
 

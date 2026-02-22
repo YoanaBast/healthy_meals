@@ -943,6 +943,11 @@ body:has(.modal-overlay:target) {
     margin-bottom: 1.5rem;
     color: var(--accent);
 }
+.container-content h2, h1 {
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+    color: var(--accent);
+}
 
 .container-home h1 {
    font-size: 3rem;

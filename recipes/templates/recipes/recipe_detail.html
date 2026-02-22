@@ -11,8 +11,8 @@
         <a href="javascript:history.back()" class="btn">← Back</a>
         <a href="{% url 'edit_recipe' recipe.pk %}" class="btn">Edit</a>
         <a href="{% url 'manage_recipes' %}" class="btn">All Recipes</a>
-
     </div>
+
     <button class="btn btn-danger" style="margin-left: auto;" onclick="openDeleteModal('recipe', {{ recipe.pk }}, '{{ recipe.name|escapejs }}')">Delete</button>
 </div>
 
@@ -79,6 +79,11 @@
         </tbody>
     </table>
 </div>
+
+    <div style="max-width: 800px; margin: 2rem auto;">
+        <a href="javascript:history.back()" class="btn">← Back</a>
+        <a href="{% url 'manage_recipes' %}" class="btn">All Recipes</a>
+    </div>
 
 <style>
 .nutrients-tables {

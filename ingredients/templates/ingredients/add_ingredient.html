@@ -10,9 +10,10 @@
 </div>
 
 <div class="container-content">
+    <h2>Add Ingredient</h2>
+
     <div class="grid-container">
         <div class="grid-item info">
-            <h2>Add Ingredient</h2>
 
             <form id="add-ingredient-form" method="post" action="{% url 'add_ingredient' %}">
                 {% csrf_token %}

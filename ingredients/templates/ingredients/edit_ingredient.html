@@ -20,6 +20,7 @@
 </div>
 
 <div class="container-content">
+                <h2 class="section-title" style="margin-bottom:2rem;">Edit Ingredient</h2>
 
     <!-- MAIN EDIT FORM -->
     <form method="POST" id="edit-ingredient-form">
@@ -27,7 +28,6 @@
 
         <div class="grid-container">
             <div class="grid-item info">
-                <h2 class="section-title" style="margin-bottom:2rem;">Edit Ingredient</h2>
 
                 {{ form.name.label_tag }}
                 {{ form.name }}
@@ -78,7 +78,7 @@
 
         <!-- Nutrients -->
         <div style="margin-top:2rem; padding-top:2rem; border-top:1px solid var(--border);">
-            <h2>Nutrients (per base quantity)</h2>
+        <h2 style="font-size: 18px;">Nutrients (per base quantity)</h2>
             <div class="nutrients-grid" style="display:grid; grid-template-columns: repeat(4, 1fr); gap:1rem; margin-top:1rem;">
                 {% for field in form.visible_fields %}
                     {% if "base_quantity_" in field.name %}
@@ -97,7 +97,7 @@
 
     <!-- ADDITIONAL UNITS -->
     <div style="margin-top:2rem; padding-top:2rem; border-top:1px solid var(--border);">
-        <h2>Additional Measurement Units</h2>
+        <h2 style="font-size: 18px;">Additional Measurement Units</h2>
         <p style="color:var(--text-secondary); font-size:0.875rem; margin-bottom:1rem;">
             Optional. Define extra units with their conversion to base (e.g. 1 cup = 120g → conversion = 120).
         </p>
@@ -151,6 +151,13 @@
     </div>
 
 
+</div>
+
+<div class="container-content">
+    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+        <a href="javascript:history.back()" class="btn">Back</a>
+        <a href="{% url 'manage_ingredients' %}" class="btn">All Ingredients</a>
+    </div>
 </div>
 
 {% include 'core/_quick_add_modal.html' %}
