@@ -3,12 +3,11 @@ import json
 from django.contrib import messages
 from django.core.paginator import Paginator
 from django.db import IntegrityError
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 
 from .models import Ingredient, IngredientMeasurementUnit, IngredientCategory, IngredientDietaryTag, MeasurementUnit
-from .models import Ingredient, IngredientMeasurementUnit, IngredientCategory, IngredientDietaryTag
 from .forms import IngredientAddForm, IngredientEditForm
 
 
@@ -95,7 +94,7 @@ def edit_ingredient(request, ingredient_id):
                     'default_url': default_url,
                     'all_units': MeasurementUnit.objects.all().order_by('name_singular'),
                 })
-            return redirect('manage_ingredients')
+            return redirect('edit_ingredient', ingredient_id=ingredient.id)
         else:
             name_errors = form.errors.get('name', [])
             if any('already exists' in e for e in name_errors):
@@ -114,41 +113,6 @@ def edit_ingredient(request, ingredient_id):
     return render(request, "ingredients/edit_ingredient.html", context)
 
 
-def ingredient_detail(request, ingredient_id):
-    ingredient = get_object_or_404(Ingredient, pk=ingredient_id)
-    default_imu = ingredient.measurement_units.filter(unit=ingredient.default_unit).first()
-
-    selected_imu = default_imu
-    quantity = ingredient.base_quantity
-
-    if request.method == "POST":
-        selected_unit_id = request.POST.get("unit")
-        quantity = float(request.POST.get("quantity", ingredient.base_quantity))
-        if selected_unit_id:
-            selected_imu = get_object_or_404(IngredientMeasurementUnit, id=selected_unit_id)
-
-    nutrients_dict = ingredient.get_nutrients_dict(selected_imu, quantity) if selected_imu else {}
-
-    nutrients = {
-        n: f"{round(v, 2)} {ingredient.NUTRIENT_UNITS.get(n, '')}"
-        for n, v in nutrients_dict.items()
-    }
-
-    quantity = int(quantity) if quantity == int(quantity) else quantity
-    unit_name = selected_imu.name_for_quantity(quantity) if selected_imu else "-"
-
-    return render(request, "ingredients/ingredient_detail.html", {
-        "ingredient": ingredient,
-        "unit_name": unit_name,
-        "nutrients": nutrients,
-        "quantity": quantity,
-        "selected_imu": selected_imu,
-        "all_units": MeasurementUnit.objects.all().order_by('name_singular'),
-        "no_units_defined": not selected_imu,
-    })
-
-
-    return render(request, "ingredients/edit_ingredient.html", context)
 
 
 
@@ -202,6 +166,7 @@ def delete_ingredient(request, ingredient_id):
         return redirect('manage_ingredients')
     return render(request, 'ingredients/ingredient_delete_confirm.html', {'ingredient': ing})
 
+
 def add_category_ajax(request):
     if request.method == 'POST':
         data = json.loads(request.body)
@@ -213,6 +178,25 @@ def add_category_ajax(request):
             return JsonResponse({'error': f'"{name}" already exists.'}, status=400)
         return JsonResponse({'id': obj.id, 'name': obj.name})
     return JsonResponse({'error': 'Invalid method.'}, status=405)
+
+# Edit
+def edit_category_ajax(request, pk):
+    if request.method == "POST":
+        cat = IngredientCategory.objects.filter(pk=pk).first()
+        if not cat: return JsonResponse({"error": "Not found"}, status=404)
+        name = request.POST.get("name")
+        if not name: return JsonResponse({"error": "Name required"}, status=400)
+        cat.name = name
+        cat.save()
+        return JsonResponse({"id": cat.id, "name": cat.name})
+
+# Delete
+def delete_category_ajax(request, pk):
+    if request.method == "POST":
+        cat = IngredientCategory.objects.filter(pk=pk).first()
+        if not cat: return JsonResponse({"error": "Not found"}, status=404)
+        cat.delete()
+        return JsonResponse({"success": True})
 
 
 def add_dietary_tag_ajax(request):
@@ -226,6 +210,29 @@ def add_dietary_tag_ajax(request):
             return JsonResponse({'error': f'"{name}" already exists.'}, status=400)
         return JsonResponse({'id': obj.id, 'name': obj.name})
     return JsonResponse({'error': 'Invalid method.'}, status=405)
+
+# Edit dietary tag
+def edit_dietary_tag_ajax(request, pk):
+    if request.method == "POST":
+        tag = IngredientDietaryTag.objects.filter(pk=pk).first()
+        if not tag:
+            return JsonResponse({"error": "Not found"}, status=404)
+        name = request.POST.get("name")
+        if not name:
+            return JsonResponse({"error": "Name required"}, status=400)
+        tag.name = name
+        tag.save()
+        return JsonResponse({"id": tag.id, "name": tag.name})
+
+# Delete dietary tag
+def delete_dietary_tag_ajax(request, pk):
+    if request.method == "POST":
+        tag = IngredientDietaryTag.objects.filter(pk=pk).first()
+        if not tag:
+            return JsonResponse({"error": "Not found"}, status=404)
+        tag.delete()
+        return JsonResponse({"success": True})
+
 
 def add_measurement_unit(request, ingredient_id):
     ingredient = get_object_or_404(Ingredient, pk=ingredient_id)
@@ -259,10 +266,83 @@ def add_measurement_unit_ajax(request):
     return JsonResponse({'error': 'Invalid method.'}, status=405)
 
 
-def delete_measurement_unit(request, imu_id):
+def delete_measurement_unit(request, ingredient_id, imu_id):
     imu = get_object_or_404(IngredientMeasurementUnit, pk=imu_id)
-    ingredient_id = imu.ingredient.id
     if request.method == 'POST':
         imu.delete()
     return redirect('edit_ingredient', ingredient_id=ingredient_id)
+
+def list_categories_ajax(request):
+    cats = IngredientCategory.objects.all().order_by('name')
+    return JsonResponse({'items': [
+        {
+            'id': c.id,
+            'name': c.name,
+            'edit_url': reverse('edit_category_ajax', kwargs={'pk': c.id}),
+            'delete_url': reverse('delete_category_ajax', kwargs={'pk': c.id}),
+            'edit_fields': [
+                {'key': 'name', 'placeholder': 'Name', 'value': c.name},
+            ]
+        }
+        for c in cats
+    ]})
+
+
+def list_dietary_tags_ajax(request):
+    tags = IngredientDietaryTag.objects.all().order_by('name')
+    return JsonResponse({'items': [
+        {
+            'id': t.id,
+            'name': t.name,
+            'edit_url': reverse('edit_dietary_tag_ajax', kwargs={'pk': t.id}),
+            'delete_url': reverse('delete_dietary_tag_ajax', kwargs={'pk': t.id}),
+            'edit_fields': [
+                {'key': 'name', 'placeholder': 'Name', 'value': t.name},
+            ]
+        }
+        for t in tags
+    ]})
+
+
+def list_measurement_units_ajax(request):
+    units = MeasurementUnit.objects.all().order_by('name_singular')
+    return JsonResponse({'items': [
+        {
+            'id': u.id,
+            'name': f'{u.name_singular} ({u.code})',
+            'edit_url': reverse('edit_measurement_unit_ajax', kwargs={'pk': u.id}),
+            'delete_url': reverse('delete_measurement_unit_ajax', kwargs={'pk': u.id}),
+            'edit_fields': [
+                {'key': 'name_singular', 'placeholder': 'Singular (e.g. gram)', 'value': u.name_singular},
+                {'key': 'name_plural', 'placeholder': 'Plural (e.g. grams)', 'value': u.name_plural},
+                {'key': 'code', 'placeholder': 'Code (e.g. g)', 'value': u.code},
+            ]
+        }
+        for u in units
+    ]})
+
+def edit_measurement_unit_ajax(request, pk):
+    if request.method == 'POST':
+        unit = get_object_or_404(MeasurementUnit, pk=pk)
+        name_singular = request.POST.get('name_singular', '').strip()
+        name_plural = request.POST.get('name_plural', '').strip()
+        if not name_singular:
+            return JsonResponse({'error': 'Name is required.'}, status=400)
+        unit.name_singular = name_singular
+        if name_plural:
+            unit.name_plural = name_plural
+        unit.save()
+        return JsonResponse({'id': unit.id, 'name': f'{unit.name_singular} ({unit.code})'})
     return JsonResponse({'error': 'Invalid method.'}, status=405)
+
+def delete_measurement_unit_ajax(request, pk):
+    if request.method == 'POST':
+        unit = get_object_or_404(MeasurementUnit, pk=pk)
+        unit.delete()
+        return JsonResponse({'success': True})
+    return JsonResponse({'error': 'Invalid method.'}, status=405)
+
+
+def dietary_tags_fragment(request):
+    form = IngredientAddForm()
+    return HttpResponse(str(form['dietary_tag']))

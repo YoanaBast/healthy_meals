@@ -6,7 +6,16 @@
 
 <div class="container-content">
     <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-        <a href="javascript:history.back()" class="btn">Back</a>
+        <a href="javascript:history.back()" class="btn">← Back</a>
+    </div>
+
+    <div style="
+    display: flex; gap: 0.5rem; flex-wrap: wrap;">
+        <a href="{% url 'ingredient_detail' ingredient.id %}" class="btn">Details</a>
+    </div>
+
+    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+        <a href="{% url 'manage_ingredients' %}" class="btn">All Ingredients</a>
     </div>
 </div>
 
@@ -24,18 +33,24 @@
                 {{ form.name }}
 
                 {{ form.category.label_tag }}
-                <div style="display:flex; align-items:center; gap:0.4rem;">
+                <div style="display:flex; align-items:center; gap:0.4rem; margin-bottom:0.5rem;">
                     {{ form.category }}
                     <button type="button" class="btn btn-small"
                         onclick="openQuickModal('Add Category', '{% url "add_category_ajax" %}', 'id_category')">+</button>
+                    <button type="button" class="btn btn-small" title="Manage categories"
+                        onclick="fetchAndManage('{% url "list_categories_ajax" %}', 'Manage Categories')">⋯</button>
                 </div>
 
-                <div style="display:flex; align-items:center; gap:0.4rem; margin-top:0.75rem;">
+                <div style="display:flex; align-items:center; gap:0.4rem; margin-top:0.75rem; margin-bottom:0.25rem;">
                     {{ form.dietary_tag.label_tag }}
                     <button type="button" class="btn btn-small"
                         onclick="openQuickModal('Add Dietary Tag', '{% url "add_dietary_tag_ajax" %}', 'id_dietary_tag')">+</button>
+                    <button type="button" class="btn btn-small" title="Manage dietary tags"
+                        onclick="fetchAndManage('{% url "list_dietary_tags_ajax" %}', 'Manage Dietary Tags')">⋯</button>
                 </div>
-                {{ form.dietary_tag }}
+                <div id="dietary-tag-widget">
+                    {{ form.dietary_tag }}
+                </div>
             </div>
 
             <div class="grid-item info">
@@ -54,9 +69,12 @@
                              {key:'name_singular', placeholder:'Singular (e.g. gram)'},
                              {key:'name_plural', placeholder:'Plural (e.g. grams)'}]
                         )">+</button>
+                    <button type="button" class="btn btn-small" title="Manage units"
+                        onclick="fetchAndManage('{% url "list_measurement_units_ajax" %}', 'Manage Units', 'id_default_unit')">⋯</button>
                 </div>
             </div>
         </div>
+
 
         <!-- Nutrients -->
         <div style="margin-top:2rem; padding-top:2rem; border-top:1px solid var(--border);">
@@ -72,7 +90,9 @@
                 {% endfor %}
             </div>
         </div>
-
+    <div style="clear:both; width:100%; margin-top:2rem; padding-top:1.5rem;">
+        <button type="submit" form="edit-ingredient-form" class="btn">Save</button>
+    </div>
     </form>
 
     <!-- ADDITIONAL UNITS -->
@@ -97,10 +117,10 @@
                     <td>{{ imu.unit.name_singular }} ({{ imu.unit.code }})</td>
                     <td>{{ imu.conversion_to_base }}</td>
                     <td>
-                        <form method="post" action="{% url 'delete_measurement_unit' imu.id %}">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-danger btn-small">Delete</button>
-                        </form>
+                     <form method="post" action="{% url 'delete_measurement_unit' ingredient.id imu.id %}" onsubmit="return confirm('Are you sure you want to delete this unit?');">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger btn-small">Delete</button>
+                    </form>
                     </td>
                 </tr>
                 {% endfor %}
@@ -131,17 +151,18 @@
     </div>
 
 
-<!-- SAVE / CANCEL at the very bottom -->
-<div style="clear:both; width:100%; margin-top:2rem; padding-top:1.5rem; border-top:1px solid var(--border);">
-    <button type="submit" form="edit-ingredient-form" class="btn">Save</button>
-    <a href="javascript:history.back()" class="btn btn-danger">Cancel</a>
-</div>
-
-
 </div>
 
 {% include 'core/_quick_add_modal.html' %}
+{% include 'core/_manage_list_modal.html' %}
+
+<script>
+function fetchAndManage(url, title) {
+    fetch(url)
+        .then(r => r.json())
+        .then(d => openManageModal(title, d.items))
+        .catch(e => alert('Failed to load: ' + e));
+}
+</script>
 
 {% endblock %}
-
-

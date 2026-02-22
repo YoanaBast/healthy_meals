@@ -3,15 +3,12 @@
 # TO-DO
 
 ## PRIORITY 1 FIXES
-    - ingredient details - check measurment units and also add all units and make it redirect to the created ingr
     - edit ing to aslo redirect to details
     - fix the dry in recipe urls
     - recipe details capitalize 
     - add delete category, tag, unit
-    - ingredient details capitalize and check measurment units and also add all units and make it redirect to the created ingr
-    - edit ing to aslo redirect to details
-    - fix the dry in recipe urls
-    - recipe details capitalize
+    - move save in edit ing up but make it not redirect
+    - in meal suggestions i get the sucsses twice 
 
 ## PRIORITY 2 FIXES
     - clean up css and move to different files(?) - the project breaks when I try to import css and I'm not sure why yet
