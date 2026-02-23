@@ -1216,4 +1216,9 @@ body:has(.modal-overlay:target) {
     letter-spacing: 0.01em;
 }
 
-
+.card p {
+    padding: 10px 15px; /* top/bottom 10px, left/right 15px */
+    margin: 0;          /* remove default p margin */
+    font-size: 2rem;    /* smaller text */
+    text-align: left;   /* align text to left if you want */
+}

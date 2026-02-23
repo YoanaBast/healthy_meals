@@ -41,6 +41,7 @@
 - https://cloudconvert.com/png-to-ico
 - https://www.figma.com/
 - https://uiverse.io/mRcOol7/hot-fox-27
+- https://uiverse.io/eslam-hany/nasty-zebra-54
 - https://fonts.google.com/
 - https://favicon.io/favicon-generator/
 - https://emojicombos.com/heart
