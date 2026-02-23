@@ -98,11 +98,11 @@ def edit_ingredient(request, ingredient_id):
                     'all_units': MeasurementUnit.objects.all().order_by('name_singular'),
                 })
             return redirect('edit_ingredient', ingredient_id=ingredient.id)
-        else:
-            name_errors = form.errors.get('name', [])
-            if any('already exists' in e for e in name_errors):
-                name = request.POST.get('name', '').strip().lower()
-                messages.error(request, f'"{name}" already exists.')
+        # else:
+        #     name_errors = form.errors.get('name', [])
+        #     if any('already exists' in e for e in name_errors):
+        #         name = request.POST.get('name', '').strip().lower()
+        #         messages.error(request, f'"{name}" already exists.')
     else:
         form = IngredientEditForm(instance=ing)
 
@@ -245,18 +245,15 @@ def add_measurement_unit(request, ingredient_id):
 
         if not conversion:
             messages.error(request, 'Conversion to base is required.')
-            return redirect(reverse('edit_ingredient', kwargs={'ingredient_id': ingredient_id}) + '#additional-units')
-
+            return redirect(reverse('edit_ingredient', kwargs={'ingredient_id': ingredient_id}))
         try:
             conversion_float = float(conversion)
         except ValueError:
             messages.error(request, 'Please enter a valid number for conversion.')
-            return redirect(reverse('edit_ingredient', kwargs={'ingredient_id': ingredient_id}) + '#additional-units')
-
+            return redirect(reverse('edit_ingredient', kwargs={'ingredient_id': ingredient_id}))
         if conversion_float <= 0:
             messages.error(request, 'Conversion to base must be greater than 0.')
-            return redirect(reverse('edit_ingredient', kwargs={'ingredient_id': ingredient_id}) + '#additional-units')
-
+            return redirect(reverse('edit_ingredient', kwargs={'ingredient_id': ingredient_id}))
         if unit_id:
             unit = get_object_or_404(MeasurementUnit, pk=unit_id)
             obj, created = IngredientMeasurementUnit.objects.get_or_create(
@@ -268,8 +265,7 @@ def add_measurement_unit(request, ingredient_id):
                 messages.error(request, f'"{unit.name_singular}" is already added for this ingredient.')
             else:
                 messages.success(request, f'"{unit.name_singular}" added successfully.')
-    return redirect(reverse('edit_ingredient', kwargs={'ingredient_id': ingredient_id}) + '#additional-units')
-
+    return redirect(reverse('edit_ingredient', kwargs={'ingredient_id': ingredient_id}))
 
 def add_measurement_unit_ajax(request):
     if request.method == 'POST':
@@ -384,4 +380,4 @@ def edit_measurement_unit_conversion(request, ingredient_id, imu_id):
                 messages.success(request, 'Conversion updated.')
         except (ValueError, TypeError):
             messages.error(request, 'Please enter a valid number.')
-    return redirect(reverse('edit_ingredient', kwargs={'ingredient_id': ingredient_id}) + '#additional-units')
+    return redirect(reverse('edit_ingredient', kwargs={'ingredient_id': ingredient_id}))

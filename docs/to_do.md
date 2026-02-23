@@ -9,9 +9,6 @@ user = User.objects.get(username="default") this is because auth is excluded
     - check the custom error messages in mixin
     - update the homepage
 
-    - on fridge add i can assign 0 and negative 
-    - on edit ingredietn it shows 2 labels for the duplicate names specifically 
-    - on add and edit recipe i can assign negative ingredients 
 
 ## PRIORITY 2 FIXES
     - finish documentation and link it properly
@@ -26,8 +23,6 @@ user = User.objects.get(username="default") this is because auth is excluded
     - add select boxes and select all with option to delete all ?
 
 ## TEST
-    - duplicates, deleting to set null
-    - add unique=true where applicable, make sure measure units are transformed dynamically
     - update the setup inscrutions and files, test on other PC and acc
 
     

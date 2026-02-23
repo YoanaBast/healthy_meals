@@ -29,7 +29,11 @@
 
         {% csrf_token %}
         {% include "core/errors_label.html" %}
-
+        {% if messages %}
+            {% for message in messages %}
+                <div class="message {{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
 
         <div class="grid-container">
             <div class="grid-item info">
@@ -113,11 +117,6 @@
             Optional. Define extra units with their conversion to base (e.g. 1 cup = 120g → conversion = 120).
         </p>
 
-        {% if messages %}
-            {% for message in messages %}
-                <div class="message {{ message.tags }}">{{ message }}</div>
-            {% endfor %}
-        {% endif %}
 
         {% if ingredient.measurement_units.all %}
         <table class="data-table" style="max-width:500px; margin-bottom:1rem;">
@@ -159,7 +158,7 @@
             <p style="color:var(--text-secondary); font-style:italic; margin-bottom:1rem;">None added yet.</p>
         {% endif %}
 
-        <form method="post" action="{% url 'add_measurement_unit' ingredient.id %}">
+        <form method="post" action="{% url 'add_measurement_unit' ingredient.id %}" novalidate>
             {% csrf_token %}
             <div style="display:flex; gap:0.75rem; align-items:flex-end; flex-wrap:wrap; max-width:500px;">
                 <div>
