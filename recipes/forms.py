@@ -40,7 +40,7 @@ class RecipeForm(forms.ModelForm):
 
     class Meta:
         model = Recipe
-        fields = ['name', 'category', 'servings', 'instructions']
+        exclude = ['cooking_time', 'ingredients', 'favourited_by']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -75,7 +75,7 @@ class RecipeForm(forms.ModelForm):
 class RecipeIngredientForm(forms.ModelForm):
     class Meta:
         model = RecipeIngredient
-        fields = ['ingredient', 'quantity', 'unit']
+        exclude = ['recipe']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

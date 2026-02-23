@@ -3,13 +3,11 @@
 
 ## PRIORITY 1 FIXES
     - show only fav needs to filter all not just page and stay checked until i uncheck it
-
-## PRIORITY 2 FIXES
-    - remove attrs={'class':
-    - fix DRY for the form in edit_ingredient_popup (? no idea what i meant here, check if calling form twice is optimal)
-    - use exclude in the form (?)
-    - move nutrients and stuff outside of models
     
+## PRIORITY 2 FIXES
+    - move nutrients and stuff outside of models
+    - make ingredients added to your list to x and y added
+
 ## FEATURES
     - add view option to grocery list
     - add search boxes
@@ -32,7 +30,7 @@
     - check if i can make a guide
     - check if i can make day/night widget
     - later I plan to have a check that allows edit/delete only on fields created by a specific user (user cannot delete public ingredients made by other users)
-
+    - created by will be added to models once i implement auth
 
 
 
