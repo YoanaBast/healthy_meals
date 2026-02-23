@@ -19,13 +19,13 @@
        {% include 'header.html' %}
 
 <main>
-<!--    {% if messages %}-->
-<!--        <div style="max-width:1200px; margin: 0.75rem auto; padding: 0 1.5rem;">-->
-<!--            {% for message in messages %}-->
-<!--                <div class="message {{ message.tags }}">{{ message }}</div>-->
-<!--            {% endfor %}-->
-<!--        </div>-->
-<!--    {% endif %}-->
+    {% if messages %}
+        <div style="max-width:1200px; margin: 0.75rem auto; padding: 0 1.5rem;">
+            {% for message in messages %}
+                <div class="message {{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
 
     {% block content %}
     {% endblock %}

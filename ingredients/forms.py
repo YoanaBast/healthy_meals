@@ -1,38 +1,19 @@
 from django import forms
-from .models import Ingredient, IngredientDietaryTag, IngredientMeasurementUnit
 
-NUTRIENTS = [
-    'kcal', 'protein', 'carbs', 'fat', 'fiber', 'sugar', 'salt', 'cholesterol',
-    'vitamin_a', 'vitamin_c', 'vitamin_d', 'vitamin_e', 'vitamin_k',
-    'vitamin_b1', 'vitamin_b2', 'vitamin_b3', 'vitamin_b6', 'vitamin_b12',
-    'folate', 'calcium', 'iron', 'magnesium', 'potassium', 'zinc'
-]
+from core.constants import NUTRIENTS
+from .models import Ingredient, IngredientMeasurementUnit
+from core.mixins import ErrorMessagesMixin
 
 
-class IngredientFormBase(forms.ModelForm):
-    class Meta:
-        model = Ingredient
-        fields = (
-                ['name', 'category', 'dietary_tag', 'base_quantity', 'default_unit'] +
-                [f'base_quantity_{n}' for n in NUTRIENTS]
-        )
-        #  '__all__'
 
-        widgets = {
-            'ingredient': forms.Select(attrs={
-                'onchange': 'updateUnit(this)'
-            }),
-            'name': forms.TextInput(attrs={'class': 'form-input'}),
-            'category': forms.Select(attrs={'class': 'form-select'}),
-            'dietary_tag': forms.CheckboxSelectMultiple(attrs={'class': 'dietary-tags'}),
-            'default_unit': forms.Select(attrs={'class': 'form-select', 'style': 'width: 50%;'}),
-            'base_quantity': forms.NumberInput(attrs={'class': 'form-input', 'style': 'width: 50%;', 'value': 100, 'min': 0}, ),
-        }
+class IngredientFormBase(ErrorMessagesMixin, forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.fields['dietary_tag'].required = False  # making optional
+        self.apply_error_messages(['name', 'quantity', 'unit'])
+
+        self.fields['dietary_tag'].required = False
 
         for nutrient in NUTRIENTS:
             field = f'base_quantity_{nutrient}'
@@ -40,16 +21,36 @@ class IngredientFormBase(forms.ModelForm):
             self.fields[field].required = False
             self.fields[field].initial = 0
             self.fields[field].widget = forms.NumberInput(
-                attrs={'class': 'form-input', 'value': 0, 'step': 'any',  'min': 0}  # allows float
+                attrs={'class': 'form-input nutrient-input', 'step': 'any', 'min': 0}
             )
 
+        self.fields['base_quantity_kcal'].help_text = 'Calories per base quantity.'
+        self.fields['base_quantity_protein'].help_text = 'In grams.'
+        self.fields['base_quantity_fat'].help_text = 'Total fat in grams.'
 
+
+    class Meta:
+        model = Ingredient
+        fields = (
+            ['name', 'category', 'dietary_tag', 'base_quantity', 'default_unit'] +
+            [f'base_quantity_{n}' for n in NUTRIENTS]
+        )
+
+        widgets = {
+            'ingredient': forms.Select(attrs={
+                'onchange': 'updateUnit(this)'  # JS behaviour, stays here
+            }),
+            'name': forms.TextInput(attrs={'class': 'form-input'}),
+            'category': forms.Select(attrs={'class': 'form-select'}),
+            'dietary_tag': forms.CheckboxSelectMultiple(attrs={'class': 'dietary-tags'}),
+            'default_unit': forms.Select(attrs={'class': 'form-select half-width'}),
+            'base_quantity': forms.NumberInput(attrs={'class': 'form-input half-width', 'min': 0}),
+        }
 
 class IngredientAddForm(IngredientFormBase):
     def save(self, commit=True):
         ingredient = super().save(commit=commit)
         if commit:
-            # create measurement unit for the default unit
             IngredientMeasurementUnit.objects.get_or_create(
                 ingredient=ingredient,
                 unit=ingredient.default_unit,
@@ -57,5 +58,9 @@ class IngredientAddForm(IngredientFormBase):
             )
         return ingredient
 
+
 class IngredientEditForm(IngredientFormBase):
-    ...
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['base_quantity'].widget.attrs['readonly'] = True
+        self.fields['base_quantity'].help_text = 'Base quantity cannot be changed after creation as it affects nutrient calculations.'

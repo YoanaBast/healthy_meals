@@ -4,4 +4,4 @@ from .models import UserFridge
 class UserFridgeForm(forms.ModelForm):
     class Meta:
         model = UserFridge
-        fields = ['quantity', 'unit']
+        exclude = ['user', 'ingredient']

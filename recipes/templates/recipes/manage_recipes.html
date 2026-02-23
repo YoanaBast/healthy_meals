@@ -116,37 +116,6 @@
 
 <script src="{% static 'js/zero_inputt_handler.js' %}"></script>
 <script src="{% static 'js/delete_popup.js' %}"></script>
-<script>
-function toggleFav(recipeId, btn) {
-    fetch(`/recipes/${recipeId}/toggle_fav/`, {
-        method: 'POST',
-        headers: {
-            'X-CSRFToken': getCookie('csrftoken'),
-            'Content-Type': 'application/json'
-        }
-    })
-    .then(res => res.json())
-    .then(data => {
-        btn.innerHTML = data.favourited
-            ? '<img src="{% static "images/full_heart.svg" %}" alt="fav" class="heart-icon" />'
-            : '<img src="{% static "images/empty_heart.svg" %}" alt="fav" class="heart-icon" />';
-    });
-    }
+<script src="{% static 'js/recipe_favourites.js' %}"></script>
 
-// helper to get csrf token
-function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let cookie of cookies) {
-            cookie = cookie.trim();
-            if (cookie.startsWith(name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
-            }
-        }
-    }
-    return cookieValue;
-}
-</script>
 {% endblock %}

@@ -404,7 +404,18 @@ def generate_grocery_list(request):
                     unit=ing_data['unit'],
                 )
 
-        messages.success(request, "Ingredients added to your grocery list!")
+        preview_items = list(final_needed.values())
+        preview_parts = [
+            f"{d['ingredient'].name} - {round(d['quantity'], 2)} {d['unit'].code if d['unit'] else ''}"
+            for d in preview_items[:3]
+        ]
+        remaining = len(preview_items) - 3
+        preview_str = ", ".join(preview_parts)
+        if remaining > 0:
+            preview_str += f" and {remaining} more"
+        preview_str += " added to your list!"
+
+        messages.success(request, preview_str)
         return redirect('user_grocery_list')
 
     return render(request, 'planner/generate_grocery_list.html', {

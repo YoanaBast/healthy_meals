@@ -1,6 +1,7 @@
 from django.core.validators import MinValueValidator
 from django.db import models
 
+from core.constants import NUTRIENTS, NUTRIENT_UNITS
 # Create your models here.
 
 
@@ -16,7 +17,7 @@ class IngredientDietaryTag(models.Model):
 
 
 class IngredientCategory(models.Model):
-    name = models.CharField(max_length=100, unique=True)
+    name = models.CharField(max_length=40, unique=True)
 
     def __str__(self):
         return self.name
@@ -69,39 +70,8 @@ class IngredientMeasurementUnit(models.Model):
 
 
 class Ingredient(models.Model):
-
-    NUTRIENTS = [
-        'kcal', 'protein', 'carbs', 'fat', 'fiber', 'sugar', 'salt', 'cholesterol',
-        'vitamin_a', 'vitamin_c', 'vitamin_d', 'vitamin_e', 'vitamin_k',
-        'vitamin_b1', 'vitamin_b2', 'vitamin_b3', 'vitamin_b6', 'vitamin_b12',
-        'folate', 'calcium', 'iron', 'magnesium', 'potassium', 'zinc'
-    ]
-    NUTRIENT_UNITS = {
-        'kcal': 'kcal',
-        'protein': 'g',
-        'carbs': 'g',
-        'fat': 'g',
-        'fiber': 'g',
-        'sugar': 'g',
-        'salt': 'g',
-        'cholesterol': 'g',
-        'vitamin_a': 'µg',
-        'vitamin_c': 'mg',
-        'vitamin_d': 'µg',
-        'vitamin_e': 'mg',
-        'vitamin_k': 'µg',
-        'vitamin_b1': 'mg',
-        'vitamin_b2': 'mg',
-        'vitamin_b3': 'mg',
-        'vitamin_b6': 'mg',
-        'vitamin_b12': 'µg',
-        'folate': 'µg',
-        'calcium': 'mg',
-        'iron': 'mg',
-        'magnesium': 'mg',
-        'potassium': 'mg',
-        'zinc': 'mg',
-    }
+    NUTRIENTS = NUTRIENTS
+    NUTRIENT_UNITS = NUTRIENT_UNITS
 
     name = models.CharField(max_length=100, unique=True)
 

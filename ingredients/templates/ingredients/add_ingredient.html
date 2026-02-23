@@ -3,6 +3,9 @@
 {% block title %}Add Ingredient{% endblock %}
 
 {% block content %}
+<link rel="stylesheet" href="{% static 'css/ingredient_forms_styles.css' %}">
+
+
 <div class="container-content">
     <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
         <a href="javascript:history.back()" class="btn">Back</a>
@@ -17,6 +20,18 @@
 
             <form id="add-ingredient-form" method="post" action="{% url 'add_ingredient' %}">
                 {% csrf_token %}
+                {% if form.errors %}
+                    <div class="message error">
+                        {% for field in form %}
+                            {% for error in field.errors %}
+                                <p>{{ field.label }}: {{ error }}</p>
+                            {% endfor %}
+                        {% endfor %}
+                        {% for error in form.non_field_errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
 
                 {{ form.name.label_tag }} {{ form.name }}
 
@@ -74,7 +89,7 @@
         {% endfor %}
     </div>
 
-    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: flex-start;">
+    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: flex-start; margin-top: 1rem;">
         <button type="submit" class="btn">Save</button>
         <a href="{% url 'manage_ingredients' %}" class="btn btn-danger">Cancel</a>
     </div>
@@ -86,14 +101,7 @@
 {% include 'core/_manage_list_modal.html' %}
 
 <script src="{% static 'js/zero_inputt_handler.js' %}"></script>
+<script src="{% static 'js/fetch_and_manage.js' %}"></script>
 
-<script>
-function fetchAndManage(url, title) {
-    fetch(url)
-        .then(r => r.json())
-        .then(d => openManageModal(title, d.items))
-        .catch(e => alert('Failed to load: ' + e));
-}
-</script>
 
 {% endblock %}
