@@ -1077,6 +1077,22 @@ body:has(.modal-overlay:target) {
     background: var(--bg-secondary);
 }
 
+/* Fridge modal centering fix */
+#addFridgeItemModal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 1000;
+}
+
+/* Center content regardless of display:block or display:flex */
+#addFridgeItemModal .recipe-modal-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
 
 /* ============================================================
    TOOLTIP
@@ -1195,19 +1211,3 @@ body:has(.modal-overlay:target) {
 }
 
 
-/* Fridge modal centering fix */
-#addFridgeItemModal {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.5);
-    z-index: 1000;
-}
-
-/* Center content regardless of display:block or display:flex */
-#addFridgeItemModal .recipe-modal-content {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-}
