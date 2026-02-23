@@ -37,3 +37,10 @@ function closeModal() {
     document.body.style.overflow = 'auto';
 }
 
+document.getElementById('addFridgeItemForm').addEventListener('submit', function(e) {
+    const qty = parseFloat(document.getElementById('quantityInput').value);
+    if (!qty || qty <= 0) {
+        e.preventDefault();
+        alert('Quantity must be greater than 0.');
+    }
+});
