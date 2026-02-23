@@ -2,6 +2,7 @@
 <div id="ingredientModal" class="recipe-modal">
     <div class="recipe-modal-content">
         <h4>Add Ingredient</h4>
+                {% include "core/errors_label.html" %}
 
         <select id="ingredientSelect" onchange="loadUnits()">
             <option value="">Select ingredient</option>
@@ -18,7 +19,7 @@
         </select>
 
         <br><br>
-        <input type="number" id="quantityInput" step="0.01" min="0.01" placeholder="Quantity">
+        <input type="number" id="quantityInput" name="quantity" step="0.01" min="0.01" placeholder="Quantity">
         <br><br>
         <select id="unitSelect"></select>
         <br><br>

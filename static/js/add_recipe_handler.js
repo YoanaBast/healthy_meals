@@ -40,11 +40,15 @@ function addIngredient() {
         document.getElementById('unitSelect').selectedIndex
     ].text;
 
-    if (!ingredient_id || !quantity || !unit_id) {
+    if (!ingredient_id || quantity === '' || isNaN(quantity) || !unit_id) {
         alert('Please fill in all fields.');
         return;
     }
 
+    if (quantity <= 0) {
+        alert('Quantity must be greater than 0.');
+        return;
+    }
     if (mode === 'edit') {
         fetch(addIngredientUrl, {
             method: "POST",

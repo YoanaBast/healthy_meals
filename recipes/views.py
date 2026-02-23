@@ -155,6 +155,13 @@ def add_ingredient(request, pk):
             quantity = data.get("quantity")
             unit_id = data.get("unit_id")
 
+            try:
+                quantity = float(quantity)
+                if quantity <= 0:
+                    return JsonResponse({"success": False, "error": "Quantity must be greater than 0."})
+            except (ValueError, TypeError):
+                return JsonResponse({"success": False, "error": "Please enter a valid quantity."})
+
             recipe = Recipe.objects.get(pk=pk)
             ingredient = Ingredient.objects.get(pk=ingredient_id)
             unit = IngredientMeasurementUnit.objects.get(pk=unit_id)
@@ -180,8 +187,6 @@ def add_ingredient(request, pk):
 
         except Exception as e:
             return JsonResponse({"success": False, "error": str(e)})
-
-    return JsonResponse({"success": False, "error": "Invalid request method"})
 
 
 def add_recipe_category_ajax(request):
