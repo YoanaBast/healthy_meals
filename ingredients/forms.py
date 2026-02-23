@@ -26,9 +26,6 @@ class IngredientFormBase(ErrorMessagesMixin, forms.ModelForm):
                 attrs={'class': 'form-input nutrient-input', 'step': 'any', 'min': 0}
             )
 
-
-
-
     class Meta:
         model = Ingredient
         fields = (
@@ -46,6 +43,12 @@ class IngredientFormBase(ErrorMessagesMixin, forms.ModelForm):
             'default_unit': forms.Select(attrs={'class': 'form-select half-width'}),
             'base_quantity': forms.NumberInput(attrs={'class': 'form-input half-width', 'min': 0.01}),
         }
+
+    def clean_name(self):
+        name = self.cleaned_data['name'].strip()
+        if Ingredient.objects.filter(name__iexact=name).exists():
+            raise forms.ValidationError(f'"{name}" already exists.')
+        return name
 
 class IngredientAddForm(IngredientFormBase):
     def save(self, commit=True):

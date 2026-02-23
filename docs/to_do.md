@@ -8,12 +8,10 @@ user = User.objects.get(username="default") this is because auth is excluded
 ## PRIORITY 1 FIXES
     - check the custom error messages in mixin
     - update the homepage
-    - fiber -1
-    - fridge add -1 0
 
-    - fridge add, add ingredients on add recipe/ edit 
-    - add ingredient negarive nutrient  saved 
-    - add/edit ingredient label not shown for duplicate with not capitalzie , on edit it shows below
+    - on fridge add i can assign 0 and negative 
+    - on edit ingredietn it shows 2 labels for the duplicate names specifically 
+    - on add and edit recipe i can assign negative ingredients 
 
 ## PRIORITY 2 FIXES
     - finish documentation and link it properly

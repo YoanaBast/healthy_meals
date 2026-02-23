@@ -112,11 +112,13 @@
         <p style="color:var(--text-secondary); font-size:0.875rem; margin-bottom:1rem;">
             Optional. Define extra units with their conversion to base (e.g. 1 cup = 120g → conversion = 120).
         </p>
+
         {% if messages %}
             {% for message in messages %}
                 <div class="message {{ message.tags }}">{{ message }}</div>
             {% endfor %}
         {% endif %}
+
         {% if ingredient.measurement_units.all %}
         <table class="data-table" style="max-width:500px; margin-bottom:1rem;">
             <thead>
