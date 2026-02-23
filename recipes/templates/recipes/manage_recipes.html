@@ -58,8 +58,10 @@
                                     <div class="action-buttons">
 
                                     <!-- Favourite -->
-                                        <button class="btn-heart" onclick="toggleFav({{ rec.id }}, this)">
-                                            {% if rec.is_fav %}
+                                        <button class="btn-heart"
+                                                onclick="toggleFav({{ rec.id }}, this)"
+                                                data-full-heart="{% static 'images/full_heart.svg' %}"
+                                                data-empty-heart="{% static 'images/empty_heart.svg' %}">                                            {% if rec.is_fav %}
                                                 <img src="{% static 'images/full_heart.svg' %}" alt="fav" />
                                             {% else %}
                                                 <img src="{% static 'images/empty_heart.svg' %}" alt="fav" />

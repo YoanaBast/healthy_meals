@@ -69,15 +69,9 @@ function updatePaginationLinks() {
 
 function filterRecipes() {
     const search = document.getElementById('search-box').value.toLowerCase();
-    const showFav = document.getElementById('filter-fav').checked;
 
     document.querySelectorAll('.recipe-line').forEach(div => {
-        const fav = div.dataset.fav === "1";
         const name = div.dataset.name;
-
-        const matchesSearch = name.includes(search);
-        const matchesFav = !showFav || fav;
-
-        div.style.display = (matchesSearch && matchesFav) ? 'flex' : 'none';
+        div.style.display = name.includes(search) ? 'flex' : 'none';
     });
 }

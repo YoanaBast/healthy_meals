@@ -23,7 +23,7 @@
 
 .fav-star {
     color: var(--accent);
-    margin-left: auto;
+    margin-right: auto;
 }
 
 .pagination {
