@@ -6,9 +6,7 @@ from .models import Ingredient, IngredientMeasurementUnit
 from core.mixins import ErrorMessagesMixin
 
 
-
 class IngredientFormBase(ErrorMessagesMixin, forms.ModelForm):
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -50,6 +48,7 @@ class IngredientFormBase(ErrorMessagesMixin, forms.ModelForm):
             raise forms.ValidationError(f'"{name}" already exists.')
         return name
 
+
 class IngredientAddForm(IngredientFormBase):
     def save(self, commit=True):
         ingredient = super().save(commit=commit)
@@ -67,3 +66,12 @@ class IngredientEditForm(IngredientFormBase):
         super().__init__(*args, **kwargs)
         self.fields['base_quantity'].widget.attrs['readonly'] = True
         self.fields['base_quantity'].help_text = 'Base quantity cannot be changed after creation as it affects nutrient calculations.'
+
+    def clean_name(self):
+        name = self.cleaned_data['name'].strip()
+        qs = Ingredient.objects.filter(name__iexact=name)
+        if self.instance.pk:
+            qs = qs.exclude(pk=self.instance.pk)
+        if qs.exists():
+            raise forms.ValidationError(f'"{name}" already exists.')
+        return name

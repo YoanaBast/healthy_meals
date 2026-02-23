@@ -10,7 +10,6 @@ user = User.objects.get(username="default") this is because auth is excluded
     - update the homepage
 
     - on fridge add i can assign 0 and negative 
-    - on edit ingredietn it shows 2 labels for the duplicate names specifically 
     - on add and edit recipe i can assign negative ingredients 
 
 ## PRIORITY 2 FIXES
