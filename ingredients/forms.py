@@ -1,12 +1,8 @@
 from django import forms
-from .models import Ingredient, IngredientDietaryTag, IngredientMeasurementUnit
 
-NUTRIENTS = [
-    'kcal', 'protein', 'carbs', 'fat', 'fiber', 'sugar', 'salt', 'cholesterol',
-    'vitamin_a', 'vitamin_c', 'vitamin_d', 'vitamin_e', 'vitamin_k',
-    'vitamin_b1', 'vitamin_b2', 'vitamin_b3', 'vitamin_b6', 'vitamin_b12',
-    'folate', 'calcium', 'iron', 'magnesium', 'potassium', 'zinc'
-]
+from core.constants import NUTRIENTS
+from .models import Ingredient, IngredientMeasurementUnit
+
 
 
 class IngredientFormBase(forms.ModelForm):
