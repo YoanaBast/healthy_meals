@@ -4,6 +4,7 @@
 
 {% block content %}
 <link rel="stylesheet" href="{% static 'css/ingredient_forms_styles.css' %}">
+<link rel="stylesheet" href="{% static 'css/ingredient_styles.css' %}">
 
 <div class="container-content">
     <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
@@ -55,8 +56,13 @@
             </div>
 
             <div class="grid-item info">
-                {{ form.base_quantity.label_tag }}
-                {{ form.base_quantity }}
+            {{ form.base_quantity.label_tag }}
+<div class="field-with-help">
+    {{ form.base_quantity }}
+    {% if form.base_quantity.help_text %}
+        <span class="help-tooltip" title="{{ form.base_quantity.help_text }}">?</span>
+    {% endif %}
+</div>
 
                 {{ form.default_unit.label_tag }}
                 <div style="display:flex; align-items:center; gap:0.4rem;">
@@ -73,14 +79,15 @@
                     <button type="button" class="btn btn-small" title="Manage units"
                         onclick="fetchAndManage('{% url "list_measurement_units_ajax" %}', 'Manage Units', 'id_default_unit')">⋯</button>
                 </div>
+                <br>
+                <p class="small-gray">The reference amount all nutrient values are calculated for. For example, if base quantity is 100g, all nutrients below represent what's in 100g of this ingredient.</p>
             </div>
         </div>
 
 
         <!-- Nutrients -->
         <div style="margin-top:2rem; padding-top:2rem; border-top:1px solid var(--border);">
-        <h2 style="font-size: 18px;">Nutrients (per base quantity)</h2>
-            <div class="nutrients-grid" style="display:grid; grid-template-columns: repeat(4, 1fr); gap:1rem; margin-top:1rem;">
+<h2 style="font-size: 18px;">Nutrients (per {{ ingredient.base_quantity }} {{ ingredient.default_unit.code }})</h2>            <div class="nutrients-grid" style="display:grid; grid-template-columns: repeat(4, 1fr); gap:1rem; margin-top:1rem;">
                 {% for field in form.visible_fields %}
                     {% if "base_quantity_" in field.name %}
                     <div class="form-group">

@@ -38,6 +38,9 @@ class IngredientFormBase(forms.ModelForm):
                 attrs={'class': 'form-input nutrient-input', 'step': 'any', 'min': 0}
             )
 
+        self.fields['base_quantity_kcal'].help_text = 'Calories per base quantity.'
+        self.fields['base_quantity_protein'].help_text = 'In grams.'
+        self.fields['base_quantity_fat'].help_text = 'Total fat in grams.'
 
 class IngredientAddForm(IngredientFormBase):
     def save(self, commit=True):
@@ -52,4 +55,7 @@ class IngredientAddForm(IngredientFormBase):
 
 
 class IngredientEditForm(IngredientFormBase):
-    ...
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['base_quantity'].widget.attrs['readonly'] = True
+        self.fields['base_quantity'].help_text = 'Base quantity cannot be changed after creation as it affects nutrient calculations.'

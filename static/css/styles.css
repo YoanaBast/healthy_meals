@@ -423,6 +423,12 @@ nav {
 /* ============================================================
    TYPOGRAPHY
    ============================================================ */
+
+.small-gray {
+    font-size: 0.8rem; /* smaller text */
+    color: gray;
+}
+
 .section-title {
     font-size: 2rem;
     font-weight: 700;
