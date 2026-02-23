@@ -1,13 +1,8 @@
 user = User.objects.get(username="default") this is because auth is excluded 
 
 
-
-
-
 # TO-DO
 ## PRIORITY 1 FIXES
-    - check the custom error messages in mixin
-    - update the homepage
 
 
 ## PRIORITY 2 FIXES

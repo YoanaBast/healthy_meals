@@ -68,7 +68,6 @@ class Command(BaseCommand):
         base_qty = data.get('base_quantity', 100)
         unit_code = data.get('primary_unit', 'g')
         default_unit_obj = MeasurementUnit.objects.get(code=unit_code)
-        print(default_unit_obj)
         defaults = {
             'category': category,
             'base_quantity': base_qty,
