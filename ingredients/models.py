@@ -85,7 +85,7 @@ class Ingredient(models.Model):
     #ManyToManyField does not use null=True because the relation is stored in a separate join table
 
     for nutrient in NUTRIENTS:
-        locals()[f'base_quantity_{nutrient}'] = models.FloatField(default=0)
+        locals()[f'base_quantity_{nutrient}'] = models.FloatField(default=0, validators=[MinValueValidator(0)])
     #dynamically creates a model field for each nutrient in the NUTRIENTS list
 
     @property

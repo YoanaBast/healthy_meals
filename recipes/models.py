@@ -135,14 +135,8 @@ class Recipe(models.Model):
             qty = ri.quantity
             ing_unit_obj = ri.unit
 
-            # print(f"\n--- DEBUG RECIPE INGREDIENT ---")
-            # print(f"Ingredient: {ing}")
-            # print(f"Quantity: {qty}")
-            # print(f"Unit object: {ing_unit_obj}")
-
             # skip if not a proper IngredientMeasurementUnit
             if not ing_unit_obj or not hasattr(ing_unit_obj, 'conversion_to_base'):
-                # print(f"Skipping: Invalid unit for ingredient {ing}")
                 continue
 
             ing_totals = ing.get_nutrients_dict(
@@ -150,15 +144,10 @@ class Recipe(models.Model):
                 quantity=qty
             )
 
-            # print(f"Nutrient totals for this ingredient: {ing_totals}")
 
             for nutrient, value in ing_totals.items():
                 total[nutrient] = total.get(nutrient, 0) + value
-        #
-        #     print(f"Running total after this ingredient: {total}")
-        #
-        # print(f"\n=== FINAL TOTAL NUTRIENTS FOR RECIPE {self.name} ===")
-        # print(total)
+
         return total
 
     @property

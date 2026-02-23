@@ -1,7 +1,8 @@
 from django.conf import settings
+from django.core.validators import MinValueValidator
 from django.db import models
 
-from ingredients.models import Ingredient, IngredientMeasurementUnit, MeasurementUnit
+from ingredients.models import Ingredient, MeasurementUnit
 from recipes.models import Recipe
 
 
@@ -12,7 +13,7 @@ from recipes.models import Recipe
 class UserFridge(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
-    quantity = models.FloatField(default=0)
+    quantity = models.FloatField(default=0, validators=[MinValueValidator(0.01)])
     unit = models.ForeignKey(MeasurementUnit, on_delete=models.SET_NULL, null=True)
 
     class Meta:
@@ -25,7 +26,7 @@ class UserFridge(models.Model):
 class UserGroceryList(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
-    quantity = models.FloatField(default=0)
+    quantity = models.FloatField(validators=[MinValueValidator(0.01)])
     unit = models.ForeignKey(MeasurementUnit, on_delete=models.SET_NULL, null=True)
 
     class Meta:
@@ -49,7 +50,7 @@ class GroceryListGenerationItem(models.Model):
     generation = models.ForeignKey(GroceryListGeneration, on_delete=models.CASCADE, related_name='items')
     recipe = models.ForeignKey(Recipe, on_delete=models.SET_NULL, null=True, blank=True)
     ingredient = models.ForeignKey(Ingredient, on_delete=models.SET_NULL, null=True)
-    quantity = models.FloatField()
+    quantity = models.FloatField(validators=[MinValueValidator(0.01)])
     unit = models.ForeignKey(MeasurementUnit, on_delete=models.SET_NULL, null=True)
 
     def __str__(self):

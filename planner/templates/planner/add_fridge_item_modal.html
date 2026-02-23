@@ -4,8 +4,9 @@
     <div class="recipe-modal-content">
         <h4>Add to Fridge</h4>
 
-        <form id="addFridgeItemForm" method="post" action="{% url 'add_fridge_item' %}">
+        <form id="addFridgeItemForm" method="post" action="{% url 'add_fridge_item' %}" novalidate>
             {% csrf_token %}
+                {% include "core/errors_label.html" %}
 
             <!-- Ingredient Dropdown -->
             <label for="ingredientSelect">Ingredient</label>
