@@ -8,11 +8,10 @@ function toggleFav(recipeId, btn) {
     })
     .then(res => res.json())
     .then(data => {
-        btn.innerHTML = data.favourited
-            ? '<img src="{% static "images/full_heart.svg" %}" alt="fav" class="heart-icon" />'
-            : '<img src="{% static "images/empty_heart.svg" %}" alt="fav" class="heart-icon" />';
+        const src = data.favourited ? btn.dataset.fullHeart : btn.dataset.emptyHeart;
+        btn.innerHTML = `<img src="${src}" alt="fav" class="heart-icon" />`;
     });
-    }
+}
 
 // helper to get csrf token
 function getCookie(name) {
