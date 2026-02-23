@@ -9,14 +9,15 @@ from ingredients.models import Ingredient, IngredientMeasurementUnit
 
 class RecipeFormAdmin(forms.ModelForm):
     """
-    this changes the input/eedit option for the cooking time, the default was time and not duration
+    Changes the input/edit option for the cooking time — default was time not duration.
     """
     class Meta:
         model = Recipe
         fields = '__all__'
         widgets = {
-            'cooking_time': forms.TimeInput(format='%H:%M'),  # HH:MM
+            'cooking_time': forms.TimeInput(format='%H:%M'),
         }
+
 
 class RecipeForm(forms.ModelForm):
     category = forms.ModelChoiceField(
@@ -24,25 +25,25 @@ class RecipeForm(forms.ModelForm):
         required=False
     )
 
-    hours = forms.IntegerField(min_value=0, max_value=23, required=True, label="Hours", initial=0,
-                               widget=forms.NumberInput(attrs={'class': 'form-input', 'style': 'width: 80px;', 'value': 0, 'min': 0}, ))
-    minutes = forms.IntegerField(min_value=0, max_value=59, required=True, label="Minutes", initial=0,
-                                 widget=forms.NumberInput(attrs={'class': 'form-input', 'style': 'width: 80px;', 'value': 0, 'min': 0}))
-
+    hours = forms.IntegerField(
+        min_value=0, max_value=23, required=True, label="Hours", initial=0,
+        widget=forms.NumberInput(attrs={'class': 'form-input small-width', 'min': 0})
+    )
+    minutes = forms.IntegerField(
+        min_value=0, max_value=59, required=True, label="Minutes", initial=0,
+        widget=forms.NumberInput(attrs={'class': 'form-input small-width', 'min': 0})
+    )
     servings = forms.IntegerField(
-        min_value=1,
-        initial=1,
-        widget=forms.NumberInput(attrs={'min': 1, 'step': 1, 'class': 'form-input', 'style': 'width: 80px;'})
+        min_value=1, initial=1,
+        widget=forms.NumberInput(attrs={'class': 'form-input small-width', 'min': 1, 'step': 1})
     )
 
     class Meta:
         model = Recipe
         fields = ['name', 'category', 'servings', 'instructions']
 
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Pre-fill hours and minutes if instance exists
         if self.instance and self.instance.cooking_time:
             self.fields['hours'].initial = self.instance.cooking_time.hour
             self.fields['minutes'].initial = self.instance.cooking_time.minute
@@ -62,15 +63,10 @@ class RecipeForm(forms.ModelForm):
 
     def save(self, commit=True):
         instance = super().save(commit=False)
-
-        # handle cooking_time
         h = self.cleaned_data.get('hours', 0)
         m = self.cleaned_data.get('minutes', 0)
         instance.cooking_time = time(hour=h, minute=m)
-
-        # handle category
         instance.category = self.cleaned_data.get('category')
-
         if commit:
             instance.save()
         return instance
@@ -84,7 +80,6 @@ class RecipeIngredientForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        # Default empty
         self.fields['unit'].queryset = IngredientMeasurementUnit.objects.none()
 
         if self.is_bound:
@@ -107,6 +102,7 @@ class RecipeIngredientForm(forms.ModelForm):
         if quantity is not None and quantity <= 0:
             raise forms.ValidationError("Quantity must be greater than 0.")
         return quantity
+
 
 RecipeIngredientFormSet = inlineformset_factory(
     Recipe, RecipeIngredient,

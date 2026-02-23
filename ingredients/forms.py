@@ -13,26 +13,25 @@ class IngredientFormBase(forms.ModelForm):
     class Meta:
         model = Ingredient
         fields = (
-                ['name', 'category', 'dietary_tag', 'base_quantity', 'default_unit'] +
-                [f'base_quantity_{n}' for n in NUTRIENTS]
+            ['name', 'category', 'dietary_tag', 'base_quantity', 'default_unit'] +
+            [f'base_quantity_{n}' for n in NUTRIENTS]
         )
-        #  '__all__'
 
         widgets = {
             'ingredient': forms.Select(attrs={
-                'onchange': 'updateUnit(this)'
+                'onchange': 'updateUnit(this)'  # JS behaviour, stays here
             }),
             'name': forms.TextInput(attrs={'class': 'form-input'}),
             'category': forms.Select(attrs={'class': 'form-select'}),
             'dietary_tag': forms.CheckboxSelectMultiple(attrs={'class': 'dietary-tags'}),
-            'default_unit': forms.Select(attrs={'class': 'form-select', 'style': 'width: 50%;'}),
-            'base_quantity': forms.NumberInput(attrs={'class': 'form-input', 'style': 'width: 50%;', 'value': 100, 'min': 0}, ),
+            'default_unit': forms.Select(attrs={'class': 'form-select half-width'}),
+            'base_quantity': forms.NumberInput(attrs={'class': 'form-input half-width', 'min': 0}),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.fields['dietary_tag'].required = False  # making optional
+        self.fields['dietary_tag'].required = False
 
         for nutrient in NUTRIENTS:
             field = f'base_quantity_{nutrient}'
@@ -40,22 +39,21 @@ class IngredientFormBase(forms.ModelForm):
             self.fields[field].required = False
             self.fields[field].initial = 0
             self.fields[field].widget = forms.NumberInput(
-                attrs={'class': 'form-input', 'value': 0, 'step': 'any',  'min': 0}  # allows float
+                attrs={'class': 'form-input nutrient-input', 'step': 'any', 'min': 0}
             )
-
 
 
 class IngredientAddForm(IngredientFormBase):
     def save(self, commit=True):
         ingredient = super().save(commit=commit)
         if commit:
-            # create measurement unit for the default unit
             IngredientMeasurementUnit.objects.get_or_create(
                 ingredient=ingredient,
                 unit=ingredient.default_unit,
                 conversion_to_base=ingredient.base_quantity
             )
         return ingredient
+
 
 class IngredientEditForm(IngredientFormBase):
     ...
