@@ -25,8 +25,22 @@
                 <h2 class="section-title" style="margin-bottom:2rem;">Edit Ingredient</h2>
 
     <!-- MAIN EDIT FORM -->
-    <form method="POST" id="edit-ingredient-form">
+    <form method="POST" id="edit-ingredient-form" novalidate>
+
         {% csrf_token %}
+            {% if form.errors %}
+                <div class="message error">
+                    {% for field in form %}
+                        {% for error in field.errors %}
+                            <p>{{ field.label }}: {{ error }}</p>
+                        {% endfor %}
+                    {% endfor %}
+                    {% for error in form.non_field_errors %}
+                        <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
 
         <div class="grid-container">
             <div class="grid-item info">
@@ -104,12 +118,16 @@
     </form>
 
     <!-- ADDITIONAL UNITS -->
-    <div style="margin-top:2rem; padding-top:2rem; border-top:1px solid var(--border);">
+<div id="additional-units" style="margin-top:2rem; padding-top:2rem; border-top:1px solid var(--border);">
         <h2 style="font-size: 18px;">Additional Measurement Units</h2>
         <p style="color:var(--text-secondary); font-size:0.875rem; margin-bottom:1rem;">
             Optional. Define extra units with their conversion to base (e.g. 1 cup = 120g → conversion = 120).
         </p>
-
+        {% if messages %}
+            {% for message in messages %}
+                <div class="message {{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
         {% if ingredient.measurement_units.all %}
         <table class="data-table" style="max-width:500px; margin-bottom:1rem;">
             <thead>
@@ -120,18 +138,30 @@
                 </tr>
             </thead>
             <tbody>
-                {% for imu in ingredient.measurement_units.all %}
-                <tr>
-                    <td>{{ imu.unit.name_singular }} ({{ imu.unit.code }})</td>
-                    <td>{{ imu.conversion_to_base }}</td>
-                    <td>
-                     <form method="post" action="{% url 'delete_measurement_unit' ingredient.id imu.id %}" onsubmit="return confirm('Are you sure you want to delete this unit?');">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-danger btn-small">Delete</button>
-                    </form>
-                    </td>
-                </tr>
-                {% endfor %}
+
+            {% for imu in ingredient.measurement_units.all %}
+        <tr>
+            <td>{{ imu.unit.name_singular }} ({{ imu.unit.code }})</td>
+            <td>
+                <form method="post" action="{% url 'edit_measurement_unit_conversion' ingredient.id imu.id %}"
+                      style="display:flex; gap:0.5rem; align-items:center;">
+                    {% csrf_token %}
+                    <input type="number" name="conversion_to_base"
+                           value="{{ imu.conversion_to_base }}"
+                           step="0.0001" min="0.0001"
+                           style="width:80px;">
+                    <button type="submit" class="btn btn-small">Save</button>
+                </form>
+            </td>
+            <td>
+        <form method="post" action="{% url 'delete_measurement_unit' ingredient.id imu.id %}"
+              onsubmit="return confirm('Are you sure?');">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger btn-small">Delete</button>
+        </form>
+    </td>
+</tr>
+{% endfor %}
             </tbody>
         </table>
         {% else %}

@@ -78,4 +78,5 @@ urlpatterns = [
     path('add/', views.add_ingredient, name='add_ingredient'),
     path('<int:ingredient_id>/', include(ingredient_detail_patterns)),
     path('ajax/', include(ajax_patterns)),
+path('<int:ingredient_id>/units/<int:imu_id>/edit/', views.edit_measurement_unit_conversion, name='edit_measurement_unit_conversion'),
 ]

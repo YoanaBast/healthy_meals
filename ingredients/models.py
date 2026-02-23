@@ -36,14 +36,6 @@ class MeasurementUnit(models.Model):
     def __str__(self):
         return f"{self.name_singular} ({self.code})"
 
-class MeasurementUnitsConvert(models.Model):
-    """maybe not neeeded"""
-    first_unit = models.ForeignKey(MeasurementUnit, on_delete=models.CASCADE, related_name='first_measurment_unit')
-    first_unit_quantity = models.FloatField(default=1, validators=[MinValueValidator(0.01)])
-
-    second_unit = models.ForeignKey(MeasurementUnit, on_delete=models.CASCADE, related_name='second_measurment_unit')
-    second_unit_quantity = models.FloatField(validators=[MinValueValidator(0.01)])
-
 
 
 class IngredientMeasurementUnit(models.Model):
@@ -52,7 +44,7 @@ class IngredientMeasurementUnit(models.Model):
     """
     ingredient = models.ForeignKey('Ingredient', on_delete=models.CASCADE, related_name='measurement_units')
     unit = models.ForeignKey(MeasurementUnit, on_delete=models.CASCADE)
-    conversion_to_base = models.FloatField(help_text="How much of this unit equals the base_quantity")
+    conversion_to_base = models.FloatField(validators=[MinValueValidator(0.01)], help_text="How much of this unit equals the base_quantity")
     # 1 cup of carrot ≈ 120 g → conversion_to_base = 120
     def name_for_quantity(self, quantity=1):
         return self.unit.name_singular if quantity == 1 else self.unit.name_plural

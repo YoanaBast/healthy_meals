@@ -6,7 +6,6 @@ user = User.objects.get(username="default") this is because auth is excluded
 
 # TO-DO
 ## PRIORITY 1 FIXES
-    - show only fav needs to filter all not just page and stay checked until i uncheck it
     - check the custom error messages in mixin
     - update the homepage
 
@@ -16,7 +15,6 @@ user = User.objects.get(username="default") this is because auth is excluded
     - remember to set debug false 
 
 ## FEATURES
-    - add view option to grocery list
     - add search boxes
     - add more dummy data
 

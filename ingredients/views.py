@@ -242,14 +242,34 @@ def add_measurement_unit(request, ingredient_id):
     if request.method == 'POST':
         unit_id = request.POST.get('unit')
         conversion = request.POST.get('conversion_to_base')
-        if unit_id and conversion:
+
+        if not conversion:
+            messages.error(request, 'Conversion to base is required.')
+            return redirect(reverse('edit_ingredient', kwargs={'ingredient_id': ingredient_id}) + '#additional-units')
+
+        try:
+            conversion_float = float(conversion)
+        except ValueError:
+            messages.error(request, 'Please enter a valid number for conversion.')
+            return redirect(reverse('edit_ingredient', kwargs={'ingredient_id': ingredient_id}) + '#additional-units')
+
+        if conversion_float <= 0:
+            messages.error(request, 'Conversion to base must be greater than 0.')
+            return redirect(reverse('edit_ingredient', kwargs={'ingredient_id': ingredient_id}) + '#additional-units')
+
+        if unit_id:
             unit = get_object_or_404(MeasurementUnit, pk=unit_id)
-            IngredientMeasurementUnit.objects.get_or_create(
+            obj, created = IngredientMeasurementUnit.objects.get_or_create(
                 ingredient=ingredient,
                 unit=unit,
-                defaults={'conversion_to_base': float(conversion)}
+                defaults={'conversion_to_base': conversion_float}
             )
-    return redirect('edit_ingredient', ingredient_id=ingredient_id)
+            if not created:
+                messages.error(request, f'"{unit.name_singular}" is already added for this ingredient.')
+            else:
+                messages.success(request, f'"{unit.name_singular}" added successfully.')
+    return redirect(reverse('edit_ingredient', kwargs={'ingredient_id': ingredient_id}) + '#additional-units')
+
 
 def add_measurement_unit_ajax(request):
     if request.method == 'POST':
@@ -349,3 +369,19 @@ def delete_measurement_unit_ajax(request, pk):
 def dietary_tags_fragment(request):
     form = IngredientAddForm()
     return HttpResponse(str(form['dietary_tag']))
+
+def edit_measurement_unit_conversion(request, ingredient_id, imu_id):
+    imu = get_object_or_404(IngredientMeasurementUnit, pk=imu_id)
+    if request.method == 'POST':
+        conversion = request.POST.get('conversion_to_base')
+        try:
+            conversion_float = float(conversion)
+            if conversion_float <= 0:
+                messages.error(request, 'Conversion must be greater than 0.')
+            else:
+                imu.conversion_to_base = conversion_float
+                imu.save()
+                messages.success(request, 'Conversion updated.')
+        except (ValueError, TypeError):
+            messages.error(request, 'Please enter a valid number.')
+    return redirect(reverse('edit_ingredient', kwargs={'ingredient_id': ingredient_id}) + '#additional-units')

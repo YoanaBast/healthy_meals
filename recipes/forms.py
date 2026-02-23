@@ -27,15 +27,31 @@ class RecipeForm(forms.ModelForm):
 
     hours = forms.IntegerField(
         min_value=0, max_value=23, required=True, label="Hours", initial=0,
-        widget=forms.NumberInput(attrs={'class': 'form-input small-width', 'min': 0})
+        widget=forms.NumberInput(attrs={'class': 'form-input small-width', 'min': 0}),
+        error_messages={
+            'required': 'Please enter the cooking hours.',
+            'min_value': 'Hours cannot be negative.',
+            'max_value': 'Hours cannot exceed 23.',
+            'invalid': 'Enter a whole number for hours.',
+        }
     )
     minutes = forms.IntegerField(
         min_value=0, max_value=59, required=True, label="Minutes", initial=0,
-        widget=forms.NumberInput(attrs={'class': 'form-input small-width', 'min': 0})
+        widget=forms.NumberInput(attrs={'class': 'form-input small-width', 'min': 0}),
+        error_messages={
+            'required': 'Please enter the cooking minutes.',
+            'max_value': 'Minutes cannot exceed 59.',
+            'invalid': 'Enter a whole number for minutes.',
+        }
     )
     servings = forms.IntegerField(
         min_value=1, initial=1,
-        widget=forms.NumberInput(attrs={'class': 'form-input small-width', 'min': 1, 'step': 1})
+        widget=forms.NumberInput(attrs={'class': 'form-input small-width', 'min': 1, 'step': 1}),
+        error_messages={
+            'required': 'Please enter the number of servings.',
+            'min_value': 'Servings must be at least 1.',
+            'invalid': 'Enter a whole number for servings.',
+        }
     )
 
     class Meta:
