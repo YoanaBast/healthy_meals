@@ -74,7 +74,7 @@
         {% endfor %}
     </div>
 
-    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: flex-start;">
+    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: flex-start; margin-top: 1rem;">
         <button type="submit" class="btn">Save</button>
         <a href="{% url 'manage_ingredients' %}" class="btn btn-danger">Cancel</a>
     </div>
@@ -86,14 +86,7 @@
 {% include 'core/_manage_list_modal.html' %}
 
 <script src="{% static 'js/zero_inputt_handler.js' %}"></script>
+<script src="{% static 'js/fetch_and_manage.js' %}"></script>
 
-<script>
-function fetchAndManage(url, title) {
-    fetch(url)
-        .then(r => r.json())
-        .then(d => openManageModal(title, d.items))
-        .catch(e => alert('Failed to load: ' + e));
-}
-</script>
 
 {% endblock %}

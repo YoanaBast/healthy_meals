@@ -163,13 +163,7 @@
 {% include 'core/_quick_add_modal.html' %}
 {% include 'core/_manage_list_modal.html' %}
 
-<script>
-function fetchAndManage(url, title) {
-    fetch(url)
-        .then(r => r.json())
-        .then(d => openManageModal(title, d.items))
-        .catch(e => alert('Failed to load: ' + e));
-}
-</script>
+<script src="{% static 'js/fetch_and_manage.js' %}"></script>
+
 
 {% endblock %}
