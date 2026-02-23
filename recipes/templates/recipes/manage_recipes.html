@@ -47,8 +47,8 @@
                             {% for rec in recipes %}
                             <tr>
                                 <td data-label="Ingredient Name">{{ rec.name|title_except  }}</td>
-                                <td data-label="Category">{{ rec.category|default:"-" }}</td>
-                                <td data-label="Dietary Information"> {{ rec.dietary_info|default:"-" }}</td>
+                                <td data-label="Category">{{ rec.category.name|default:"-"|title_except }}</td>
+                                <td data-label="Dietary Information"> {{ rec.dietary_info|default:"-"|title_except }}</td>
                                 <td data-label="Cooking Duration">{{ rec.cooking_duration|default:"-"  }}</td>
                                 <td data-label="Kcal per Serving">{{ rec.kcal_per_serving|default:"-"  }}</td>
                                 <td data-label="Servings">{{ rec.servings|default:"-"  }}</td>

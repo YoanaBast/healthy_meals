@@ -27,8 +27,8 @@
     <div class="grid-container">
         <div class="grid-item info">
             <h1>{{ recipe.name|title_except }}</h1>
-            <p><strong>Category:</strong> {{ recipe.category|default:"-" }}</p>
-            <p><strong>Dietary Info:</strong> {{ recipe.dietary_info|default:"-" }}</p>
+            <p><strong>Category:</strong> {{ recipe.category.name|default:"-"|title_except }}</p>
+            <p><strong>Dietary Info:</strong> {{ recipe.dietary_info|default:"-"|title_except }}</p>
             <p><strong>Cooking Duration:</strong> {{ recipe.cooking_duration|default:"-" }}</p>
             <p><strong>Kcal per Serving:</strong> {{ recipe.kcal_per_serving|default:"-" }}</p>
             <p><strong>Servings:</strong> {{ recipe.servings|default:"-" }}</p>
@@ -37,7 +37,7 @@
             <h2>Ingredients</h2>
             <ul>
               {% for ing, qtys in recipe.quantity_ingredients_list_all_units %}
-                  <li>{{ ing.name }} — {{ qtys }}</li>
+                  <li>{{ ing.name|title_except }} — {{ qtys }}</li>
               {% empty %}
                   <li>No ingredients added.</li>
               {% endfor %}
@@ -46,7 +46,7 @@
     </div>
 
     <h2>Instructions</h2>
-    <p>{{ recipe.instructions|linebreaks }}</p>
+    <p>{{ recipe.instructions|capfirst|linebreaks }}</p>
 
     <!-- Nutrients Grid -->
 <div class="nutrients-tables">
