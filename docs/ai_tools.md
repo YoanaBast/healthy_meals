@@ -28,7 +28,7 @@
 
   
   
-### Other tools used:
+### Other tools used (mainly for UI):
 
 - https://www.canva.com/
 - https://www.remove.bg/
@@ -43,4 +43,4 @@
 - https://uiverse.io/mRcOol7/hot-fox-27
 - https://fonts.google.com/
 - https://favicon.io/favicon-generator/
-
+- https://emojicombos.com/heart

@@ -13,8 +13,6 @@
 
 <div class="container-home">
 
-    <!-- Back button -->
-
 
     <div style="max-width: 800px; margin: 2rem auto;">
         <a href="javascript:history.back()" class="btn">← Back</a>
@@ -22,12 +20,13 @@
         <a href="{% url 'manage_recipes' %}" class="btn">All Recipes</a>
     </div>
 
-    <form method="post" action="{% url 'edit_recipe' recipe.pk %}">
+    <form method="post" action="{% url 'edit_recipe' recipe.pk %}" novalidate>
         {% csrf_token %}
 
         <!-- Recipe fields -->
         <div style="max-width: 800px; margin: 2rem auto;">
             <h2>Edit Recipe</h2>
+        {% include "core/errors_label.html" with form=recipe_form %}
 
             <div class="grid-container">
 

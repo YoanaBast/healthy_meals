@@ -71,6 +71,8 @@ ingredient_detail_patterns = [
     path('edit/', views.edit_ingredient, name='edit_ingredient'),
     path('delete/', views.delete_ingredient, name='delete_ingredient'),
     path('unit/', include(ingredient_unit_patterns)),
+    path('units/<int:imu_id>/edit/', views.edit_measurement_unit_conversion, name='edit_measurement_unit_conversion'),
+
 ]
 
 urlpatterns = [

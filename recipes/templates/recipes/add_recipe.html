@@ -1,6 +1,11 @@
 {% extends 'base.html' %}
-{% block title %}Add Recipe{% endblock %}
 {% load static %}
+
+
+{% block title %}
+Add Recipe
+{% endblock %}
+
 {% block content %}
 
 <div id="recipe-meta"
@@ -13,8 +18,10 @@
 </div>
 
 <div class="container-home">
-    <form method="post" action="{% url 'add_recipe' %}">
+    <form method="post" action="{% url 'add_recipe' %}" novalidate>
         {% csrf_token %}
+        {% include "core/errors_label.html" with form=recipe_form %}
+
         {{ ingredient_formset.management_form }}
 
         <h2>Add Recipe</h2>

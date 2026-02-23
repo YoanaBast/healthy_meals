@@ -6,9 +6,12 @@ user = User.objects.get(username="default") this is because auth is excluded
 
 # TO-DO
 ## PRIORITY 1 FIXES
-    - show only fav needs to filter all not just page and stay checked until i uncheck it
     - check the custom error messages in mixin
     - update the homepage
+
+    - on fridge add i can assign 0 and negative 
+    - on edit ingredietn it shows 2 labels for the duplicate names specifically 
+    - on add and edit recipe i can assign negative ingredients 
 
 ## PRIORITY 2 FIXES
     - finish documentation and link it properly
@@ -16,7 +19,6 @@ user = User.objects.get(username="default") this is because auth is excluded
     - remember to set debug false 
 
 ## FEATURES
-    - add view option to grocery list
     - add search boxes
     - add more dummy data
 

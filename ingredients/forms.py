@@ -1,4 +1,5 @@
 from django import forms
+from django.core.validators import MinValueValidator
 
 from core.constants import NUTRIENTS
 from .models import Ingredient, IngredientMeasurementUnit
@@ -11,9 +12,10 @@ class IngredientFormBase(ErrorMessagesMixin, forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.apply_error_messages(['name', 'quantity', 'unit'])
-
+        self.apply_error_messages(['name', 'base_quantity', 'default_unit'])
         self.fields['dietary_tag'].required = False
+        self.fields['base_quantity'].validators.append(MinValueValidator(0.01))
+        self.fields['base_quantity'].error_messages['min_value'] = 'Base quantity must be greater than 0.'
 
         for nutrient in NUTRIENTS:
             field = f'base_quantity_{nutrient}'
@@ -23,11 +25,6 @@ class IngredientFormBase(ErrorMessagesMixin, forms.ModelForm):
             self.fields[field].widget = forms.NumberInput(
                 attrs={'class': 'form-input nutrient-input', 'step': 'any', 'min': 0}
             )
-
-        self.fields['base_quantity_kcal'].help_text = 'Calories per base quantity.'
-        self.fields['base_quantity_protein'].help_text = 'In grams.'
-        self.fields['base_quantity_fat'].help_text = 'Total fat in grams.'
-
 
     class Meta:
         model = Ingredient
@@ -44,8 +41,14 @@ class IngredientFormBase(ErrorMessagesMixin, forms.ModelForm):
             'category': forms.Select(attrs={'class': 'form-select'}),
             'dietary_tag': forms.CheckboxSelectMultiple(attrs={'class': 'dietary-tags'}),
             'default_unit': forms.Select(attrs={'class': 'form-select half-width'}),
-            'base_quantity': forms.NumberInput(attrs={'class': 'form-input half-width', 'min': 0}),
+            'base_quantity': forms.NumberInput(attrs={'class': 'form-input half-width', 'min': 0.01}),
         }
+
+    def clean_name(self):
+        name = self.cleaned_data['name'].strip()
+        if Ingredient.objects.filter(name__iexact=name).exists():
+            raise forms.ValidationError(f'"{name}" already exists.')
+        return name
 
 class IngredientAddForm(IngredientFormBase):
     def save(self, commit=True):
