@@ -3,7 +3,6 @@
 # TO-DO
 
 ## PRIORITY 1 FIXES
-    - in meal suggestions i get the sucsses twice 
 
 ## PRIORITY 2 FIXES
     - clean up css and move to different files(?) - the project breaks when I try to import css and I'm not sure why yet

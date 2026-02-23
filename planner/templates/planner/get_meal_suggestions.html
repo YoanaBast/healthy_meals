@@ -2,13 +2,21 @@
 
 {% block title %}Meal Suggestions{% endblock %}
 {% load custom_filters %}
+{% load core_filters %}
 
 {% block content %}
 
 <div class="container-home">
 
     <h2>Meal Suggestions</h2>
-    <p>Based on what’s currently in your fridge.</p>
+    <p>Get meal suggestions based on what’s currently in your fridge.</p>
+    <p>
+      Making a recipe will take ingredients from your
+      <a href="{% url 'manage_fridge' %}">fridge</a>
+      and save it in your
+      <a href="{% url 'meal_list' %}">meal history</a>.
+    </p>
+
         {% if messages %}
             {% for message in messages %}
                 <div class="message {{ message.tags }}">
@@ -35,7 +43,7 @@
 
                 {% for s in suggestions %}
                 <tr>
-                    <td>{{ s.recipe.name }}</td>
+                    <td>{{ s.recipe.name|title_except }}</td>
 
                     <td>{{ s.match_percent }}%</td>
 
