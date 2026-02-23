@@ -1,0 +1,231 @@
+/* Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+
+
+/* Container for hero / heading section */
+.container-home-head {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+    padding: 20px;
+    max-width: 1200px;
+    margin: 20px auto;
+    justify-items: center;
+    border-radius: 15px;
+    color: white;
+    text-align: center;
+
+    /* center dark green, edges transparent */
+    background: linear-gradient(
+        to right,
+        rgba(6, 64, 43, 0) 0%,
+        rgba(6, 64, 43, 0.5) 50%,
+        rgba(6, 64, 43, 0) 100%
+    );
+}
+
+/* H2 inside hero */
+.container-home-head h2 {
+    font-size: 2rem;
+    margin-bottom: 5px;
+}
+
+/* P below H2 */
+.container-home-head p {
+    font-size: 1.1rem;
+    color: #d4f0d4;  /* lighter green */
+    margin-top: 0;
+}
+
+/* spacing between this container and cards */
+.container-home-head + .container-home-cards {
+    margin-top: 20px;
+}
+
+/* Grid container */
+.container-home-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 60px;
+    padding: 0;         /* remove extra padding to fix mobile overflow */
+    margin: 20px auto;  /* center container */
+    max-width: 1200px;
+    justify-items: stretch;
+    align-items: stretch;
+    box-sizing: border-box;
+}
+
+/* Cards */
+.tab-content-cards {
+    width: 100%;
+    height: 180px;           /* fixed height */
+    background-color: #06402B;
+    border-radius: 15px;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+/* Mobile: 1 card per row */
+@media (max-width: 600px) {
+    .container-home-cards {
+        grid-template-columns: 1fr;
+        margin: 0 10px;      /* small margin to avoid edges */
+        gap: 20px;           /* keep vertical spacing consistent */
+    }
+}
+
+/* Tab header text */
+.tab-head-cards {
+    text-decoration: none;
+    color: white;
+    font-size: 36px;
+    font-weight: bold;
+    display: inline-block;
+    cursor: pointer;
+}
+
+.tab-head-cards span {
+    display: inline-block;
+    transition: transform 0.3s;
+    white-space: nowrap;
+}
+
+.tab-head-cards:hover span {
+    animation: wave 1.5s ease-in-out infinite;
+}
+
+.tab-head-cards:hover span:nth-child(1) { animation-delay: 0s; }
+.tab-head-cards:hover span:nth-child(2) { animation-delay: 0.05s; }
+.tab-head-cards:hover span:nth-child(3) { animation-delay: 0.1s; }
+
+@keyframes wave {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+/* Card styling */
+.card {
+    position: relative;
+    width: 100%;
+    max-width: 300px;
+    border-radius: 15px;
+    cursor: pointer;
+    background: #06402B;
+    transition: all 0.5s ease;
+    color: white;
+    overflow: hidden;
+}
+
+/* Decorative corners */
+.card::before,
+.card::after {
+    content: "";
+    position: absolute;
+    width: 20%;
+    height: 20%;
+    transition: all 0.5s ease, opacity 0.5s ease;
+    z-index: 1;
+}
+
+.card::before {
+    top: 0;
+    right: 0;
+    background-color: darkgreen;
+    border-radius: 0 15px 0 100%;
+}
+
+.card::after {
+    bottom: 0;
+    left: 0;
+    background-color: lightgreen;
+    border-radius: 0 100% 0 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    padding: 10px;
+    text-align: center;
+    white-space: normal;
+    overflow: auto; /* scroll if content is too big */
+    max-height: 180px; /* limit height */
+    font-size: 0.8rem; /* smaller text */
+    line-height: 1.1;
+    opacity: 0;
+}
+
+/* Hover effect */
+.card:hover::before,
+.card:hover::after {
+    width: 100%;
+    height: 100%;
+    border-radius: 15px;
+}
+
+.card:hover::after {
+    content: attr(data-text);
+    padding: 12px;
+    font-size: 0.9rem; /* slightly bigger than before */
+    line-height: 1.3;  /* optional: improves readability */
+    overflow-y: auto;
+    z-index: 2;
+    opacity: 1; /* fade in */
+    color: #333;       /* dark gray text */
+
+}
+
+.card .word {
+    padding: 5px 0; /* adds vertical spacing between words and card edges */
+}
+
+.tab-head-cards {
+    margin-bottom: 10px; /* space between heading and card */
+}
+
+.tab-content-cards {
+    width: 100%;
+    height: 180px;
+    background-color: #06402B;
+    border-radius: 15px;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 10px;
+    box-sizing: border-box;
+    /* remove min-width: 300px */
+}
+
+/* Mobile layout: 1 card per row */
+@media (max-width: 600px) {
+    .container-home-cards {
+        grid-template-columns: 1fr;
+        gap: 20px;
+        padding: 0 20px;  /* ← add horizontal padding */
+        margin: 0 auto;
+    }
+
+    .tab-head-cards {
+        width: 100%;  /* ← make the link full width */
+        display: block;
+    }
+
+    .tab-content-cards {
+        max-width: 100%;  /* ← remove the 300px cap on mobile */
+        min-width: unset;
+    }
+
+    .card {
+        max-width: 100%;  /* ← same here */
+    }
+}

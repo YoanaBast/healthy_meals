@@ -6,60 +6,72 @@ Foodganizer Home
 {% endblock %}
 
 {% block content %}
+<link rel="stylesheet" href="{% static 'css/homepage_styles.css' %}">
 
 <div class="hero">
     <img class="hero-bg" src="{% static 'images/cucumber_tomato.svg' %}" alt="Tomato">
-    <div class="hero-text">
-        <p>Ready to get ahead of your meal planning? Start your journey below:</p>
-    </div>
+
+</div>
+
+
+<div class="container-home-head">
+    <h2>Ready to get ahead of your meal planning?</h2>
+    <p>Start your journey below:</p>
 </div>
 
 
-<div class="container-home_bot">
+<div class="container-home-cards">
 
-    <div id="grocery-list" class="tab-content active">
-    <a href="{% url 'generate_grocery_list' %}" class="tab-head">
-        <span class="word">Generate</span>
-        <span class="word">Grocery</span>
-        <span class="word">List</span>
-    </a>
-    <p>Generate a personalized grocery list based on your favourite recipes!</p>
+<a href="{% url 'generate_grocery_list' %}" class="tab-head-cards">
+    <div id="grocery-list" class="tab-content-cards card" data-text="Get a personalized grocery list!">
+      <p>Generate Grocery List</p>
     </div>
+</a>
 
-    <div id="meal-suggestions" class="tab-content">
-        <a href="{% url 'meal_suggestions' %}" class="tab-head">
-            <span class="word">Get</span>
-            <span class="word">Meal</span>
-            <span class="word">Suggestions</span>
-        </a>
-        <p>Ditch going to the store! See what you can cook with the ingredients in your fridge.</p>
+<a href="{% url 'user_grocery_list' %}" class="tab-head-cards">
+    <div id="grocery-list-product" class="tab-content-cards card" data-text="Your personalized grocery list!">
+      <p>View Grocery List</p>
     </div>
+</a>
 
-    <div id="update-fridge" class="tab-content">
-        <a href="{% url 'manage_fridge' %}" class="tab-head">
-            <span class="word">Update</span>
-            <span class="word">your</span>
-            <span class="word">Fridge</span>
-        </a>
-        <p>What do you have in your fridge?</p>
+<a href="{% url 'meal_suggestions' %}" class="tab-head-cards">
+    <div id="meal-suggestions" class="tab-content-cards card" data-text="See what you can cook right now!">
+      <p>Get Meal Suggestions</p>
     </div>
+</a>
 
-    <div id="manage-recipes" class="tab-content">
-        <a href="{% url 'manage_recipes' %}" class="tab-head">
-            <span class="word">Manage</span>
-            <span class="word">Recipes</span>
-        </a>
-        <p>Manage your recipes here!.</p>
+<a href="{% url 'meal_list' %}" class="tab-head-cards">
+    <div id="meal-list" class="tab-content-cards card" data-text="Your own grocery list!">
+      <p>Your Meals Meals</p>
     </div>
+</a>
 
-    <div id="manage-ingredients" class="tab-content">
-        <a href="{% url 'manage_ingredients' %}" class="tab-head">
-            <span class="word">Manage</span>
-            <span class="word">Ingredients</span>
-         </a>
-        <p>Introduce new ingredients here</p>
+<a href="{% url 'manage_recipes' %}" class="tab-head-cards">
+    <div id="manage-recipes" class="tab-content-cards card" data-text="Manage your recipes here!">
+      <p>Manage Recipes </p>
     </div>
+</a>
+
+<a href="{% url 'manage_fridge' %}" class="tab-head-cards">
+    <div id="update-fridge" class="tab-content-cards card" data-text="What do you have in your fridge?">
+      <p>Update your Fridge</p>
+    </div>
+</a>
+
+<a href="{% url 'manage_ingredients' %}" class="tab-head-cards">
+    <div id="manage-ingredients" class="tab-content-cards card" data-text="Introduce new ingredients here.">
+      <p>Manage Ingredients </p>
+    </div>
+</a>
+
+<a href="#" class="tab-head-cards">
+<div id="calorie-tracker" class="tab-content-cards card" data-text="Coming Soon">
+      <p>Calorie Tracker </p>
+</div>
+</a>
+
 
 </div>
+
 
 {% endblock %}
