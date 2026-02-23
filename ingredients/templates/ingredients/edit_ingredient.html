@@ -28,18 +28,7 @@
     <form method="POST" id="edit-ingredient-form" novalidate>
 
         {% csrf_token %}
-            {% if form.errors %}
-                <div class="message error">
-                    {% for field in form %}
-                        {% for error in field.errors %}
-                            <p>{{ field.label }}: {{ error }}</p>
-                        {% endfor %}
-                    {% endfor %}
-                    {% for error in form.non_field_errors %}
-                        <p>{{ error }}</p>
-                    {% endfor %}
-                </div>
-            {% endif %}
+        {% include "core/errors_label.html" %}
 
 
         <div class="grid-container">
