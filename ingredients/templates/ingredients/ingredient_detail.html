@@ -6,6 +6,7 @@
 {% block title %}{{ ingredient.name }} Details{% endblock %}
 
 {% block content %}
+<link rel="stylesheet" href="{% static 'css/ingredient_styles.css' %}">
 
 <div class="container-content">
     <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
@@ -116,30 +117,6 @@
     </div>
 
 
-<style>
-.nutrients-tables {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 2rem;
-    margin-left: 0;   /* left-align the table */
-    max-width: 500px;      /* adjust width */
-}
-
-.nutrients-table {
-    width: 100%;
-    border-collapse: collapse;
-    background: #111;
-    color: #fff;
-}
-.nutrients-table th, .nutrients-table td {
-    border: 1px solid #444;
-    padding: 0.5rem 1rem;
-    text-align: left;
-}
-.nutrients-table th { background: #222; }
-
-
-</style>
 <script src="{% static 'js/delete_popup.js' %}"></script>
 
 {% endblock %}
