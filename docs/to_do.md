@@ -1,18 +1,7 @@
 user = User.objects.get(username="default") this is because auth is excluded 
 
 
-read-only or disabled fields
 
-The easiest quick win is adding explicit error_messages to at least one form, e.g.:
-pythonservings = forms.IntegerField(
-    min_value=1,
-    error_messages={
-        'min_value': 'Servings must be at least 1.',
-        'required': 'Please enter the number of servings.',
-    }
-)
-
-Custom error_messages on fields — this I haven't seen, worth adding
 
 
 # TO-DO
@@ -20,6 +9,7 @@ Custom error_messages on fields — this I haven't seen, worth adding
 ## PRIORITY 1 FIXES
     - show only fav needs to filter all not just page and stay checked until i uncheck it
     - remove all prints 
+    - check the custom error messages in mixin
 ## PRIORITY 2 FIXES
 
 ## FEATURES

@@ -56,11 +56,14 @@ def add_ingredient(request):
                 return redirect('edit_ingredient', ingredient_id=ingredient.id)
             except IntegrityError:
                 messages.error(request, f'"{ingredient.name}" already exists.')
-        else:
-            name_errors = form.errors.get('name', [])
-            if any('already exists' in e for e in name_errors):
-                name = request.POST.get('name', '').strip().lower()
-                messages.error(request, f'"{name}" already exists.')
+
+            print(f"errors: {form.errors}")
+
+        # else:
+        #     name_errors = form.errors.get('name', [])
+        #     if any('already exists' in e for e in name_errors):
+        #         name = request.POST.get('name', '').strip().lower()
+        #         messages.error(request, f'"{name}" already exists.')
 
     return render(request, 'ingredients/add_ingredient.html', {'form': form})
 

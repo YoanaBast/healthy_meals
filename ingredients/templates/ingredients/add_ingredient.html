@@ -20,6 +20,18 @@
 
             <form id="add-ingredient-form" method="post" action="{% url 'add_ingredient' %}">
                 {% csrf_token %}
+                {% if form.errors %}
+                    <div class="message error">
+                        {% for field in form %}
+                            {% for error in field.errors %}
+                                <p>{{ field.label }}: {{ error }}</p>
+                            {% endfor %}
+                        {% endfor %}
+                        {% for error in form.non_field_errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
 
                 {{ form.name.label_tag }} {{ form.name }}
 

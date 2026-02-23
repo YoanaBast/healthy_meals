@@ -2,10 +2,33 @@ from django import forms
 
 from core.constants import NUTRIENTS
 from .models import Ingredient, IngredientMeasurementUnit
+from core.mixins import ErrorMessagesMixin
 
 
 
-class IngredientFormBase(forms.ModelForm):
+class IngredientFormBase(ErrorMessagesMixin, forms.ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.apply_error_messages(['name', 'quantity', 'unit'])
+
+        self.fields['dietary_tag'].required = False
+
+        for nutrient in NUTRIENTS:
+            field = f'base_quantity_{nutrient}'
+            self.fields[field].label = nutrient.replace('_', ' ').title()
+            self.fields[field].required = False
+            self.fields[field].initial = 0
+            self.fields[field].widget = forms.NumberInput(
+                attrs={'class': 'form-input nutrient-input', 'step': 'any', 'min': 0}
+            )
+
+        self.fields['base_quantity_kcal'].help_text = 'Calories per base quantity.'
+        self.fields['base_quantity_protein'].help_text = 'In grams.'
+        self.fields['base_quantity_fat'].help_text = 'Total fat in grams.'
+
+
     class Meta:
         model = Ingredient
         fields = (
@@ -23,24 +46,6 @@ class IngredientFormBase(forms.ModelForm):
             'default_unit': forms.Select(attrs={'class': 'form-select half-width'}),
             'base_quantity': forms.NumberInput(attrs={'class': 'form-input half-width', 'min': 0}),
         }
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self.fields['dietary_tag'].required = False
-
-        for nutrient in NUTRIENTS:
-            field = f'base_quantity_{nutrient}'
-            self.fields[field].label = nutrient.replace('_', ' ').title()
-            self.fields[field].required = False
-            self.fields[field].initial = 0
-            self.fields[field].widget = forms.NumberInput(
-                attrs={'class': 'form-input nutrient-input', 'step': 'any', 'min': 0}
-            )
-
-        self.fields['base_quantity_kcal'].help_text = 'Calories per base quantity.'
-        self.fields['base_quantity_protein'].help_text = 'In grams.'
-        self.fields['base_quantity_fat'].help_text = 'Total fat in grams.'
 
 class IngredientAddForm(IngredientFormBase):
     def save(self, commit=True):
