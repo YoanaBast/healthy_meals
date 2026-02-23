@@ -5,12 +5,15 @@ user = User.objects.get(username="default") this is because auth is excluded
 
 
 # TO-DO
--r remember to set debug false 
 ## PRIORITY 1 FIXES
     - show only fav needs to filter all not just page and stay checked until i uncheck it
-    - remove all prints 
     - check the custom error messages in mixin
+    - update the homepage
+
 ## PRIORITY 2 FIXES
+    - finish documentation and link it properly
+    - remove all prints 
+    - remember to set debug false 
 
 ## FEATURES
     - add view option to grocery list
@@ -19,7 +22,6 @@ user = User.objects.get(username="default") this is because auth is excluded
 
     - add calorie tracker
     - add select boxes and select all with option to delete all ?
-    - finish documentation and link it properly
 
 ## TEST
     - duplicates, deleting to set null
@@ -29,7 +31,8 @@ user = User.objects.get(username="default") this is because auth is excluded
     
 ## UI
     - make the house, cart, fork on the same row for mobile
-    - no sticky header on mobile 
+    - no sticky header on mobile    
+    - center the divs in header lol
 
 ## EXTRA FEATURES
     - check if i can make a guide
