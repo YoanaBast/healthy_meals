@@ -52,18 +52,10 @@ def add_ingredient(request):
                         defaults={'conversion_to_base': 1}
                     )
 
-                # Redirect to edit so user can add extra units immediately
                 return redirect('edit_ingredient', ingredient_id=ingredient.id)
             except IntegrityError:
                 messages.error(request, f'"{ingredient.name}" already exists.')
 
-            print(f"errors: {form.errors}")
-
-        # else:
-        #     name_errors = form.errors.get('name', [])
-        #     if any('already exists' in e for e in name_errors):
-        #         name = request.POST.get('name', '').strip().lower()
-        #         messages.error(request, f'"{name}" already exists.')
 
     return render(request, 'ingredients/add_ingredient.html', {'form': form})
 
@@ -98,11 +90,7 @@ def edit_ingredient(request, ingredient_id):
                     'all_units': MeasurementUnit.objects.all().order_by('name_singular'),
                 })
             return redirect('edit_ingredient', ingredient_id=ingredient.id)
-        # else:
-        #     name_errors = form.errors.get('name', [])
-        #     if any('already exists' in e for e in name_errors):
-        #         name = request.POST.get('name', '').strip().lower()
-        #         messages.error(request, f'"{name}" already exists.')
+
     else:
         form = IngredientEditForm(instance=ing)
 
@@ -114,9 +102,6 @@ def edit_ingredient(request, ingredient_id):
         'all_units': MeasurementUnit.objects.all().order_by('name_singular'),
     }
     return render(request, "ingredients/edit_ingredient.html", context)
-
-
-
 
 
 def ingredient_detail(request, ingredient_id):
@@ -141,7 +126,6 @@ def ingredient_detail(request, ingredient_id):
                 ingredient_unit=selected_unit,
                 quantity=quantity
             )
-            # print(f"nutrients {nutrients}") # dict!
             unit_name = selected_unit.name_for_quantity(quantity)
 
     nutrients = {
@@ -291,6 +275,7 @@ def delete_measurement_unit(request, ingredient_id, imu_id):
         imu.delete()
     return redirect('edit_ingredient', ingredient_id=ingredient_id)
 
+
 def list_categories_ajax(request):
     cats = IngredientCategory.objects.all().order_by('name')
     return JsonResponse({'items': [
@@ -340,6 +325,7 @@ def list_measurement_units_ajax(request):
         for u in units
     ]})
 
+
 def edit_measurement_unit_ajax(request, pk):
     if request.method == 'POST':
         unit = get_object_or_404(MeasurementUnit, pk=pk)
@@ -365,6 +351,7 @@ def delete_measurement_unit_ajax(request, pk):
 def dietary_tags_fragment(request):
     form = IngredientAddForm()
     return HttpResponse(str(form['dietary_tag']))
+
 
 def edit_measurement_unit_conversion(request, ingredient_id, imu_id):
     imu = get_object_or_404(IngredientMeasurementUnit, pk=imu_id)

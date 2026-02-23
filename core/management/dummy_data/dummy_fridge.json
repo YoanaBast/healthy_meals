@@ -1,8 +1,0 @@
-{
-  "fridge_items": [
-    {"name": "Flour", "quantity": 500, "unit": "g"},
-    {"name": "Milk", "quantity": 2, "unit": "cup"},
-    {"name": "Butter", "quantity": 100, "unit": "g"},
-    {"name": "Egg", "quantity": 6, "unit": "pc"}
-  ]
-}

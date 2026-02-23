@@ -15,7 +15,7 @@ from .models import Recipe, RecipeCategory, RecipeIngredient
 # Create your views here.
 
 def manage_recipes(request):
-    user = User.objects.get(username="default")
+    user, _ = User.objects.get_or_create(username="default")
     recipes_qs = Recipe.objects.all().order_by('name')
     paginator = Paginator(recipes_qs, 10)
     page_number = request.GET.get('page')
@@ -44,17 +44,12 @@ def add_recipe(request):
     ingredients = Ingredient.objects.prefetch_related('measurement_units__unit').all()
 
     if request.method == 'POST':
-        print("DEBUG: POST data =", request.POST)  # <-- see all form fields
         recipe_form = RecipeForm(request.POST)
         ingredient_formset = RecipeIngredientFormSet(request.POST)
-
-        print("DEBUG: recipe_form.is_valid() =", recipe_form.is_valid())
-        print("DEBUG: recipe_form.errors =", recipe_form.errors)
 
         if recipe_form.is_valid() and ingredient_formset.is_valid():
             try:
                 recipe = recipe_form.save(commit=False)
-                print("DEBUG: recipe.category =", recipe.category)
 
                 recipe.name = recipe.name.strip().lower()
                 recipe.save()
