@@ -1,7 +1,10 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load core_filters %}
 
-{% block title %}Generate Grocery List{% endblock %}
+{% block title %}
+Generate Grocery List
+{% endblock %}
 
 {% block content %}
 
@@ -10,7 +13,8 @@
 
 <div class="container-home">
     <h2>Select Recipes</h2>
-<p>Create your very own <a href="{% url 'user_grocery_list' %}">grocery list</a>.</p> <br>
+<p>Create your very own <a href="{% url 'user_grocery_list' %}">Grocery List</a>.</p> <br>
+<p>Try searching for a recipe, or choose from your favourites!</p> <br>
 
     {% if messages %}
         {% for message in messages %}
@@ -33,7 +37,7 @@
         {% for rec in page_obj %}
         <div class="recipe-line"
              data-fav="{{ rec.is_fav|yesno:'1,0' }}"
-             data-name="{{ rec.name|lower }}">
+                 data-name="{{ rec.name|lower }}">
             <label>
                 <input type="checkbox"
                        class="recipe-checkbox"
@@ -41,8 +45,10 @@
                        value="{{ rec.id }}"
                     {% if rec.id|stringformat:"s" in selected_recipes %}checked{% endif %}
                     onchange="updateSelection(this)">
-                {{ rec.name }} {% if rec.is_fav %}<span class="fav-star">★</span>{% endif %}
+                {{ rec.name|title_except }} - {{ rec.category.name|title_except  }} - {{ rec.nutrients_with_units.kcal|default:"0 kcal"}}  {% if rec.is_fav %}<span class="fav-star">♡</span>{% endif %}
             </label>
+            <a href="{% url 'recipe_detail' rec.id %}" class="btn btn-small btn-secondary">View</a>
+
         </div>
         {% endfor %}
 
@@ -55,7 +61,6 @@
             <input type="hidden" class="hidden-selection" name="recipes" value="{{ r }}">
         {% endfor %}
 
-<!--        <button type="submit" class="btn">Generate Grocery List</button>-->
     </form>
 
     {% if page_obj.has_other_pages %}
