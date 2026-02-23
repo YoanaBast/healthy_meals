@@ -4,8 +4,13 @@
 {% block title %}Generate Grocery List{% endblock %}
 
 {% block content %}
+
+<link rel="stylesheet" href="{% static 'css/planner_styles.css' %}">
+
+
 <div class="container-home">
     <h2>Select Recipes</h2>
+<p>Create your very own <a href="{% url 'user_grocery_list' %}">grocery list</a>.</p> <br>
 
     {% if messages %}
         {% for message in messages %}
@@ -66,45 +71,6 @@
     {% endif %}
 </div>
 
-<style>
-.recipe-line {
-    background: var(--bg-secondary);
-    padding: 1rem;
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    margin-bottom: 0.5rem;
-}
-
-.recipe-line label {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    text-align: left;
-}
-
-.recipe-line input[type="checkbox"] {
-    flex-shrink: 0;
-}
-
-.fav-star {
-    color: var(--accent);
-    margin-left: auto;
-}
-
-.pagination {
-    text-align: center;
-    margin-top: 1rem;
-}
-
-.pagination a {
-    padding: 0.5rem 1rem;
-    margin: 0 0.25rem;
-}
-</style>
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {

@@ -1,3 +1,7 @@
+- CSS @import works fine in development but breaks with collectstatic + DEBUG=False because WhiteNoise serves each file independently — it doesn't process or bundle @import statements, so the imported files never load.
+- No amount of planning seems to be enough, I and up reworking things multiple times 
+- worked on multiple git branches, switched back and forth, forgot to pull, made and resolved conflicts, learned that the local main does not update on its own and a git pull instead of a git pull origin main gave me a heart attack 
+- creating a branch called pages-something and then learning it is called paginator left me with some weird looking branches 
 
 
 # TO-DO

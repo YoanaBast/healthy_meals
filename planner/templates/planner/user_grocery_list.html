@@ -4,10 +4,11 @@
 {% block title %}My Grocery List{% endblock %}
 
 {% block content %}
+<link rel="stylesheet" href="{% static 'css/planner_styles.css' %}">
+
 <div class="container-home">
     <h2>My Grocery List</h2>
-
-    {% if messages %}
+    <p>Enjoy a personalized grocery list from the <a href="{% url 'generate_grocery_list' %}">grocery list generator</a>.</p>    {% if messages %}
         {% for message in messages %}
             <div class="alert alert-{{ message.tags }}">{{ message }}</div>
         {% endfor %}
@@ -109,58 +110,6 @@ function openGroceryDeleteModal(id, name) {
 }
 </script>
 
-<style>
-.history-section {
-    margin-top: 2rem;
-}
 
-.history-card {
-    background: var(--bg-secondary);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 1rem 1.25rem;
-    margin-bottom: 1rem;
-}
-
-.history-header {
-    display: flex;
-    align-items: center;
-    margin-bottom: 0.75rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 1px solid var(--border);
-}
-
-.history-date {
-    font-size: 0.85rem;
-    color: var(--text-muted);
-    font-weight: 500;
-}
-
-.history-recipe {
-    margin-bottom: 0.75rem;
-}
-
-.history-recipe:last-child {
-    margin-bottom: 0;
-}
-
-.history-recipe-name {
-    font-weight: 600;
-    margin-bottom: 0.25rem;
-    color: var(--accent);
-}
-
-.history-ingredients {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-.history-ingredients li {
-    font-size: 0.9rem;
-    padding: 0.15rem 0;
-    color: var(--text-secondary, inherit);
-}
-</style>
 
 {% endblock %}

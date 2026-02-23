@@ -13,7 +13,8 @@
 - Claude:
   - explained to me how ajax works and showed me how to apply it to my views 
   - Assisted me with questions, such as "Do you think solution X is optimal, or should I do Y. What are the pros and cons of both approaches"
-  - Some CSS suggestions
+  - General lazy tasks such as:
+    - I've changed my templates and styles multiple times, could you scan for any unused css classes and reorder in a more readable way?
   
 
 - ClickUp Brain:
