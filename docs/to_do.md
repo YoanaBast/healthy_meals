@@ -1,9 +1,9 @@
+
 # TO-DO
 ## PRIORITY 1 FIXES
-
+    - add a template for how it works 
 
 ## PRIORITY 2 FIXES
-    - add how it works template 
 
 ## FEATURES
     - add search boxes
