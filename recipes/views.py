@@ -15,7 +15,7 @@ from .models import Recipe, RecipeCategory, RecipeIngredient
 # Create your views here.
 
 def manage_recipes(request):
-    user = User.objects.get(username="default")
+    user, _ = User.objects.get_or_create(username="default")
     recipes_qs = Recipe.objects.all().order_by('name')
     paginator = Paginator(recipes_qs, 10)
     page_number = request.GET.get('page')

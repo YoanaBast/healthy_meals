@@ -11,7 +11,7 @@ from recipes.models import Recipe, RecipeIngredient
 # Create your views here.
 
 def manage_fridge(request):
-    user = User.objects.get(username="default")
+    user, _ = User.objects.get_or_create(username="default")
     fridge_list = UserFridge.objects.filter(user=user).select_related('ingredient__category', 'unit')
     ingredients = Ingredient.objects.all()
 
@@ -49,7 +49,7 @@ def edit_fridge_item(request, item_id):
 
 
 def delete_fridge_item(request, fridge_id):
-    user = User.objects.get(username="default")
+    user, _ = User.objects.get_or_create(username="default")
     item = get_object_or_404(UserFridge, id=fridge_id, user=user)
     if request.method == "POST":
         item.delete()
@@ -137,7 +137,7 @@ def add_fridge_item(request):
 
 
 def get_meal_suggestions(request):
-    user = User.objects.get(username="default")
+    user, _ = User.objects.get_or_create(username="default")
     fridge_items = UserFridge.objects.filter(user=user)
     recipes = Recipe.objects.all()
 
@@ -198,7 +198,7 @@ def make_recipe(request, id):
         return redirect('meal_suggestions')
 
     recipe = get_object_or_404(Recipe, id=id)
-    user = User.objects.get(username="default")
+    user, _ = User.objects.get_or_create(username="default")
     fridge_items = UserFridge.objects.filter(user=user)
 
     # First, check if user has enough ingredients
@@ -261,7 +261,7 @@ def convert_qty_to_unit(qty, from_unit, to_unit, ingredient):
 
 
 def generate_grocery_list(request):
-    user = User.objects.get(username="default")
+    user, _ = User.objects.get_or_create(username="default")
 
     show_favs = request.GET.get('favs') == '1'
 
@@ -437,7 +437,7 @@ def generate_grocery_list(request):
 
 def user_grocery_list(request):
     from collections import OrderedDict
-    user = User.objects.get(username="default")
+    user, _ = User.objects.get_or_create(username="default")
     items = UserGroceryList.objects.filter(user=user).select_related('ingredient', 'unit')
 
     raw_history = GroceryListGeneration.objects.filter(user=user).prefetch_related(
@@ -498,7 +498,7 @@ def add_grocery_to_fridge(request, item_id):
 
 def add_all_grocery_to_fridge(request):
     if request.method == "POST":
-        user = User.objects.get(username="default")
+        user, _ = User.objects.get_or_create(username="default")
         items = UserGroceryList.objects.filter(user=user)
 
         for item in items:
@@ -518,7 +518,7 @@ def delete_grocery_item_by_id(request, id):
     return delete_grocery_item(request, item_id=id)
 
 def meal_list(request):
-    user = User.objects.get(username="default")
+    user, _ = User.objects.get_or_create(username="default")
     meals = UserMealList.objects.filter(user=user).select_related('recipe')
 
     paginator = Paginator(meals, 10)

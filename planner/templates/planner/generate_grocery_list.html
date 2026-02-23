@@ -12,7 +12,7 @@ Generate Grocery List
 
 
 <div class="container-home">
-    <h2>Select Recipes</h2>
+    <h2>Generate Grocery List</h2>
 <p>Create your very own <a href="{% url 'user_grocery_list' %}">Grocery List</a>.</p> <br>
 <p>Try searching for a recipe, or choose from your favourites!</p> <br>
 
@@ -50,13 +50,16 @@ Generate Grocery List
             <a href="{% url 'recipe_detail' rec.id %}" class="btn btn-small btn-secondary">View</a>
 
         </div>
+        {% empty %}
+            <p style="color: var(--text-secondary); font-style: italic;">
+                {% if show_favs %}
+                    No favourite recipes found. <a href="?page=1">Show all recipes</a>.
+                {% else %}
+                    No recipes yet. <a href="{% url 'add_recipe' %}">Add your first recipe</a>.
+                {% endif %}
+            </p>
         {% endfor %}
 
-        <!--
-            Hidden inputs carry selections from OTHER pages.
-            On load, JS removes any hidden input whose ID matches a visible checkbox on
-            this page (to avoid duplicates), then re-adds one for every pre-checked box.
-        -->
         {% for r in selected_recipes %}
             <input type="hidden" class="hidden-selection" name="recipes" value="{{ r }}">
         {% endfor %}
