@@ -5,8 +5,6 @@
     - show only fav needs to filter all not just page and stay checked until i uncheck it
     
 ## PRIORITY 2 FIXES
-    - move nutrients and stuff outside of models
-    - make ingredients added to your list to x and y added
 
 ## FEATURES
     - add view option to grocery list
