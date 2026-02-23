@@ -1,34 +1,24 @@
-user = User.objects.get(username="default") this is because auth is excluded 
-
 
 # TO-DO
 ## PRIORITY 1 FIXES
-    
+    - add a template for how it works 
 
 ## PRIORITY 2 FIXES
-    - finish documentation and link it properly
-    - remember to set debug false 
 
 ## FEATURES
     - add search boxes
     - add more dummy data
-
     - add calorie tracker
-    - add select boxes and select all with option to delete all ?
+    - add select boxes and select all with option to delete all ? bulk actions
 
 ## TEST
-    - update the setup inscrutions and files, test on other PC and acc
-
     
 ## UI
-    - make the house, cart, fork on the same row for mobile
-    - no sticky header on mobile    
-    - center the divs in header lol
 
 ## EXTRA FEATURES
-    - check if i can make a guide
-    - check if i can make day/night widget
-    - later I plan to have a check that allows edit/delete only on fields created by a specific user (user cannot delete public ingredients made by other users)
+    -  make a guide
+    - make day/night widget
+    - have a check that allows edit/delete only on fields created by a specific user (user cannot delete public ingredients made by other users)
     - created by will be added to models once i implement auth
 
 

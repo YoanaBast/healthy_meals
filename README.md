@@ -75,8 +75,13 @@ python fast_setup.py
 ```
 
 ## Notes:
+1. This is developed as uni assignment. To be compliant to the no auth requirement, I have assigned a default user for all logic that needs it. I intend to scale the app and a huge part of my logic will depend on dynamic users. 
+   - default user in question: user = User.objects.get(username="default") 
+   - No auth requirement: "Authentication and Django User management are explicitly excluded from the following requirements. You are not supposed to implement login, logout, registration, or user-related functionality."
+
 
 
 ## See Also:
 - [AI & Tools Used](docs/ai_tools.md)
 - [TO-DO List](docs/to_do.md) 
+- Demo

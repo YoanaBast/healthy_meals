@@ -110,3 +110,4 @@ class TestIngredientModels(TestCase):
         fat = self.egg_ingredient.get_nutrients_dict(starting_unit=pc_unit, quantity=100)["fat"]
         self.assertEqual(fat, 0)
 
+#git check
