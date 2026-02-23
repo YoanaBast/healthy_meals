@@ -1,5 +1,5 @@
 from django.core.paginator import Paginator
-from django.db.models import Prefetch
+from django.db.models import Prefetch, Exists, OuterRef
 from planner.forms import UserFridgeForm
 from django.contrib import messages
 from django.contrib.auth.models import User
@@ -263,7 +263,8 @@ def convert_qty_to_unit(qty, from_unit, to_unit, ingredient):
 def generate_grocery_list(request):
     user = User.objects.get(username="default")
 
-    from django.db.models import Exists, OuterRef
+    show_favs = request.GET.get('favs') == '1'
+
     recipes = Recipe.objects.annotate(
         is_fav=Exists(
             Recipe.favourited_by.through.objects.filter(
@@ -273,7 +274,12 @@ def generate_grocery_list(request):
         )
     ).prefetch_related(
         Prefetch('recipe_ingredient', queryset=RecipeIngredient.objects.select_related('unit', 'ingredient'))
-    ).all()
+    )
+
+    if show_favs:
+        recipes = recipes.filter(favourited_by=user)
+
+    recipes = recipes.order_by('name')
 
     paginator = Paginator(recipes, 10)
     page_number = request.GET.get('page')
@@ -293,6 +299,8 @@ def generate_grocery_list(request):
                 'page_obj': page_obj,
                 'recipes': page_obj.object_list,
                 'selected_recipes': selected_recipes,
+                'show_favs': show_favs,
+
             })
 
         selected_recipes_qs = Recipe.objects.filter(id__in=recipe_ids).prefetch_related(
@@ -422,6 +430,8 @@ def generate_grocery_list(request):
         'page_obj': page_obj,
         'recipes': page_obj.object_list,
         'selected_recipes': selected_recipes,
+        'show_favs': show_favs,
+
     })
 
 
