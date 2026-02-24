@@ -46,7 +46,6 @@ python fast_setup.py
 ```
 - This will do the following:
   - create .env if you don't have one 
-  - generate and assign a django secret key
   - install requirements
   - makemigrations and migrate
   - collectstatic
