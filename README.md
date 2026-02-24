@@ -19,6 +19,7 @@ git clone https://github.com/YoanaBast/healthy_meals.git
 cd healthy_meals
 ```
 - healthy_meals is the name of my root, if you set another name for yours, please use that name - cd your_root
+- if you already have a root with venv and clone in that venv, you may get the healthy_meals folder nested in your root. Then you need to cd healthy_meals
 
   
 ### 2. Virtual Environment
@@ -34,7 +35,7 @@ source venv/bin/activate   # on Linux/Mac
 venv\Scripts\activate      # on Windows
 ```
 
-- all following commanda are to be run in venv
+- all following commanda are to be run in the root where manage.py is (healthy_meals or your_root)
   
 
 ### 3. Setup
