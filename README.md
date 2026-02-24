@@ -46,7 +46,7 @@ venv\Scripts\activate      # on Windows
 python fast_setup.py
 ```
 - This will do the following:
-  - create .env if you don't have one 
+  - create .env if you don't have one (you need to put your creds like [this](docs/creds_example.md))
   - install requirements
   - makemigrations and migrate
   - collectstatic
