@@ -30,10 +30,14 @@ python -m venv venv
 source venv/bin/activate   # on Linux/Mac
 venv\Scripts\activate      # on Windows
 ```
+### 3. Requirements
+```bash
+    pip install -r requirements.txt
+```
 
-### 2. Setup
+### 4. Setup
 
-#### 2.1 Fast Setup
+#### 4.1 Fast Setup
 - You can run the command below to complete the setup:
 ```bash
 python fast_setup.py
@@ -46,7 +50,7 @@ python fast_setup.py
   - collectstatic
 - It will also offer you to populate dummy data (it will ask you first)
 
-#### 2.2 Manual Setup
+#### 4.2 Manual Setup
 - If you don't want to use the fast setup, you can follow the steps below
     - create a .env file in the root directory (healthy_meals)
     - put [this](docs/creds_example.md) inside and update it with your credentials
@@ -68,7 +72,7 @@ python fast_setup.py
     python manage.py runserver
 ```
 
-#### 2.3 Dummy Data
+#### 4.3 Dummy Data
 - You can populate the DB with some dummy data by running this:
 ```bash
     python manage.py populate_dummy_data
