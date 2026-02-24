@@ -28,7 +28,7 @@
     <form method="POST" id="edit-ingredient-form" novalidate>
 
         {% csrf_token %}
-        {% include "core/errors_label.html" %}
+        {% include "errors_label.html" %}
         {% if messages %}
             {% for message in messages %}
                 <div class="message {{ message.tags }}">{{ message }}</div>
@@ -188,8 +188,8 @@
     </div>
 </div>
 
-{% include 'core/_quick_add_modal.html' %}
-{% include 'core/_manage_list_modal.html' %}
+{% include '_quick_add_modal.html' %}
+{% include '_manage_list_modal.html' %}
 
 <script src="{% static 'js/fetch_and_manage.js' %}"></script>
 
