@@ -1,4 +1,4 @@
-from django.core.validators import MinValueValidator
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 
 from core.constants import NUTRIENTS, NUTRIENT_UNITS
@@ -6,7 +6,7 @@ from core.constants import NUTRIENTS, NUTRIENT_UNITS
 
 
 class IngredientDietaryTag(models.Model):
-    name = models.CharField(max_length=100, unique=True)
+    name = models.CharField(max_length=60, unique=True)
 
     def __str__(self):
         return self.name
@@ -29,13 +29,11 @@ class IngredientCategory(models.Model):
 
 class MeasurementUnit(models.Model):
     code = models.CharField(max_length=10, unique=True)
-    name_singular = models.CharField(max_length=50)
-    name_plural = models.CharField(max_length=50)
-
+    name_singular = models.CharField(max_length=40)
+    name_plural = models.CharField(max_length=40)
 
     def __str__(self):
         return f"{self.name_singular} ({self.code})"
-
 
 
 class IngredientMeasurementUnit(models.Model):
@@ -44,8 +42,10 @@ class IngredientMeasurementUnit(models.Model):
     """
     ingredient = models.ForeignKey('Ingredient', on_delete=models.CASCADE, related_name='measurement_units')
     unit = models.ForeignKey(MeasurementUnit, on_delete=models.CASCADE)
-    conversion_to_base = models.FloatField(validators=[MinValueValidator(0.01)], help_text="How much of this unit equals the base_quantity")
+
+    conversion_to_base = models.FloatField(default=1, validators=[MinValueValidator(0.01), MaxValueValidator(100_000)], help_text="How much of this unit equals the base_quantity")
     # 1 cup of carrot ≈ 120 g → conversion_to_base = 120
+
     def name_for_quantity(self, quantity=1):
         return self.unit.name_singular if quantity == 1 else self.unit.name_plural
 
@@ -64,18 +64,15 @@ class IngredientMeasurementUnit(models.Model):
 class Ingredient(models.Model):
     NUTRIENTS = NUTRIENTS
     NUTRIENT_UNITS = NUTRIENT_UNITS
+    # init because will use in loop
 
     name = models.CharField(max_length=100, unique=True)
 
-    default_unit = models.ForeignKey(
-        'MeasurementUnit',
-        on_delete=models.SET_NULL,
-        null=True,
-        related_name='+'
-    )
+    default_unit = models.ForeignKey('MeasurementUnit', on_delete=models.SET_NULL, null=True, related_name='+') #no reverse
     #the unit that holds the nutrient data for conversions
 
-    base_quantity = models.FloatField(default=100, validators=[MinValueValidator(0.01)], help_text="The quantity the NUTRIENTS are based on in default_unit (100 g, 1 pc, etc.)")
+    base_quantity = models.FloatField(default=100, validators=[MinValueValidator(0.01), MaxValueValidator(100_000)],
+                                      help_text="The quantity the NUTRIENTS are based on in default_unit (100 g, 1 pc, etc.)")
     #base_quantity = 100 means nutrients are defined per 100g
 
     category = models.ForeignKey(IngredientCategory, null=True, on_delete=models.SET_NULL, related_name='ingredient')
@@ -85,7 +82,7 @@ class Ingredient(models.Model):
     #ManyToManyField does not use null=True because the relation is stored in a separate join table
 
     for nutrient in NUTRIENTS:
-        locals()[f'base_quantity_{nutrient}'] = models.FloatField(default=0, validators=[MinValueValidator(0)])
+        locals()[f'base_quantity_{nutrient}'] = models.FloatField(default=0, validators=[MinValueValidator(0), MaxValueValidator(100_000)], )
     #dynamically creates a model field for each nutrient in the NUTRIENTS list
 
     @property
@@ -94,7 +91,7 @@ class Ingredient(models.Model):
         return ", ".join(tag.name for tag in self.dietary_tag.all()) or "-"
 
     def get_nutrients_dict(self, ingredient_unit: 'IngredientMeasurementUnit', quantity: float):
-        # Compare the underlying MeasurementUnit, not the object itself
+        """Return a dics of all nutrients per unit and quantity"""
         if ingredient_unit == self.default_unit:
             quantity_in_base_units = quantity
         else:
