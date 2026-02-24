@@ -15,7 +15,7 @@
   - Assisted me with questions, such as "Do you think solution X is optimal, or should I do Y. What are the pros and cons of both approaches"
   - General lazy tasks such as:
     - I've changed my templates and styles multiple times, could you scan for any unused css classes and reorder in a more readable way?
-  
+    - Showed my DB ERD and described what I like in my app to write the text for the "how it works" section.
 
 - ClickUp Brain:
   - Generated images:

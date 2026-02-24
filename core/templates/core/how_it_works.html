@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}How It Works{% endblock %}
+
+{% block content %}
+<div class="container-content" style="max-width: 800px; margin: 2rem auto; line-height: 1.8;">
+
+    <h1 class="section-title">How Foodganizer Works</h1>
+    <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+        Foodganizer is built around one idea: <strong>you're in control</strong>. 
+        Every ingredient, unit, category, and tag is yours to create and customise.
+    </p>
+
+
+    <!-- INGREDIENTS -->
+    <section style="margin-bottom: 2.5rem;">
+        <h2 style="color: var(--accent);"> Ingredients</h2>
+        <p>
+            Everything starts with ingredients. You can create your own ingredients from scratch —
+            give them a name, category, dietary tags, and a base quantity (e.g. 100g). 
+            Then fill in the full nutrient breakdown: calories, protein, carbs, fat, fibre, sugar, zinc, and more.
+        </p>
+        <p>
+            Each ingredient supports <strong>multiple measurement units</strong>. For example, flour can be measured 
+            in grams, kilograms, or cups — and you define the conversion yourself (e.g. 1 cup = 120g). 
+            This means the app can always calculate nutrients accurately no matter what unit you're using.
+        </p>
+        <p>
+            You can also create your own <strong>categories</strong> (e.g. Dairy, Grain, Vegetable), 
+            <strong>dietary tags</strong> (e.g. Vegan, Gluten-Free), and <strong>measurement units</strong> 
+            (e.g. cups, tablespoons, pieces) — nothing is hardcoded.
+        </p>
+    </section>
+
+
+    <!-- RECIPES -->
+    <section style="margin-bottom: 2.5rem;">
+        <h2 style="color: var(--accent);">Recipes</h2>
+        <p>
+            Build recipes by combining your ingredients. Each recipe tracks:
+        </p>
+        <ul style="color: var(--text-secondary); padding-left: 1.5rem;">
+            <li>Cooking time and servings</li>
+            <li>Category (e.g. Breakfast, Dinner)</li>
+            <li>Full ingredient list with quantities and units</li>
+            <li>Instructions</li>
+            <li>Auto-calculated total nutrients and nutrients per serving</li>
+            <li>Dietary info — shared tags across all ingredients</li>
+        </ul>
+        <p>
+            You can favourite recipes to find them quickly when generating your grocery list.
+        </p>
+    </section>
+
+    <hr style="border-color: var(--border); margin: 2rem 0;">
+
+    <!-- FRIDGE -->
+    <section style="margin-bottom: 2.5rem;">
+        <h2 style="color: var(--accent);">Your Fridge</h2>
+        <p>
+            Your fridge tracks what ingredients you currently have at home and in what quantities. 
+            When you add an ingredient you already have in a different unit, Foodganizer 
+            <strong>automatically converts and merges</strong> the quantities so your fridge stays accurate.
+        </p>
+        <p>
+            For example, if you have 500ml of milk and add 1 cup (240ml), the app converts and 
+            adds them together — no duplicates, no guesswork.
+        </p>
+    </section>
+
+    <!-- MEAL SUGGESTIONS -->
+    <section style="margin-bottom: 2.5rem;">
+        <h2 style="color: var(--accent);">Meal Suggestions</h2>
+        <p>
+            Based on what's in your fridge, Foodganizer suggests which recipes you can make — 
+            and shows you a <strong>match percentage</strong> so you can see how close you are even 
+            if you're missing a few ingredients.
+        </p>
+        <p>
+            When you make a recipe, the required ingredients are automatically 
+            <strong>subtracted from your fridge</strong> and the meal is saved to your meal history.             Every recipe you make is logged with a timestamp. Your meal history lets you look back
+            at what you've cooked and when.
+        </p>
+    </section>
+
+
+    <!-- GROCERY LIST -->
+    <section style="margin-bottom: 2.5rem;">
+        <h2 style="color: var(--accent);">Grocery List</h2>
+        <p>
+            Select one or more recipes and generate a grocery list. Foodganizer works out exactly 
+            what you need, <strong>subtracts what you already have in your fridge</strong>, and gives 
+            you only the shortfall — so you never buy what you don't need.
+        </p>
+        <p>
+            Once you've done your shopping, you can add individual items or your entire grocery list 
+            to your fridge in one click. Your generation history is also saved so you can review 
+            past lists.
+        </p>
+    </section>
+
+    <!-- MEAL HISTORY -->
+    <section style="margin-bottom: 2.5rem;">
+        <h2 style="color: var(--accent);">Calorie Tracker</h2>
+        <p>
+            Coming soon.
+        </p>
+
+        <div style="text-align: left; margin-top: 3rem;">
+        <a href="{% url 'homepage' %}" class="btn">Get Started</a>
+    </div>
+    </section>
+
+
+
+</div>
+
+
+{% endblock %}

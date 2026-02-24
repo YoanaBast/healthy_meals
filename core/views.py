@@ -4,3 +4,6 @@ from django.shortcuts import render
 
 def homepage(request):
     return render(request, 'core/homepage.html')
+
+def how_it_works(request):
+    return render(request, 'core/how_it_works.html')
