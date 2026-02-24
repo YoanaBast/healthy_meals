@@ -3,7 +3,9 @@
 {% load recipe_extras %}
 {% load core_filters %}
 
-{% block title %}{{ ingredient.name }} Details{% endblock %}
+{% block title %}
+{{ ingredient.name }} Details
+{% endblock %}
 
 {% block content %}
 <link rel="stylesheet" href="{% static 'css/ingredient_styles.css' %}">
@@ -21,72 +23,92 @@
 
 {% include 'ingredients/delete_ingredient_modal.html' %}
 
+
 <div class="container-content">
+    {% if messages %}
+        {% for message in messages %}
+            <div class="message {{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+
+
     <div class="grid-container">
         <div class="grid-item info">
-                <h1 class="section-title">{{ ingredient.name|title_except }} </h1>
+            <h1 class="section-title">{{ ingredient.name|title_except }} </h1>
 
 <!-- Details Table -->
                 <table class="data-table">
                     <tbody>
+
                         <tr>
                             <th>Category</th>
                             <td>{{ ingredient.category|default:"-" }}</td>
                         </tr>
+
                         <tr>
                             <th>Base Quantity</th>
                             <td>{{ ingredient.base_quantity }}</td>
                         </tr>
+
                         <tr>
                             <th>Default Unit</th>
                             <td>{{ ingredient.default_unit|default:"-" }}</td>
                         </tr>
 
+                        <tr>
+                            <th>All Units</th>
+                            <td>
+                                {% for mu in ingredient.measurement_units.all %}
+                                    {{ mu.unit.name_singular }} ({{ mu.unit.code }}) — {{ mu.conversion_to_base }} per base
+                                    {% if not forloop.last %}<br>{% endif %}
+                                {% empty %}
+                                    -
+                                {% endfor %}
+                            </td>
+                        </tr>
 
-                    <tr>
-                        <th>All Units</th>
-                        <td>
-                            {% for mu in ingredient.measurement_units.all %}
-                                {{ mu.unit.name_singular }} ({{ mu.unit.code }}) — {{ mu.conversion_to_base }} per base
-                                {% if not forloop.last %}<br>{% endif %}
-                            {% empty %}
-                                -
-                            {% endfor %}
-                        </td>
-                    </tr>
                         <tr>
                             <th>Dietary Information</th>
                             <td>{{ ingredient.dietary_info|default:"-" }}</td>
                         </tr>
+
                     </tbody>
                 </table>
 </div>
 
 <!-- Unit Selection  -->
-
         <div class="grid-item info">
             <div class="nutrients-section" style="display: flex; flex-direction: column; gap: 1.5rem;">
-                <!-- Form on top -->
-<form method="post" class="styled-form">
-    {% csrf_token %}
-    <div class="form-group">
-        <label>Measurement unit:</label>
-        <select name="unit">
-            {% for mu in ingredient.measurement_units.all %}
-                <option value="{{ mu.id }}" {% if mu == selected_imu %}selected{% endif %}>
-                    {{ mu.unit.name_singular }} ({{ mu.unit.code }})
-                </option>
-            {% empty %}
-                <option disabled>No units defined</option>
-            {% endfor %}
-        </select>
-    </div>
-    <div class="form-group">
-        <input type="number" name="quantity" step="0.01" required placeholder="Quantity" value="{{ quantity }}">
-    </div>
-    <button type="submit" class="btn btn-secondary btn-small">Update</button>
-</form>
-</div> </div>
+                <form method="post" class="styled-form" novalidate>
+                    {% csrf_token %}
+                    <div class="form-group">
+
+                        <p class="small-gray">Update the unit and quantity to your preference and the nutrient table below will reflect it. </p>
+                        <br>
+                        <label>Measurement unit:</label>
+
+                        <select name="unit">
+                            {% for mu in ingredient.measurement_units.all %}
+                                <option value="{{ mu.id }}" {% if mu == selected_imu %}selected{% endif %}>
+                                    {{ mu.unit.name_singular }} ({{ mu.unit.code }})
+                                </option>
+                            {% empty %}
+                                <option disabled>No units defined</option>
+                            {% endfor %}
+                        </select>
+
+                    </div>
+
+                        <label>Quantity:</label>
+                        <div class="form-group">
+                            <input type="number" name="quantity" step="0.01" min="0.01" required placeholder="Quantity" value="{{ quantity }}">
+                        </div>
+
+                    <button type="submit" class="btn btn-secondary btn-small">Update</button>
+
+                </form>
+            </div>
+        </div>
 
 <!-- nutrients table -->
     <div class="nutrients-tables">

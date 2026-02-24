@@ -118,15 +118,24 @@ def ingredient_detail(request, ingredient_id):
 
     if request.method == "POST":
         selected_unit_id = request.POST.get("unit")
-        quantity = float(request.POST.get("quantity", 0))
+        quantity_raw = request.POST.get("quantity", "")
 
-        if selected_unit_id and quantity:
-            selected_unit = IngredientMeasurementUnit.objects.get(id=selected_unit_id)
-            nutrients_dict  = ingredient.get_nutrients_dict(
-                ingredient_unit=selected_unit,
-                quantity=quantity
-            )
-            unit_name = selected_unit.name_for_quantity(quantity)
+        try:
+            quantity = float(quantity_raw)
+            if quantity <= 0:
+                messages.error(request, 'Quantity must be greater than 0.')
+                quantity = ingredient.base_quantity
+            elif selected_unit_id:
+                selected_unit = IngredientMeasurementUnit.objects.get(id=selected_unit_id)
+                nutrients_dict = ingredient.get_nutrients_dict(
+                    ingredient_unit=selected_unit,
+                    quantity=quantity
+                )
+                unit_name = selected_unit.name_for_quantity(quantity)
+        except (ValueError, TypeError):
+            messages.error(request, 'Please enter a valid quantity.')
+            quantity = ingredient.base_quantity
+
 
     nutrients = {
         n: f"{round(v, 2)} {ingredient.NUTRIENT_UNITS.get(n, '')}"
