@@ -1,5 +1,7 @@
 from django.core.paginator import Paginator
 from django.db.models import Prefetch, Exists, OuterRef
+from django.urls import reverse
+
 from planner.forms import UserFridgeForm
 from django.contrib import messages
 from django.contrib.auth.models import User
@@ -239,7 +241,12 @@ def make_recipe(request, id):
     # Save to meal history
     UserMealList.objects.create(user=user, recipe=recipe)
 
-    messages.success(request, f"{recipe.name} was made successfully!")
+    messages.success(request, (
+        f'<b>{recipe.name.title()}</b> made successfully! '
+        f'<a href="{reverse("recipe_detail", kwargs={"pk": recipe.id})}">View recipe</a> · '
+        f'<a href="{reverse("meal_list")}">Meal history</a> · '
+        f'<a href="{reverse("manage_fridge")}">Check your fridge</a>'
+    ))
     return redirect('meal_suggestions')
 
 

@@ -10,20 +10,19 @@
 
     <h2>Meal Suggestions</h2>
     <p>Get meal suggestions based on what’s currently in your fridge.</p>
-    <p>
-      Making a recipe will take ingredients from your
-      <a href="{% url 'manage_fridge' %}">fridge</a>
-      and save it in your
-      <a href="{% url 'meal_list' %}">meal history</a>.
-    </p>
+<!--    <p>-->
+<!--      Making a recipe will take ingredients from your-->
+<!--      <a href="{% url 'manage_fridge' %}">fridge</a>-->
+<!--      and save it in your-->
+<!--      <a href="{% url 'meal_list' %}">meal history</a>.-->
+<!--    </p>-->
+    <br>
 
-<!--        {% if messages %}-->
-<!--            {% for message in messages %}-->
-<!--                <div class="message {{ message.tags }}">-->
-<!--                    {{ message }}-->
-<!--                </div>-->
-<!--            {% endfor %}-->
-<!--        {% endif %}-->
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">{{ message|safe }}</div>
+            {% endfor %}
+        {% endif %}
 
     <br>
 
