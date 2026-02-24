@@ -20,7 +20,7 @@ cd healthy_meals
 ```
 ### 2. Virtual Environment
 **Check if a venv already exists:**
-- If you created a project in your IDE **before cloning**, it may have already created a virtual environment.
+- If you created a project in your IDE, it may have already created a virtual environment.
 - Look in the project folder for a `venv/` (or similarly named) directory.  
 - You can also check the IDE’s Python interpreter settings to see if a venv is active.
 
