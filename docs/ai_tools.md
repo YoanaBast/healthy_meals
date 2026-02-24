@@ -1,7 +1,13 @@
-### AI used:
+I want to disclose all tools used. Special thanks to everyone, who have developed any of the below tools! 
 
+### AI used:
+  
 - Vercel (v0):
   - Prototyped the UI at the start; this was the original design before major changes: [original UI](documented_files/dummy_recipe.html)
+
+
+- GitHub Copilot
+  - generated some coimmit messages when working on origin main from the website (ex: editing the README.md from the browser)
 
 
 - ChatGPT:
@@ -46,3 +52,4 @@
 - https://fonts.google.com/
 - https://favicon.io/favicon-generator/
 - https://emojicombos.com/heart
+- https://readme-typing-svg.herokuapp.com/demo/
