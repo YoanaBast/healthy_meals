@@ -1,7 +1,6 @@
 # Example .env for Local Setup
 
-Create a `.env` file in the project root (same level as `manage.py`) and copy this content.  
-Replace placeholders with your local credentials.
+Replace placeholders with your local credentials: your_db_name, your_db_user, your_db_password (SECRET_KEY will be already available)
 
 ```text
 # Database configuration
