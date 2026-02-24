@@ -71,7 +71,7 @@ python fast_setup.py
 #### 2.3 Dummy Data
 - You can populate the DB with some dummy data by running this:
 ```bash
-    "python manage.py populate_dummy_data"
+    python manage.py populate_dummy_data
 ```
 
 ## Notes:
