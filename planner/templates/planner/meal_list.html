@@ -1,6 +1,9 @@
 {% extends "base.html" %}
+{% load core_filters %}
 
-{% block title %}My Meal History{% endblock %}
+{% block title %}
+My Meal History
+{% endblock %}
 
 {% block content %}
 
@@ -37,7 +40,7 @@
                     <td>{{ forloop.counter }}</td>
                     <td>
                         {% if entry.recipe %}
-                            {{ entry.recipe.name }}
+                            {{ entry.recipe.name|title_except  }}
                         {% else %}
                             <em style="color: #aaa;">Recipe deleted</em>
                         {% endif %}

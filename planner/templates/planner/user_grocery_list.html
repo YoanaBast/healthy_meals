@@ -1,7 +1,10 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load core_filters %}
 
-{% block title %}My Grocery List{% endblock %}
+{% block title %}
+Grocery List
+{% endblock %}
 
 {% block content %}
 <link rel="stylesheet" href="{% static 'css/planner_styles.css' %}">
@@ -32,7 +35,7 @@
             <tbody>
                 {% for item in items %}
                 <tr>
-                    <td>{{ item.ingredient.name }}</td>
+                    <td>{{ item.ingredient.name|title_except }}</td>
                     <td>{{ item.quantity|floatformat:2 }}</td>
                     <td>{{ item.unit }}</td>
 <td style="display: flex; gap: 0.5rem;">
@@ -67,10 +70,10 @@
 
             {% for recipe_name, ing_items in gen.by_recipe.items %}
             <div class="history-recipe">
-                <div class="history-recipe-name">{{ recipe_name }}</div>
+                <div class="history-recipe-name">{{ recipe_name|title_except }}</div>
                 <ul class="history-ingredients">
                     {% for item in ing_items %}
-                    <li>{{ item.ingredient.name }} — {{ item.quantity|floatformat:2 }} {{ item.unit }}</li>
+                    <li>{{ item.ingredient.name|title_except }} — {{ item.quantity|floatformat:2 }} {{ item.unit }}</li>
                     {% endfor %}
                 </ul>
             </div>

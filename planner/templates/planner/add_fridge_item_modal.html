@@ -1,4 +1,5 @@
 {% load static %}
+{% load core_filters %}
 
 <div id="addFridgeItemModal" class="recipe-modal" style="display:none;">
     <div class="recipe-modal-content">
@@ -19,7 +20,7 @@
                                 {"id": "{{ rel.unit.id }}", "name": "{{ rel.unit.name_singular|escapejs }}"}{% if not forloop.last %},{% endif %}
                             {% endfor %}
                         ]'
-                    >{{ ing.name }}</option>
+                    >{{ ing.name|title_except }}</option>
                 {% endfor %}
             </select>
 
