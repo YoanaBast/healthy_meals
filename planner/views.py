@@ -533,3 +533,7 @@ def meal_list(request):
     return render(request, "planner/meal_list.html", {
         "page_obj": page_obj,
     })
+
+
+def calorie_tracker(request):
+    return render(request, "planner/calorie_tracker.html")
