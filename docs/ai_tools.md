@@ -17,6 +17,7 @@
     - I've changed my templates and styles multiple times, could you scan for any unused css classes and reorder in a more readable way?
     - Showed my DB ERD and described what I like in my app to write the text for the "how it works" section.
 
+
 - ClickUp Brain:
   - Generated images:
 

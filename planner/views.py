@@ -63,7 +63,16 @@ def add_fridge_item(request):
         user, _ = User.objects.get_or_create(username="default")
 
         ing_id = request.POST.get("ingredient_id")
-        qty = float(request.POST.get("quantity"))
+        qty_raw = request.POST.get("quantity")
+        try:
+            qty = float(qty_raw)
+            if qty < 0.01:
+                messages.error(request, 'Quantity must be at least 0.01.')
+                return redirect('manage_fridge')
+        except (ValueError, TypeError):
+            messages.error(request, 'Please enter a valid quantity.')
+            return redirect('manage_fridge')
+
         unit_id = request.POST.get("unit")
 
         ingredient = Ingredient.objects.get(id=ing_id)
@@ -110,7 +119,6 @@ def add_fridge_item(request):
                 f"{item.quantity} {item.unit} → {round(qty_in_target, 2)} {unit} added"
             )
 
-            # Delete the merged item
             item.delete()
 
         # Add the new quantity being submitted
@@ -124,15 +132,6 @@ def add_fridge_item(request):
                 quantity=qty,
                 unit=unit
             )
-
-        # print("----- ADD FRIDGE DEBUG -----")
-        # print(f"POST DATA: {request.POST}")
-        # print(f"USER: {user}")
-        # print(f"INGREDIENT OBJ: {ingredient}")
-        # print(f"UNIT OBJ: {unit}")
-        # print(f"TARGET ITEM: {target_item}")
-        # print("EXPLANATIONS:", explanations)
-        # print("----- END DEBUG -----")
 
     return redirect("manage_fridge")
 
@@ -184,7 +183,6 @@ def get_meal_suggestions(request):
 
     suggestions.sort(key=lambda x: x["match_percent"], reverse=True)
 
-    # Pagination
     paginator = Paginator(suggestions, 10)  # 10 suggestions per page
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
@@ -329,7 +327,7 @@ def generate_grocery_list(request):
                         'ingredient': ing,
                         'unit': base_unit,
                         'total_qty': 0,
-                        'by_recipe': {},  # recipe obj -> qty in base unit
+                        'by_recipe': {},
                     }
 
                 try:
