@@ -9,7 +9,7 @@
 
     <form method="post" novalidate>
         {% csrf_token %}
-                {% include "core/errors_label.html" %}
+                {% include "errors_label.html" %}
 
         <label>Quantity</label>
         <input type="number" id="quantityInput" name="quantity"

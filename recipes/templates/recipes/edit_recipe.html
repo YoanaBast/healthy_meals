@@ -25,8 +25,8 @@
         <!-- Recipe fields -->
         <div style="max-width: 800px; margin: 2rem auto;">
             <h2>Edit Recipe</h2>
-        {% include "core/errors_label.html" with form=recipe_form %}
-        {% include "core/formset_errors.html" with formset=ingredient_formset %}
+        {% include "errors_label.html" with form=recipe_form %}
+        {% include "formset_errors.html" with formset=ingredient_formset %}
 
             <div class="grid-container">
                 <div class="grid-item info">
@@ -88,7 +88,7 @@
                     <p style="color: var(--text-secondary); font-style: italic;">No ingredients yet.</p>
                 {% endif %}
 
-                {% include 'core/add_button.html' %}
+                {% include 'add_button.html' %}
 
             </div>
         </div>
@@ -102,8 +102,8 @@
     </form>
 
 {% include 'recipes/add_ingredients_to_recipe_modal.html' %}
-{% include 'core/_quick_add_modal.html' %}
-{% include 'core/_manage_list_modal.html' %}
+{% include '_quick_add_modal.html' %}
+{% include '_manage_list_modal.html' %}
 
 </div>
 
