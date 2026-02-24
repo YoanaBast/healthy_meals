@@ -40,9 +40,10 @@ function closeModal() {
 document.getElementById('addFridgeItemForm').addEventListener('submit', function(e) {
     const qty = parseFloat(document.getElementById('quantityInput').value);
     const MIN_QTY = 0.01; // set minimum allowed
+    const MAX_QTY = 100000; // set minimum allowed
 
-    if (!qty || qty <= 0 || qty < MIN_QTY) {
+    if (!qty || qty <= 0 || qty < MIN_QTY || qty > MAX_QTY) {
         e.preventDefault();
-        alert(`Quantity must be greater than ${MIN_QTY}.`);
+        alert(`Quantity must be greater than ${MIN_QTY} and less than ${MAX_QTY}.`);
     }
 });
