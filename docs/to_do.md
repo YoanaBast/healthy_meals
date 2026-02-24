@@ -1,7 +1,7 @@
 
 # TO-DO
 ## PRIORITY 1 FIXES
-    - add a template for how it works 
+    - check what is going on with fridge_ingredient_loader.js (works but not very optimal)
 
 ## PRIORITY 2 FIXES
 
