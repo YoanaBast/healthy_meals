@@ -13,7 +13,6 @@
 
 <div class="container-home">
 
-
     <div style="max-width: 800px; margin: 2rem auto;">
         <a href="javascript:history.back()" class="btn">← Back</a>
         <a href="{% url 'recipe_detail' recipe.pk %}" class="btn">Details</a>
@@ -27,10 +26,11 @@
         <div style="max-width: 800px; margin: 2rem auto;">
             <h2>Edit Recipe</h2>
         {% include "core/errors_label.html" with form=recipe_form %}
+        {% include "core/formset_errors.html" with formset=ingredient_formset %}
 
             <div class="grid-container">
-
                 <div class="grid-item info">
+
                     <p>{{ recipe_form.name.label_tag }} {{ recipe_form.name }}</p>
 
                         <p>
@@ -51,6 +51,7 @@
                             {{ recipe_form.minutes }} m
                         </span>
                     </p>
+
                 </div>
 
                 <div class="grid-item info">
@@ -80,15 +81,15 @@
                                onchange="this.closest('.ingredient-line').style.opacity = this.checked ? '0.3' : '1'">
                         <label for="{{ form.DELETE.id_for_label }}">Delete</label>
                     {% endif %}
-
-
                         </div>
                     {% endfor %}
+
                 {% else %}
                     <p style="color: var(--text-secondary); font-style: italic;">No ingredients yet.</p>
                 {% endif %}
 
                 {% include 'core/add_button.html' %}
+
             </div>
         </div>
 
