@@ -247,6 +247,11 @@ def add_measurement_unit(request, ingredient_id):
         if conversion_float <= 0:
             messages.error(request, 'Conversion to base must be greater than 0.')
             return redirect(reverse('edit_ingredient', kwargs={'ingredient_id': ingredient_id}))
+
+        elif  conversion_float > 100_000:
+            messages.error(request, 'Conversion to base must be less than 100 000.')
+            return redirect(reverse('edit_ingredient', kwargs={'ingredient_id': ingredient_id}))
+
         if unit_id:
             unit = get_object_or_404(MeasurementUnit, pk=unit_id)
             obj, created = IngredientMeasurementUnit.objects.get_or_create(
@@ -370,6 +375,10 @@ def edit_measurement_unit_conversion(request, ingredient_id, imu_id):
             conversion_float = float(conversion)
             if conversion_float <= 0:
                 messages.error(request, 'Conversion must be greater than 0.')
+
+            elif conversion_float > 100_000:
+                messages.error(request, 'Conversion must be less than 100 000.')
+
             else:
                 imu.conversion_to_base = conversion_float
                 imu.save()

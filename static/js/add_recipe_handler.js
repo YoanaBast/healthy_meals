@@ -49,6 +49,11 @@ function addIngredient() {
         alert('Quantity must be greater than 0.');
         return;
     }
+
+        if (quantity > 100000) {
+        alert('Quantity must be less than 100 000.');
+        return;
+    }
     if (mode === 'edit') {
         fetch(addIngredientUrl, {
             method: "POST",
