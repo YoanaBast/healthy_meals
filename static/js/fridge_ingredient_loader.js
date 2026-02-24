@@ -39,7 +39,7 @@ function closeModal() {
 
 document.getElementById('addFridgeItemForm').addEventListener('submit', function(e) {
     const qty = parseFloat(document.getElementById('quantityInput').value);
-    const MIN_QTY = 0.001; // set minimum allowed
+    const MIN_QTY = 0.01; // set minimum allowed
 
     if (!qty || qty <= 0 || qty < MIN_QTY) {
         e.preventDefault();
