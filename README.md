@@ -1,5 +1,6 @@
-# Foodganizer
-Python | Django | HTML | CSS | JS | PostgreSQL 
+[![Typing SVG](https://readme-typing-svg.herokuapp.com?font=Ultra&size=29&pause=1000&color=0CF724&width=435&lines=Foodganizer)](https://git.io/typing-svg)
+
+[![Typing SVG](https://readme-typing-svg.herokuapp.com?font=Teko&size=25&pause=1000&color=432FF7&width=435&lines=Python+%7C+Django+%7C+HTML+%7C+CSS+%7C+JS+%7C+PostgreSQL)](https://git.io/typing-svg)
 
 The Foodganizer is built around one idea: you're in control. Every recipe, ingredient, unit, category, and tag is yours to create and customise. Fill your digital fridge and get meal suggestions that won't send you to the store! Or if you feel like going out, geenrate a grocery list fast and easy from recipes of your choice! 
 
