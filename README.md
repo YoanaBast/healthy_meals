@@ -54,12 +54,12 @@ python fast_setup.py
 ```bash
     pip install -r requirements.txt
 ```
-- run this to set up your DB:
+  - run this to set up your DB:
 ```bash
     python manage.py makemigrations
     python manage.py migrate
 ```
-- run this to set up the css:
+  - run this to set up the css:
 ```bash
     python manage.py collectstatic --noinput
 ```
@@ -76,7 +76,7 @@ python fast_setup.py
 
 ## Notes:
 1. This is developed as uni assignment. To be compliant to the no auth requirement, I have assigned a default user for all logic that needs it. I intend to scale the app and a huge part of my logic will depend on dynamic users. 
-   - default user in question: user = user = get_object_or_404(User, username="default")
+   - default user in question: user = get_object_or_404(User, username="default")
    - No auth requirement: "Authentication and Django User management are explicitly excluded from the following requirements. You are not supposed to implement login, logout, registration, or user-related functionality."
 
 
