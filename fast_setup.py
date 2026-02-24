@@ -1,6 +1,6 @@
 import subprocess
 from pathlib import Path
-from django.core.management.utils import get_random_secret_key
+# from django.core.management.utils import get_random_secret_key
 
 # Config
 env_path = Path(".env")
@@ -9,7 +9,7 @@ DB_USER=dbuser
 DB_PASSWORD=dbpassword
 DB_HOST=127.0.0.1
 DB_PORT=5432
-SECRET_KEY={get_random_secret_key()}
+SECRET_KEY =django-insecure-testkey1234567890
 """
 
 affirmatives = {
@@ -51,7 +51,7 @@ if not env_path.exists():
 if yes("\033[1;35mReady for minimal setup? (y/n): \033[0m"):
     run_commands(minimal_setup)
     print("\033[1;33mYou can now use \033[0m\033[1;36mpython manage.py runserver\033[0m\033[1;33m to view the empty app.\033[0m")
-    print("\033[1;33mYou can open another console (+) to run it there for convenience.\033[0m")
+    print("\033[1;33mYou can open another console (+) to run it there for convenience. (Ensure you are in root [healthy_meals] when running commands)\033[0m")
 
     if yes("\033[1;35mAdd dummy data? (y/n): \033[0m"):
         run_commands(populate_dummy_data)
