@@ -36,7 +36,7 @@ source venv/bin/activate   # on Linux/Mac
 venv\Scripts\activate      # on Windows
 ```
 
-- all following commanda are to be run in the root where manage.py is (healthy_meals or your_root)
+- all following commands are to be run in the root where manage.py is (healthy_meals or your_root)
   
 
 ### 3. Setup
@@ -93,4 +93,6 @@ If you don't want to use the fast setup, you can follow the steps below
 
 ## See Also:
 - [AI & Tools Used](docs/ai_tools.md)
-- [TO-DO List](docs/to_do.md) 
+- [What I've Learned](docs/what_ive_learned.md)
+- [TO-DO List](docs/to_do.md)
+
