@@ -1,9 +1,9 @@
 # Foodganizer
 Python | Django | HTML | CSS | JS | PostgreSQL 
 
-- Generate a shopping list from your selected recipes.
-- Get meal suggestions based on just what you have in your fridge. 
-- Track dietary and nutrient information for each meal in all measurement units. 
+The Foodganizer is built around one idea: you're in control. Every recipe, ingredient, unit, category, and tag is yours to create and customise. Fill your digital fridge and get meal suggestions that won't send you to the store! Or if you feel like going out, geenrate a grocery list fast and easy from recipes of your choice! 
+
+If you hate the cognitive load that comes with planning meals every single day - this app is for you!
 
 ## 🛠 Installation
 
@@ -41,7 +41,7 @@ venv\Scripts\activate      # on Windows
 ### 3. Setup
 
 #### 3.1 Fast Setup
-- You can run the command below to complete the setup:
+You can run the command below to complete the setup:
 ```bash
 python fast_setup.py
 ```
@@ -50,13 +50,12 @@ python fast_setup.py
   - install requirements
   - makemigrations and migrate
   - collectstatic
-- It will also offer you to populate dummy data (it will ask you first)
 
 #### 3.2 Manual Setup
-- If you don't want to use the fast setup, you can follow the steps below
-    - create a .env file in the root directory (healthy_meals or the name you set locally)
-    - put [this](docs/creds_example.md) inside and update it with your credentials
-    - run this to install requirements:
+If you don't want to use the fast setup, you can follow the steps below
+  - create a .env file in the root directory (healthy_meals or the name you set locally)
+  - put [this](docs/creds_example.md) inside and update it with your credentials
+  - run this to install requirements:
 ```bash
     pip install -r requirements.txt
 ```
@@ -69,12 +68,16 @@ python fast_setup.py
 ```bash
     python manage.py collectstatic --noinput
 ```
-- You can now run the server to see the empty app:
+
+### 4. Server
+- You can now run the server to see the app:
 ```bash
     python manage.py runserver
 ```
+- Stop the server with CRL + C in the same console
+- If you are reloading collectstatic for some reason, you need to re-run the surver (stop and run again)
 
-### 4. Dummy Data
+### 5. Dummy Data
 - You can populate the DB with some dummy data by running this:
 ```bash
     python manage.py populate_dummy_data
@@ -86,7 +89,6 @@ python fast_setup.py
    - No auth requirement: "Authentication and Django User management are explicitly excluded from the following requirements. You are not supposed to implement login, logout, registration, or user-related functionality."
 
 2. The project uses WhiteNoise to serve static files because DEBUG=False. Without it, collectstatic doesn’t serve files correctly. DEBUG=False is required for the custom 404 page.
-
 
 ## See Also:
 - [AI & Tools Used](docs/ai_tools.md)
