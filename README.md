@@ -18,7 +18,7 @@ Python | Django | HTML | CSS | JS | PostgreSQL
 git clone https://github.com/YoanaBast/healthy_meals.git
 cd healthy_meals
 ```
-- healthy_meals is the name of my root, if you set another name for your, please use that name - cd your_root
+- healthy_meals is the name of my root, if you set another name for yours, please use that name - cd your_root
 
   
 ### 2. Virtual Environment
