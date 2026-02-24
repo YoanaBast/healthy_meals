@@ -1,7 +1,7 @@
 from datetime import time
 
 from django.conf import settings
-from django.core.validators import MinValueValidator
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 
 from ingredients.models import IngredientMeasurementUnit, Ingredient, MeasurementUnit
@@ -23,16 +23,13 @@ class RecipeCategory(models.Model):
 class Recipe(models.Model):
     name = models.CharField(max_length=200, unique=True)
     cooking_time = models.TimeField(null=True, blank=True)
-    servings = models.PositiveIntegerField(default=1, validators=[MinValueValidator(1)])
+    servings = models.PositiveIntegerField(default=1, validators=[MinValueValidator(1), MaxValueValidator(100_000)])
     ingredients = models.ManyToManyField(Ingredient, through='RecipeIngredient', related_name='recipes')
     category = models.ForeignKey(RecipeCategory, null=True, on_delete=models.SET_NULL, related_name='ingredient')
     instructions = models.TextField()
 
-    favourited_by = models.ManyToManyField(
-        settings.AUTH_USER_MODEL,
-        related_name="favourite_recipes",
-        blank=True
-    ) #user.favourite_recipes.all(), recipe.favourited_by.add(user),recipe.favourited_by.remove(user)
+    favourited_by = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="favourite_recipes", blank=True)
+    #user.favourite_recipes.all(), recipe.favourited_by.add(user),recipe.favourited_by.remove(user)
 
     @property
     def dietary_info(self):
@@ -144,7 +141,6 @@ class Recipe(models.Model):
                 quantity=qty
             )
 
-
             for nutrient, value in ing_totals.items():
                 total[nutrient] = total.get(nutrient, 0) + value
 
@@ -162,16 +158,13 @@ class Recipe(models.Model):
 
 
 class RecipeIngredient(models.Model):
-
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE, related_name='recipe_ingredient')
     ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
 
-    quantity = models.FloatField(validators=[MinValueValidator(0.01)])
-    unit = models.ForeignKey(
-        IngredientMeasurementUnit,
-        on_delete=models.SET_NULL,
-        null=True,
-        limit_choices_to=models.Q(ingredient=models.F('ingredient'))
+    quantity = models.FloatField(validators=[MinValueValidator(0.01), MaxValueValidator(100_000)])
+
+    unit = models.ForeignKey(IngredientMeasurementUnit, on_delete=models.SET_NULL, null=True,
+                             limit_choices_to=models.Q(ingredient=models.F('ingredient'))
     )
 
     class Meta:

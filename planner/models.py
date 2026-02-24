@@ -1,5 +1,5 @@
 from django.conf import settings
-from django.core.validators import MinValueValidator
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 
 from ingredients.models import Ingredient, MeasurementUnit
@@ -13,7 +13,7 @@ from recipes.models import Recipe
 class UserFridge(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
-    quantity = models.FloatField(default=0, validators=[MinValueValidator(0.01)])
+    quantity = models.FloatField(default=0, validators=[MinValueValidator(0.01), MaxValueValidator(100_000)])
     unit = models.ForeignKey(MeasurementUnit, on_delete=models.SET_NULL, null=True)
 
     class Meta:
@@ -26,7 +26,7 @@ class UserFridge(models.Model):
 class UserGroceryList(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
-    quantity = models.FloatField(validators=[MinValueValidator(0.01)])
+    quantity = models.FloatField(validators=[MinValueValidator(0.01), MaxValueValidator(100_000)])
     unit = models.ForeignKey(MeasurementUnit, on_delete=models.SET_NULL, null=True)
 
     class Meta:
@@ -34,6 +34,7 @@ class UserGroceryList(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.ingredient.name}"
+
 
 class GroceryListGeneration(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='grocery_generations')
@@ -50,7 +51,7 @@ class GroceryListGenerationItem(models.Model):
     generation = models.ForeignKey(GroceryListGeneration, on_delete=models.CASCADE, related_name='items')
     recipe = models.ForeignKey(Recipe, on_delete=models.SET_NULL, null=True, blank=True)
     ingredient = models.ForeignKey(Ingredient, on_delete=models.SET_NULL, null=True)
-    quantity = models.FloatField(validators=[MinValueValidator(0.01)])
+    quantity = models.FloatField(validators=[MinValueValidator(0.01), MaxValueValidator(100_000)])
     unit = models.ForeignKey(MeasurementUnit, on_delete=models.SET_NULL, null=True)
 
     def __str__(self):
