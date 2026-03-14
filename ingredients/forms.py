@@ -24,23 +24,6 @@ class IngredientFormBase(ErrorMessagesMixin, forms.ModelForm):
                 attrs={'class': 'form-input nutrient-input', 'step': 'any', 'min': 0}
             )
 
-    class Meta:
-        model = Ingredient
-        fields = (
-            ['name', 'category', 'dietary_tag', 'base_quantity', 'default_unit'] +
-            [f'base_quantity_{n}' for n in NUTRIENTS]
-        )
-
-        widgets = {
-            'ingredient': forms.Select(attrs={
-                'onchange': 'updateUnit(this)'  # JS behaviour, stays here
-            }),
-            'name': forms.TextInput(attrs={'class': 'form-input'}),
-            'category': forms.Select(attrs={'class': 'form-select'}),
-            'dietary_tag': forms.CheckboxSelectMultiple(attrs={'class': 'dietary-tags'}),
-            'default_unit': forms.Select(attrs={'class': 'form-select half-width'}),
-            'base_quantity': forms.NumberInput(attrs={'class': 'form-input half-width', 'min': 0.01}),
-        }
 
     def clean_name(self):
         name = self.cleaned_data['name'].strip()
@@ -49,8 +32,11 @@ class IngredientFormBase(ErrorMessagesMixin, forms.ModelForm):
         return name
 
 
-class IngredientAddForm(IngredientFormBase):
     def save(self, commit=True):
+        """
+        ensures default unit selected upon ingredient creation exist in IngredientMeasurementUnit table
+        else it creates it
+        """
         ingredient = super().save(commit=commit)
         if commit:
             IngredientMeasurementUnit.objects.get_or_create(
@@ -61,6 +47,26 @@ class IngredientAddForm(IngredientFormBase):
         return ingredient
 
 
+    class Meta:
+        model = Ingredient
+        fields = (
+            ['name', 'category', 'dietary_tag', 'base_quantity', 'default_unit'] +
+            [f'base_quantity_{n}' for n in NUTRIENTS]
+        )
+
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-input'}),
+            'category': forms.Select(attrs={'class': 'form-select'}),
+            'dietary_tag': forms.CheckboxSelectMultiple(),
+            'default_unit': forms.Select(attrs={'class': 'form-select half-width'}),
+            'base_quantity': forms.NumberInput(attrs={'class': 'form-input half-width', 'min': 0.01}),
+        }
+
+
+class IngredientAddForm(IngredientFormBase):
+    ...
+
+
 class IngredientEditForm(IngredientFormBase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -68,6 +74,9 @@ class IngredientEditForm(IngredientFormBase):
         self.fields['base_quantity'].help_text = 'Base quantity cannot be changed after creation as it affects nutrient calculations.'
 
     def clean_name(self):
+        """
+        IngredientFormBase will wrongly flag the ingredient's OWN current name as a duplicate, hence rewriting
+        """
         name = self.cleaned_data['name'].strip()
         qs = Ingredient.objects.filter(name__iexact=name)
         if self.instance.pk:
@@ -75,3 +84,53 @@ class IngredientEditForm(IngredientFormBase):
         if qs.exists():
             raise forms.ValidationError(f'"{name}" already exists.')
         return name
+
+
+class IngredientDetailForm(forms.Form):
+    def __init__(self, ingredient, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.ingredient = ingredient
+        self.default_imu = IngredientMeasurementUnit.objects.filter(
+            ingredient=ingredient,
+            unit=ingredient.default_unit
+        ).first()  # returns None instead of raising DoesNotExist
+
+        self.fields['unit'].queryset = IngredientMeasurementUnit.objects.filter(
+            ingredient=ingredient
+        )
+
+    quantity = forms.FloatField(
+        min_value=0.01,
+        error_messages={
+            'required': 'Please enter a quantity.',
+            'invalid': 'Please enter a valid quantity.',
+            'min_value': 'Quantity must be greater than 0.',
+        },
+        widget=forms.NumberInput(attrs={'class': 'form-input', 'step': 'any', 'min': 0.01})
+    )
+    unit = forms.ModelChoiceField(
+        queryset=IngredientMeasurementUnit.objects.none(),
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+
+    def get_unit(self):
+        if self.is_valid():
+            return self.cleaned_data['unit'] or self.default_imu
+        return self.default_imu
+
+    def get_quantity(self):
+        if self.is_valid():
+            return self.cleaned_data['quantity']
+        return self.ingredient.base_quantity
+
+    def get_nutrients(self):
+        ingredient = self.ingredient
+        unit = self.get_unit()
+        quantity = self.get_quantity()
+
+        nutrients_dict = ingredient.get_nutrients_dict(ingredient_unit=unit, quantity=quantity)
+        return {
+            n: f"{round(v, 2)} {ingredient.NUTRIENT_UNITS.get(n, '')}"
+            for n, v in nutrients_dict.items()
+        }
