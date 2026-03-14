@@ -24,7 +24,6 @@ class RecipeForm(forms.ModelForm):
         queryset=RecipeCategory.objects.all().order_by('name'),
         required=False
     )
-
     hours = forms.IntegerField(
         min_value=0, max_value=23, required=True, label="Hours", initial=0,
         widget=forms.NumberInput(attrs={'class': 'form-input small-width', 'min': 0}),
@@ -64,18 +63,18 @@ class RecipeForm(forms.ModelForm):
             self.fields['hours'].initial = self.instance.cooking_time.hour
             self.fields['minutes'].initial = self.instance.cooking_time.minute
 
+    def clean_name(self):
+        name = self.cleaned_data['name'].strip().lower()
+        qs = Recipe.objects.filter(name__iexact=name)
+        if self.instance.pk:
+            qs = qs.exclude(pk=self.instance.pk)
+        if qs.exists():
+            raise forms.ValidationError(f'"{name}" already exists.')
+        return name
+
     def clean(self):
         cleaned_data = super().clean()
-        h = cleaned_data.get('hours', 0)
-        m = cleaned_data.get('minutes', 0)
-        cleaned_data['cooking_time'] = f"{h:02d}:{m:02d}:00"
         return cleaned_data
-
-    def clean_servings(self):
-        servings = self.cleaned_data.get('servings')
-        if servings is None or servings < 1:
-            raise forms.ValidationError("Servings must be at least 1.")
-        return servings
 
     def save(self, commit=True):
         instance = super().save(commit=False)
@@ -95,7 +94,6 @@ class RecipeIngredientForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
         self.fields['unit'].queryset = IngredientMeasurementUnit.objects.none()
 
         if self.is_bound:
