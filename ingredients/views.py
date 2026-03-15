@@ -5,162 +5,143 @@ from django.core.paginator import Paginator
 from django.db import IntegrityError
 from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
+from django.views import View
+from django.views.generic import ListView, CreateView, UpdateView
 
 from .models import Ingredient, IngredientMeasurementUnit, IngredientCategory, IngredientDietaryTag, MeasurementUnit
-from .forms import IngredientAddForm, IngredientEditForm
+from .forms import IngredientAddForm, IngredientEditForm, IngredientDetailForm
 
 
-def manage_ingredients(request):
-    ingredients_qs = Ingredient.objects.select_related(
-        'category', 'default_unit'
-    ).prefetch_related(
-        'dietary_tag'
-    ).all().order_by('name')
+"""
+INGREDIENT VIEWS
+"""
 
-    paginator = Paginator(ingredients_qs, 10)
-    page_number = request.GET.get('page')
-    ingredients = paginator.get_page(page_number)
+class ManageIngredientsView(ListView):
+    """
+    A dashboard with all ingredients
+    """
+    model = Ingredient
+    template_name = 'ingredients/manage_ingredients.html'
+    context_object_name = 'ingredients'
+    paginate_by = 10
 
-    add_form = IngredientAddForm()
-
-    context = {
-        'ingredients': ingredients,
-        'add_form': add_form,
-        'nutrients': Ingredient.NUTRIENTS,
-        'add_url': reverse('add_ingredient'),
-    }
-
-    return render(request, 'ingredients/manage_ingredients.html', context)
+    def get_queryset(self):
+        return Ingredient.objects.select_related(
+            'category', 'default_unit'
+        ).prefetch_related(
+            'dietary_tag'
+        ).order_by('name')
 
 
-def add_ingredient(request):
-    form = IngredientAddForm(request.POST or None)
+class AddIngredientView(CreateView):
+    model = Ingredient
+    form_class = IngredientAddForm
+    template_name = 'ingredients/add_ingredient.html'
 
-    if request.method == 'POST':
-        if form.is_valid():
-            ingredient = form.save(commit=False)
-            ingredient.name = ingredient.name.strip().lower()
-            try:
-                ingredient.save()
-                form.save_m2m()
+    def form_valid(self, form):
+        ingredient = form.save(commit=False)
+        ingredient.name = ingredient.name.strip().lower()
+        ingredient.save()
+        form.save_m2m()
+        return redirect('edit_ingredient', ingredient_id=ingredient.id)
 
-                if ingredient.default_unit:
-                    IngredientMeasurementUnit.objects.get_or_create(
-                        ingredient=ingredient,
-                        unit=ingredient.default_unit,
-                        defaults={'conversion_to_base': 1}
-                    )
-
-                return redirect('edit_ingredient', ingredient_id=ingredient.id)
-            except IntegrityError:
-                messages.error(request, f'"{ingredient.name}" already exists.')
+    def form_invalid(self, form):
+        return render(self.request, self.template_name, {'form': form})
 
 
-    return render(request, 'ingredients/add_ingredient.html', {'form': form})
+class EditIngredientView(UpdateView):
+    model = Ingredient
+    form_class = IngredientEditForm
+    template_name = 'ingredients/edit_ingredient.html'
+    pk_url_kwarg = 'ingredient_id'
 
-def edit_ingredient(request, ingredient_id):
-    default_url = reverse('manage_ingredients')
-    ing = get_object_or_404(Ingredient, pk=ingredient_id)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['ingredient'] = self.object
+        context['nutrients'] = Ingredient.NUTRIENTS
+        context['default_url'] = reverse_lazy('manage_ingredients')
+        context['all_units'] = MeasurementUnit.objects.all().order_by('name_singular')
+        return context
 
-    if request.method == "POST":
-        form = IngredientEditForm(request.POST, instance=ing)
-        if form.is_valid():
-            ingredient = form.save(commit=False)
-            ingredient.name = ingredient.name.strip().lower()
-            try:
-                ingredient.save()
-                form.save_m2m()
+    def form_valid(self, form):
+        ingredient = form.save(commit=False)
+        ingredient.name = ingredient.name.strip().lower()
+        ingredient.save()
+        form.save_m2m()
+        return redirect('edit_ingredient', ingredient_id=ingredient.id)
 
-                # Ensure IngredientMeasurementUnit exists for default unit
-                if ingredient.default_unit:
-                    IngredientMeasurementUnit.objects.get_or_create(
-                        ingredient=ingredient,
-                        unit=ingredient.default_unit,
-                        defaults={'conversion_to_base': 1}
-                    )
+    def form_invalid(self, form):
+        return render(self.request, self.template_name, self.get_context_data(form=form))
 
-            except IntegrityError:
-                messages.error(request, f'"{ingredient.name}" already exists.')
-                return render(request, "ingredients/edit_ingredient.html", {
-                    "form": form,
-                    "ingredient": ing,
-                    "nutrients": Ingredient.NUTRIENTS,
-                    'default_url': default_url,
-                    'all_units': MeasurementUnit.objects.all().order_by('name_singular'),
-                })
-            return redirect('edit_ingredient', ingredient_id=ingredient.id)
 
-    else:
-        form = IngredientEditForm(instance=ing)
+"""
+Note:
 
-    context = {
-        "form": form,
-        "ingredient": ing,
-        "nutrients": Ingredient.NUTRIENTS,
-        'default_url': default_url,
-        'all_units': MeasurementUnit.objects.all().order_by('name_singular'),
-    }
-    return render(request, "ingredients/edit_ingredient.html", context)
+POST request
+→ CreateView runs form validation
+    → valid   → form_valid()  → save + redirect
+    → invalid → form_invalid() → re-render with errors
+
+get_context_data gives a dictionary to the template to render, like context = {} in FBV
+"""
 
 
 def ingredient_detail(request, ingredient_id):
-
+    """
+    Single-object view, keeping it as FBV, because there is a unit switcher that posts, and it is simpler this way
+    """
     ingredient = get_object_or_404(Ingredient, pk=ingredient_id)
-    unit_name = ingredient.default_unit
+    form = IngredientDetailForm(ingredient, request.POST or None)
 
-    quantity = ingredient.base_quantity
-
-    nutrients_dict  = ingredient.get_nutrients_dict(
-        ingredient_unit=ingredient.default_unit,
-        quantity=quantity
-    )
-
-    if request.method == "POST":
-        selected_unit_id = request.POST.get("unit")
-        quantity_raw = request.POST.get("quantity", "")
-
-        try:
-            quantity = float(quantity_raw)
-            if quantity <= 0:
-                messages.error(request, 'Quantity must be greater than 0.')
-                quantity = ingredient.base_quantity
-            elif selected_unit_id:
-                selected_unit = IngredientMeasurementUnit.objects.get(id=selected_unit_id)
-                nutrients_dict = ingredient.get_nutrients_dict(
-                    ingredient_unit=selected_unit,
-                    quantity=quantity
-                )
-                unit_name = selected_unit.name_for_quantity(quantity)
-        except (ValueError, TypeError):
-            messages.error(request, 'Please enter a valid quantity.')
-            quantity = ingredient.base_quantity
-
-
-    nutrients = {
-        n: f"{round(v, 2)} {ingredient.NUTRIENT_UNITS.get(n, '')}"
-        for n, v in nutrients_dict.items()
-    }
+    quantity = form.get_quantity()
+    unit = form.get_unit()
     quantity = int(quantity) if quantity == int(quantity) else quantity
 
     context = {
-        "ingredient": ingredient,
-        "unit_name": unit_name,
-        'nutrients': nutrients,
-        "quantity": quantity,
-
+        'ingredient': ingredient,
+        'form': form,
+        'unit_name': unit.name_for_quantity(quantity),
+        'nutrients': form.get_nutrients(),
+        'quantity': quantity,
     }
-
-    return render(request, "ingredients/ingredient_detail.html", context)
-
+    return render(request, 'ingredients/ingredient_detail.html', context)
 
 
-def delete_ingredient(request, ingredient_id):
-    ing = get_object_or_404(Ingredient, pk=ingredient_id)
-    if request.method == 'POST':
+class DeleteIngredientView(View):
+    """
+    HTML delete button (trash bin) -> JS pop-up -> openDeleteModal (delete_popup.js)
+    -> Delete button in the pop-up posts to URL (/ingredients/7/delete/) -> URL calls DeleteIngredientView
+    """
+    def post(self, request, ingredient_id):
+        ing = get_object_or_404(Ingredient, pk=ingredient_id)
         ing.delete()
         return redirect('manage_ingredients')
-    return render(request, 'ingredients/ingredient_delete_confirm.html', {'ingredient': ing})
+
+
+"""
+Note:
+AJAX views will be kept as FBV as they just return a JSON response. CBV would add nothing to them. 
+"""
+
+"""
+INGREDIENT CATEGORY VIEWS
+"""
+
+def list_categories_ajax(request):
+    cats = IngredientCategory.objects.all().order_by('name')
+    return JsonResponse({'items': [
+        {
+            'id': c.id,
+            'name': c.name,
+            'edit_url': reverse('edit_category_ajax', kwargs={'pk': c.id}),
+            'delete_url': reverse('delete_category_ajax', kwargs={'pk': c.id}),
+            'edit_fields': [
+                {'key': 'name', 'placeholder': 'Name', 'value': c.name},
+            ]
+        }
+        for c in cats
+    ]})
 
 
 def add_category_ajax(request):
@@ -175,7 +156,7 @@ def add_category_ajax(request):
         return JsonResponse({'id': obj.id, 'name': obj.name})
     return JsonResponse({'error': 'Invalid method.'}, status=405)
 
-# Edit
+
 def edit_category_ajax(request, pk):
     if request.method == "POST":
         cat = IngredientCategory.objects.filter(pk=pk).first()
@@ -186,13 +167,41 @@ def edit_category_ajax(request, pk):
         cat.save()
         return JsonResponse({"id": cat.id, "name": cat.name})
 
-# Delete
+
 def delete_category_ajax(request, pk):
     if request.method == "POST":
         cat = IngredientCategory.objects.filter(pk=pk).first()
         if not cat: return JsonResponse({"error": "Not found"}, status=404)
         cat.delete()
         return JsonResponse({"success": True})
+
+
+"""
+INGREDIENT DIETARY TAGS VIEWS
+"""
+
+def dietary_tags_fragment(request):
+    """
+    returns the dietary_tag field widget as a raw HTML string
+    """
+    form = IngredientAddForm()
+    return HttpResponse(str(form['dietary_tag']))
+
+
+def list_dietary_tags_ajax(request):
+    tags = IngredientDietaryTag.objects.all().order_by('name')
+    return JsonResponse({'items': [
+        {
+            'id': t.id,
+            'name': t.name,
+            'edit_url': reverse('edit_dietary_tag_ajax', kwargs={'pk': t.id}),
+            'delete_url': reverse('delete_dietary_tag_ajax', kwargs={'pk': t.id}),
+            'edit_fields': [
+                {'key': 'name', 'placeholder': 'Name', 'value': t.name},
+            ]
+        }
+        for t in tags
+    ]})
 
 
 def add_dietary_tag_ajax(request):
@@ -207,7 +216,7 @@ def add_dietary_tag_ajax(request):
         return JsonResponse({'id': obj.id, 'name': obj.name})
     return JsonResponse({'error': 'Invalid method.'}, status=405)
 
-# Edit dietary tag
+
 def edit_dietary_tag_ajax(request, pk):
     if request.method == "POST":
         tag = IngredientDietaryTag.objects.filter(pk=pk).first()
@@ -220,7 +229,7 @@ def edit_dietary_tag_ajax(request, pk):
         tag.save()
         return JsonResponse({"id": tag.id, "name": tag.name})
 
-# Delete dietary tag
+
 def delete_dietary_tag_ajax(request, pk):
     if request.method == "POST":
         tag = IngredientDietaryTag.objects.filter(pk=pk).first()
@@ -229,6 +238,10 @@ def delete_dietary_tag_ajax(request, pk):
         tag.delete()
         return JsonResponse({"success": True})
 
+
+"""
+INGREDIENT MEASUREMENT UNITS VIEWS
+"""
 
 def add_measurement_unit(request, ingredient_id):
     ingredient = get_object_or_404(Ingredient, pk=ingredient_id)
@@ -265,6 +278,7 @@ def add_measurement_unit(request, ingredient_id):
                 messages.success(request, f'"{unit.name_singular}" added successfully.')
     return redirect(reverse('edit_ingredient', kwargs={'ingredient_id': ingredient_id}))
 
+
 def add_measurement_unit_ajax(request):
     if request.method == 'POST':
         data = json.loads(request.body)
@@ -288,38 +302,6 @@ def delete_measurement_unit(request, ingredient_id, imu_id):
     if request.method == 'POST':
         imu.delete()
     return redirect('edit_ingredient', ingredient_id=ingredient_id)
-
-
-def list_categories_ajax(request):
-    cats = IngredientCategory.objects.all().order_by('name')
-    return JsonResponse({'items': [
-        {
-            'id': c.id,
-            'name': c.name,
-            'edit_url': reverse('edit_category_ajax', kwargs={'pk': c.id}),
-            'delete_url': reverse('delete_category_ajax', kwargs={'pk': c.id}),
-            'edit_fields': [
-                {'key': 'name', 'placeholder': 'Name', 'value': c.name},
-            ]
-        }
-        for c in cats
-    ]})
-
-
-def list_dietary_tags_ajax(request):
-    tags = IngredientDietaryTag.objects.all().order_by('name')
-    return JsonResponse({'items': [
-        {
-            'id': t.id,
-            'name': t.name,
-            'edit_url': reverse('edit_dietary_tag_ajax', kwargs={'pk': t.id}),
-            'delete_url': reverse('delete_dietary_tag_ajax', kwargs={'pk': t.id}),
-            'edit_fields': [
-                {'key': 'name', 'placeholder': 'Name', 'value': t.name},
-            ]
-        }
-        for t in tags
-    ]})
 
 
 def list_measurement_units_ajax(request):
@@ -354,17 +336,13 @@ def edit_measurement_unit_ajax(request, pk):
         return JsonResponse({'id': unit.id, 'name': f'{unit.name_singular} ({unit.code})'})
     return JsonResponse({'error': 'Invalid method.'}, status=405)
 
+
 def delete_measurement_unit_ajax(request, pk):
     if request.method == 'POST':
         unit = get_object_or_404(MeasurementUnit, pk=pk)
         unit.delete()
         return JsonResponse({'success': True})
     return JsonResponse({'error': 'Invalid method.'}, status=405)
-
-
-def dietary_tags_fragment(request):
-    form = IngredientAddForm()
-    return HttpResponse(str(form['dietary_tag']))
 
 
 def edit_measurement_unit_conversion(request, ingredient_id, imu_id):
@@ -386,3 +364,108 @@ def edit_measurement_unit_conversion(request, ingredient_id, imu_id):
         except (ValueError, TypeError):
             messages.error(request, 'Please enter a valid number.')
     return redirect(reverse('edit_ingredient', kwargs={'ingredient_id': ingredient_id}))
+
+
+
+"""
+Old function-based views below:
+"""
+
+# def edit_ingredient(request, ingredient_id):
+#     default_url = reverse('manage_ingredients')
+#     ing = get_object_or_404(Ingredient, pk=ingredient_id)
+#
+#     if request.method == "POST":
+#         form = IngredientEditForm(request.POST, instance=ing)
+#         if form.is_valid():
+#             ingredient = form.save(commit=False)
+#             ingredient.name = ingredient.name.strip().lower()
+#             try:
+#                 ingredient.save()
+#                 form.save_m2m()
+#
+#                 # Ensure IngredientMeasurementUnit exists for default unit
+#                 if ingredient.default_unit:
+#                     IngredientMeasurementUnit.objects.get_or_create(
+#                         ingredient=ingredient,
+#                         unit=ingredient.default_unit,
+#                         defaults={'conversion_to_base': 1}
+#                     )
+#
+#             except IntegrityError:
+#                 messages.error(request, f'"{ingredient.name}" already exists.')
+#                 return render(request, "ingredients/edit_ingredient.html", {
+#                     "form": form,
+#                     "ingredient": ing,
+#                     "nutrients": Ingredient.NUTRIENTS,
+#                     'default_url': default_url,
+#                     'all_units': MeasurementUnit.objects.all().order_by('name_singular'),
+#                 })
+#             return redirect('edit_ingredient', ingredient_id=ingredient.id)
+#
+#     else:
+#         form = IngredientEditForm(instance=ing)
+#
+#     context = {
+#         "form": form,
+#         "ingredient": ing,
+#         "nutrients": Ingredient.NUTRIENTS,
+#         'default_url': default_url,
+#         'all_units': MeasurementUnit.objects.all().order_by('name_singular'),
+#     }
+#     return render(request, "ingredients/edit_ingredient.html", context)
+
+
+# def manage_ingredients(request):
+#     ingredients_qs = Ingredient.objects.select_related(
+#         'category', 'default_unit'
+#     ).prefetch_related(
+#         'dietary_tag'
+#     ).all().order_by('name')
+#
+#     paginator = Paginator(ingredients_qs, 10)
+#     page_number = request.GET.get('page')
+#     ingredients = paginator.get_page(page_number)
+#
+#     add_form = IngredientAddForm()
+#
+#     context = {
+#         'ingredients': ingredients,
+#         'add_form': add_form,
+#         'nutrients': Ingredient.NUTRIENTS,
+#         'add_url': reverse('add_ingredient'),
+#     }
+#
+#     return render(request, 'ingredients/manage_ingredients.html', context)
+
+
+# def add_ingredient(request):
+#     form = IngredientAddForm(request.POST or None)
+#
+#     if request.method == 'POST':
+#         if form.is_valid():
+#             ingredient = form.save(commit=False)
+#             ingredient.name = ingredient.name.strip().lower()
+#             try:
+#                 ingredient.save()
+#                 form.save_m2m()
+#
+#                 if ingredient.default_unit:
+#                     IngredientMeasurementUnit.objects.get_or_create(
+#                         ingredient=ingredient,
+#                         unit=ingredient.default_unit,
+#                         defaults={'conversion_to_base': 1}
+#                     ) -> redundant - handled in forms.py
+#
+#                 return redirect('edit_ingredient', ingredient_id=ingredient.id)
+#             except IntegrityError:
+#                 messages.error(request, f'"{ingredient.name}" already exists.')
+#
+#     return render(request, 'ingredients/add_ingredient.html', {'form': form})
+
+# def delete_ingredient(request, ingredient_id):
+#     ing = get_object_or_404(Ingredient, pk=ingredient_id)
+#     if request.method == 'POST':
+#         ing.delete()
+#         return redirect('manage_ingredients')
+#     return render(request, 'ingredients/ingredient_delete_confirm.html', {'ingredient': ing})

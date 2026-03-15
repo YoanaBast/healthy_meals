@@ -41,8 +41,13 @@ ingredient_unit_patterns = [
 
 ingredient_detail_patterns = [
     path('', views.ingredient_detail, name='ingredient_detail'),
-    path('edit/', views.edit_ingredient, name='edit_ingredient'),
-    path('delete/', views.delete_ingredient, name='delete_ingredient'),
+
+    # path('edit/', views.edit_ingredient, name='edit_ingredient'),
+    path('edit/', views.EditIngredientView.as_view(), name='edit_ingredient'),
+
+    # path('delete/', views.delete_ingredient, name='delete_ingredient'),
+    path('delete/', views.DeleteIngredientView.as_view(), name='delete_ingredient'),
+
     path('unit/', include(ingredient_unit_patterns)),
     path('units/<int:imu_id>/edit/', views.edit_measurement_unit_conversion, name='edit_measurement_unit_conversion'),
 
@@ -50,8 +55,12 @@ ingredient_detail_patterns = [
 
 
 urlpatterns = [
-    path('', views.manage_ingredients, name='manage_ingredients'),
-    path('add/', views.add_ingredient, name='add_ingredient'),
+    # path('', views.manage_ingredients, name='manage_ingredients'),
+    path('', views.ManageIngredientsView.as_view(), name='manage_ingredients'),
+
+    # path('add/', views.add_ingredient, name='add_ingredient'),
+    path('add/', views.AddIngredientView.as_view(), name='add_ingredient'),
+
     path('<int:ingredient_id>/', include(ingredient_detail_patterns)),
     path('ajax/', include(ajax_patterns)),
 ]

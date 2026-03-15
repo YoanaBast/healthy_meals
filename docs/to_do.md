@@ -4,6 +4,7 @@ Welcome to my to-do list! Feel free to give me siggestions :)
 ## PRIORITY 1 FIXES
 
 ## PRIORITY 2 FIXES
+    - Generation History needs to show what was added too
 
 ## FEATURES
     - add search boxes

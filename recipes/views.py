@@ -6,7 +6,9 @@ from django.core.paginator import Paginator
 from django.db import IntegrityError
 from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
+from django.views import View
+from django.views.generic import ListView, DetailView
 
 from ingredients.models import Ingredient, IngredientMeasurementUnit
 from .forms import RecipeForm, RecipeIngredientForm, RecipeIngredientFormSet
@@ -14,123 +16,140 @@ from .models import Recipe, RecipeCategory, RecipeIngredient
 
 # Create your views here.
 
-def manage_recipes(request):
-    user, _ = User.objects.get_or_create(username="default")
-    recipes_qs = Recipe.objects.all().order_by('name')
-    paginator = Paginator(recipes_qs, 10)
-    page_number = request.GET.get('page')
-    recipes = paginator.get_page(page_number)
 
-    for rec in recipes:
-        rec.is_fav = rec.favourited_by.filter(id=user.id).exists()
+"""
+RECIPE VIEWS
+"""
 
-    recipe_form = RecipeForm()
-    ingredient_form = RecipeIngredientForm()
+class ManageRecipesView(ListView):
+    """
+    A dashboard of all recipes
+    """
+    model = Recipe
+    template_name = 'recipes/manage_recipes.html'
+    context_object_name = 'recipes'
+    paginate_by = 10
 
-    context = {
-        'recipes': recipes,
-        'recipe_form': recipe_form,
-        'ingredient_form': ingredient_form,
-    }
-    return render(request, 'recipes/manage_recipes.html', context)
+    def get_queryset(self):
+        return Recipe.objects.all().order_by('name')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user, _ = User.objects.get_or_create(username="default")
+
+        for rec in context['recipes']:
+            rec.is_fav = rec.favourited_by.filter(id=user.id).exists()
+
+        context['recipe_form'] = RecipeForm()
+        context['ingredient_form'] = RecipeIngredientForm()
+        return context
 
 
-def recipe_detail(request, pk):
-    recipe = get_object_or_404(Recipe, pk=pk)
-    return render(request, 'recipes/recipe_detail.html', {'recipe': recipe})
+class RecipeDetailView(DetailView):
+    model = Recipe
+    template_name = 'recipes/recipe_detail.html'
+    context_object_name = 'recipe'
 
 
-def add_recipe(request):
-    ingredients = Ingredient.objects.prefetch_related('measurement_units__unit').all()
+class AddRecipeView(View):
+    template_name = 'recipes/add_recipe.html'
 
-    if request.method == 'POST':
+    def get_ingredients(self):
+        return Ingredient.objects.prefetch_related('measurement_units__unit').all()
+
+    def get(self, request):
+        return render(request, self.template_name, {
+            'recipe_form': RecipeForm(),
+            'ingredient_formset': RecipeIngredientFormSet(),
+            'ingredients': self.get_ingredients(),
+        })
+
+    def post(self, request):
         recipe_form = RecipeForm(request.POST)
         ingredient_formset = RecipeIngredientFormSet(request.POST)
 
         if recipe_form.is_valid() and ingredient_formset.is_valid():
-            try:
-                recipe = recipe_form.save(commit=False)
-
-                recipe.name = recipe.name.strip().lower()
-                recipe.save()
-            except IntegrityError:
-                messages.error(request, f'"{recipe.name}" already exists.')
-                return render(request, 'recipes/add_recipe.html', {
-                    'recipe_form': recipe_form,
-                    'ingredient_formset': ingredient_formset,
-                    'ingredients': ingredients,
-                })
-
+            recipe = recipe_form.save()
             ingredient_formset.instance = recipe
             ingredient_formset.save()
             return redirect('recipe_detail', pk=recipe.pk)
-        else:
-            # Catch duplicate caught at form validation level
-            name_errors = recipe_form.errors.get('name', [])
-            if any('already exists' in e for e in name_errors):
-                name = request.POST.get('name', '').strip().lower()
-                messages.error(request, f'"{name}" already exists.')
-    else:
-        recipe_form = RecipeForm()
-        ingredient_formset = RecipeIngredientFormSet()
 
-    return render(request, 'recipes/add_recipe.html', {
-        'recipe_form': recipe_form,
-        'ingredient_formset': ingredient_formset,
-        'ingredients': ingredients,
-    })
+        return render(request, self.template_name, {
+            'recipe_form': recipe_form,
+            'ingredient_formset': ingredient_formset,
+            'ingredients': self.get_ingredients(),
+        })
 
 
-def delete_recipe(request, pk):
-    recipe = get_object_or_404(Recipe, pk=pk)
-    recipe.delete()
-    return redirect('manage_recipes')
+class DeleteRecipeView(View):
+    """
+    HTML delete button (trash bin) -> JS pop-up -> openDeleteModal (delete_popup.js)
+    -> Delete button in the pop-up posts to URL (/recipes/pk/delete/) -> URL calls DeleteRecipeView
+    """
+    def post(self, request, pk):
+        recipe = get_object_or_404(Recipe, pk=pk)
+        recipe.delete()
+        return redirect('manage_recipes')
 
 
-def edit_recipe(request, pk):
-    default_url = reverse('manage_recipes')
-    recipe = get_object_or_404(Recipe, pk=pk)
+class EditRecipeView(View):
+    template_name = 'recipes/edit_recipe.html'
 
-    if request.method == 'POST':
-        recipe_form = RecipeForm(request.POST, instance=recipe)
-        ingredient_formset = RecipeIngredientFormSet(request.POST, instance=recipe)
+    def get_forms(self, request, recipe):
+        if request.method == 'POST':
+            return (
+                RecipeForm(request.POST, instance=recipe),
+                RecipeIngredientFormSet(request.POST, instance=recipe)
+            )
+        return (
+            RecipeForm(instance=recipe),
+            RecipeIngredientFormSet(instance=recipe)
+        )
+
+    def get_context(self, recipe, recipe_form, ingredient_formset):
+        existing_ids = [
+            form.instance.ingredient_id
+            for form in ingredient_formset.forms
+            if form.instance.pk
+        ]
+        return {
+            'recipe_form': recipe_form,
+            'ingredient_formset': ingredient_formset,
+            'ingredients': Ingredient.objects.prefetch_related('measurement_units__unit').exclude(id__in=existing_ids),
+            'recipe': recipe,
+            'default_url': reverse_lazy('manage_recipes'),
+        }
+
+    def get(self, request, pk):
+        recipe = get_object_or_404(Recipe, pk=pk)
+        recipe_form, ingredient_formset = self.get_forms(request, recipe)
+        return render(request, self.template_name, self.get_context(recipe, recipe_form, ingredient_formset))
+
+    def post(self, request, pk):
+        recipe = get_object_or_404(Recipe, pk=pk)
+        recipe_form, ingredient_formset = self.get_forms(request, recipe)
 
         if recipe_form.is_valid() and ingredient_formset.is_valid():
-            try:
-                updated_recipe = recipe_form.save(commit=False)
-                updated_recipe.name = updated_recipe.name.strip().lower()
-                updated_recipe.save()
-                ingredient_formset.save()
-                return redirect('recipe_detail', pk=recipe.pk)
-            except IntegrityError:
-                messages.error(request, f'"{updated_recipe.name}" already exists.')
-        else:
-            name_errors = recipe_form.errors.get('name', [])
-            if any('already exists' in e for e in name_errors):
-                name = request.POST.get('name', '').strip().lower()
-                messages.error(request, f'"{name}" already exists.')
-    else:
-        recipe_form = RecipeForm(instance=recipe)
-        ingredient_formset = RecipeIngredientFormSet(instance=recipe)
+            recipe_form.save()
+            ingredient_formset.save()
+            return redirect('recipe_detail', pk=pk)
 
-    existing_ids = [form.instance.ingredient_id for form in ingredient_formset.forms if form.instance.pk]
-    ingredients_add = Ingredient.objects.prefetch_related('measurement_units__unit').exclude(id__in=existing_ids)
+        return render(request, self.template_name, self.get_context(recipe, recipe_form, ingredient_formset))
 
-    context = {
-        'recipe_form': recipe_form,
-        'ingredient_formset': ingredient_formset,
-        'ingredients': ingredients_add,
-        'recipe': recipe,
-        'default_url': default_url,
-    }
-    return render(request, 'recipes/edit_recipe.html', context)
 
+"""
+Note:
+AJAX views will be kept as FBV as they just return a JSON response. CBV would add nothing to them. 
+"""
+
+"""
+FAVOURITE HEART
+"""
 
 def toggle_favourite(request, pk):
     user = get_object_or_404(User, username="default")
     recipe = get_object_or_404(Recipe, pk=pk)
 
-    # toggle
     if recipe.favourited_by.filter(id=user.id).exists():
         recipe.favourited_by.remove(user)
         status = False
@@ -140,6 +159,10 @@ def toggle_favourite(request, pk):
 
     return JsonResponse({"favourited": status})
 
+
+"""
+RECIPE INGREDIENT VIEWS
+"""
 
 def add_ingredient(request, pk):
     if request.method == "POST":
@@ -183,6 +206,9 @@ def add_ingredient(request, pk):
         except Exception as e:
             return JsonResponse({"success": False, "error": str(e)})
 
+"""
+RECIPE CATEGORY VIEWS
+"""
 
 def add_recipe_category_ajax(request):
     if request.method == 'POST':
@@ -214,30 +240,22 @@ def list_categories_ajax(request):
 
 
 def edit_category_ajax(request, pk=None):
-    print("DEBUG: edit_category_ajax called")
-    print("DEBUG: URL pk =", pk)
-    print("DEBUG: POST data =", request.POST)
-
     if request.method == "POST":
         if not pk:
             pk = request.POST.get("pk")
-            print("DEBUG: fallback pk from POST =", pk)
 
         name = request.POST.get("name", "").strip()
-        print("DEBUG: name =", name)
 
         if not name:
             return JsonResponse({"error": "Name required"}, status=400)
 
         cat = RecipeCategory.objects.filter(pk=pk).first()
-        print("DEBUG: category found =", cat)
 
         if not cat:
             return JsonResponse({"error": "Not found"}, status=404)
 
         cat.name = name
         cat.save()
-        print("DEBUG: category saved =", cat)
 
         return JsonResponse({"id": cat.id, "name": cat.name})
 
@@ -246,24 +264,131 @@ def edit_category_ajax(request, pk=None):
 
 
 def delete_category_ajax(request, pk=None):
-    print("DEBUG: delete_category_ajax called")
-    print("DEBUG: URL pk =", pk)
-    print("DEBUG: POST data =", request.POST)
-
     if request.method == "POST":
         if not pk:
             pk = request.POST.get("pk")
-            print("DEBUG: fallback pk from POST =", pk)
 
         cat = RecipeCategory.objects.filter(pk=pk).first()
-        print("DEBUG: category found =", cat)
 
         if not cat:
             return JsonResponse({"error": "Not found"}, status=404)
 
         cat.delete()
-        print("DEBUG: category deleted")
-
         return JsonResponse({"success": True})
-
     return JsonResponse({"error": "Invalid method"}, status=405)
+
+
+"""
+Older views:
+"""
+
+# def manage_recipes(request):
+#     user, _ = User.objects.get_or_create(username="default")
+#     recipes_qs = Recipe.objects.all().order_by('name')
+#     paginator = Paginator(recipes_qs, 10)
+#     page_number = request.GET.get('page')
+#     recipes = paginator.get_page(page_number)
+#
+#     for rec in recipes:
+#         rec.is_fav = rec.favourited_by.filter(id=user.id).exists()
+#
+#     recipe_form = RecipeForm()
+#     ingredient_form = RecipeIngredientForm()
+#
+#     context = {
+#         'recipes': recipes,
+#         'recipe_form': recipe_form,
+#         'ingredient_form': ingredient_form,
+#     }
+#     return render(request, 'recipes/manage_recipes.html', context)
+
+
+# def recipe_detail(request, pk):
+#     recipe = get_object_or_404(Recipe, pk=pk)
+#     return render(request, 'recipes/recipe_detail.html', {'recipe': recipe})
+
+
+# def add_recipe(request):
+#     ingredients = Ingredient.objects.prefetch_related('measurement_units__unit').all()
+#
+#     if request.method == 'POST':
+#         recipe_form = RecipeForm(request.POST)
+#         ingredient_formset = RecipeIngredientFormSet(request.POST)
+#
+#         if recipe_form.is_valid() and ingredient_formset.is_valid():
+#             try:
+#                 recipe = recipe_form.save(commit=False)
+#
+#                 recipe.name = recipe.name.strip().lower()
+#                 recipe.save()
+#             except IntegrityError:
+#                 messages.error(request, f'"{recipe.name}" already exists.')
+#                 return render(request, 'recipes/add_recipe.html', {
+#                     'recipe_form': recipe_form,
+#                     'ingredient_formset': ingredient_formset,
+#                     'ingredients': ingredients,
+#                 })
+#
+#             ingredient_formset.instance = recipe
+#             ingredient_formset.save()
+#             return redirect('recipe_detail', pk=recipe.pk)
+#         else:
+#             # Catch duplicate caught at form validation level
+#             name_errors = recipe_form.errors.get('name', [])
+#             if any('already exists' in e for e in name_errors):
+#                 name = request.POST.get('name', '').strip().lower()
+#                 messages.error(request, f'"{name}" already exists.')
+#     else:
+#         recipe_form = RecipeForm()
+#         ingredient_formset = RecipeIngredientFormSet()
+#
+#     return render(request, 'recipes/add_recipe.html', {
+#         'recipe_form': recipe_form,
+#         'ingredient_formset': ingredient_formset,
+#         'ingredients': ingredients,
+#     })
+
+
+# def delete_recipe(request, pk):
+#     recipe = get_object_or_404(Recipe, pk=pk)
+#     recipe.delete()
+#     return redirect('manage_recipes')
+
+
+# def edit_recipe(request, pk):
+#     default_url = reverse('manage_recipes')
+#     recipe = get_object_or_404(Recipe, pk=pk)
+#
+#     if request.method == 'POST':
+#         recipe_form = RecipeForm(request.POST, instance=recipe)
+#         ingredient_formset = RecipeIngredientFormSet(request.POST, instance=recipe)
+#
+#         if recipe_form.is_valid() and ingredient_formset.is_valid():
+#             try:
+#                 updated_recipe = recipe_form.save(commit=False)
+#                 updated_recipe.name = updated_recipe.name.strip().lower()
+#                 updated_recipe.save()
+#                 ingredient_formset.save()
+#                 return redirect('recipe_detail', pk=recipe.pk)
+#             except IntegrityError:
+#                 messages.error(request, f'"{updated_recipe.name}" already exists.')
+#         else:
+#             name_errors = recipe_form.errors.get('name', [])
+#             if any('already exists' in e for e in name_errors):
+#                 name = request.POST.get('name', '').strip().lower()
+#                 messages.error(request, f'"{name}" already exists.')
+#     else:
+#         recipe_form = RecipeForm(instance=recipe)
+#         ingredient_formset = RecipeIngredientFormSet(instance=recipe)
+#
+#     existing_ids = [form.instance.ingredient_id for form in ingredient_formset.forms if form.instance.pk]
+#     ingredients_add = Ingredient.objects.prefetch_related('measurement_units__unit').exclude(id__in=existing_ids)
+#
+#     context = {
+#         'recipe_form': recipe_form,
+#         'ingredient_formset': ingredient_formset,
+#         'ingredients': ingredients_add,
+#         'recipe': recipe,
+#         'default_url': default_url,
+#     }
+#     return render(request, 'recipes/edit_recipe.html', context)
