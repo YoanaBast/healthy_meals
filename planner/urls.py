@@ -18,14 +18,21 @@ fridge_patterns = [
 ]
 
 grocery_patterns = [
-    path('', views.user_grocery_list, name='user_grocery_list'),
+    # path('', views.user_grocery_list, name='user_grocery_list'),
+    path('', views.UserGroceryListView.as_view(), name='user_grocery_list'),
 
     # path('generate/', views.generate_grocery_list, name='generate_grocery_list'),
     path('generate/', views.GenerateGroceryListView.as_view(), name='generate_grocery_list'),
 
-    path('delete/<int:item_id>/', views.delete_grocery_item, name='delete_grocery_item'),
-    path('add-to-fridge/<int:item_id>/', views.add_grocery_to_fridge, name='add_grocery_to_fridge'),
-    path('add-all-to-fridge/', views.add_all_grocery_to_fridge, name='add_all_grocery_to_fridge'),
+    # path('delete/<int:item_id>/', views.delete_grocery_item, name='delete_grocery_item'),
+    path('delete/<int:item_id>/', views.DeleteGroceryItemView.as_view(), name='delete_grocery_item'),
+
+
+    # path('add-to-fridge/<int:item_id>/', views.add_grocery_to_fridge, name='add_grocery_to_fridge'),
+    path('add-to-fridge/<int:item_id>/', views.AddGroceryToFridgeView.as_view(), name='add_grocery_to_fridge'),
+
+    # path('add-all-to-fridge/', views.add_all_grocery_to_fridge, name='add_all_grocery_to_fridge'),
+    path('add-all-to-fridge/', views.AddAllGroceryToFridgeView.as_view(), name='add_all_grocery_to_fridge'),
 ]
 
 urlpatterns = [

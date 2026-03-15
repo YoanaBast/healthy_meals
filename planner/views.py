@@ -1,3 +1,5 @@
+from collections import OrderedDict
+
 from django.core.paginator import Paginator
 from django.db.models import Prefetch, Exists, OuterRef
 from django.urls import reverse, reverse_lazy
@@ -57,7 +59,6 @@ class DeleteFridgeItemView(View):
         return redirect('manage_fridge')
 
 
-
 class AddFridgeItemView(View):
     def post(self, request):
         user, _ = User.objects.get_or_create(username="default")
@@ -108,8 +109,9 @@ class AddFridgeItemView(View):
 
 
 """
-GET MEAL SUGGESTIONS VIEWS
+GET MEAL SUGGESTIONS VIEWS (COOK FROM FRIDGE)
 """
+
 
 def get_meal_suggestions(request):
     user, _ = User.objects.get_or_create(username="default")
@@ -168,7 +170,7 @@ def get_meal_suggestions(request):
 
 
 """
-MEALS/RECIPES MADE VIEWS
+MEALS/RECIPES MADE VIEWS 
 """
 
 
@@ -312,89 +314,73 @@ class GenerateGroceryListView(View):
         return redirect('user_grocery_list')
 
 
+class UserGroceryListView(View):
+    template_name = 'planner/user_grocery_list.html'
 
-def user_grocery_list(request):
-    from collections import OrderedDict
-    user, _ = User.objects.get_or_create(username="default")
-    items = UserGroceryList.objects.filter(user=user).select_related('ingredient', 'unit')
+    def get_history_data(self, user):
+        raw_history = GroceryListGeneration.objects.filter(user=user).prefetch_related(
+            'items__ingredient', 'items__unit', 'items__recipe',
+        )
+        history_data = []
+        for gen in raw_history:
+            by_recipe = OrderedDict()
+            for item in gen.items.all():
+                recipe_name = item.recipe.name if item.recipe else "Unknown Recipe"
+                if recipe_name not in by_recipe:
+                    by_recipe[recipe_name] = []
+                by_recipe[recipe_name].append(item)
+            history_data.append({
+                'created_at': gen.created_at,
+                'by_recipe': by_recipe,
+            })
+        return history_data
 
-    raw_history = GroceryListGeneration.objects.filter(user=user).prefetch_related(
-        'items__ingredient',
-        'items__unit',
-        'items__recipe',
-    )
+    def get(self, request):
+        user, _ = User.objects.get_or_create(username="default")
+        items = UserGroceryList.objects.filter(user=user).select_related('ingredient', 'unit')
 
-    # Group items by recipe in Python so the template stays simple
-    history_data = []
-    for gen in raw_history:
-        by_recipe = OrderedDict()
-        for item in gen.items.all():
-            recipe_name = item.recipe.name if item.recipe else "Unknown Recipe"
-            if recipe_name not in by_recipe:
-                by_recipe[recipe_name] = []
-            by_recipe[recipe_name].append(item)
-        history_data.append({
-            'created_at': gen.created_at,
-            'by_recipe': by_recipe,
+        history_page_obj = Paginator(self.get_history_data(user), 5).get_page(
+            request.GET.get('history_page')
+        )
+
+        return render(request, self.template_name, {
+            'items': items,
+            'history': history_page_obj,
+            'history_page_obj': history_page_obj,
         })
 
-    history_paginator = Paginator(history_data, 5)
-    history_page_number = request.GET.get('history_page')
-    history_page_obj = history_paginator.get_page(history_page_number)
 
-    context = {
-        'items': items,
-        'history': history_page_obj,
-        'history_page_obj': history_page_obj,
-    }
-    return render(request, 'planner/user_grocery_list.html', context)
-
-
-def delete_grocery_item(request, item_id):
-    if request.method == "POST":
+class DeleteGroceryItemView(View):
+    def post(self, request, item_id):
         item = get_object_or_404(UserGroceryList, id=item_id)
         item.delete()
-    return redirect("user_grocery_list")
+        return redirect('user_grocery_list')
 
 
-def add_grocery_to_fridge(request, item_id):
-    if request.method == "POST":
+class AddGroceryToFridgeView(View):
+    def post(self, request, item_id):
         item = get_object_or_404(UserGroceryList, id=item_id)
-
         UserFridge.objects.update_or_create(
             user=item.user,
             ingredient=item.ingredient,
-            defaults={
-                "quantity": item.quantity,
-                "unit": item.unit,
-            }
+            defaults={'quantity': item.quantity, 'unit': item.unit}
         )
         item.delete()
+        return redirect('user_grocery_list')
 
-    return redirect("user_grocery_list")
 
-
-def add_all_grocery_to_fridge(request):
-    if request.method == "POST":
+class AddAllGroceryToFridgeView(View):
+    def post(self, request):
         user, _ = User.objects.get_or_create(username="default")
         items = UserGroceryList.objects.filter(user=user)
-
         for item in items:
             UserFridge.objects.update_or_create(
                 user=item.user,
                 ingredient=item.ingredient,
-                defaults={
-                    "quantity": item.quantity,
-                    "unit": item.unit,
-                }
+                defaults={'quantity': item.quantity, 'unit': item.unit}
             )
         items.delete()
-
-    return redirect("user_grocery_list")
-
-def delete_grocery_item_by_id(request, id):
-    return delete_grocery_item(request, item_id=id)
-
+        return redirect('user_grocery_list')
 
 
 def calorie_tracker(request):
@@ -715,3 +701,89 @@ Older views:
 #         'show_favs': show_favs,
 #
 #     })
+
+
+# def user_grocery_list(request):
+#     from collections import OrderedDict
+#     user, _ = User.objects.get_or_create(username="default")
+#     items = UserGroceryList.objects.filter(user=user).select_related('ingredient', 'unit')
+#
+#     raw_history = GroceryListGeneration.objects.filter(user=user).prefetch_related(
+#         'items__ingredient',
+#         'items__unit',
+#         'items__recipe',
+#     )
+#
+#     # Group items by recipe in Python so the template stays simple
+#     history_data = []
+#     for gen in raw_history:
+#         by_recipe = OrderedDict()
+#         for item in gen.items.all():
+#             recipe_name = item.recipe.name if item.recipe else "Unknown Recipe"
+#             if recipe_name not in by_recipe:
+#                 by_recipe[recipe_name] = []
+#             by_recipe[recipe_name].append(item)
+#         history_data.append({
+#             'created_at': gen.created_at,
+#             'by_recipe': by_recipe,
+#         })
+#
+#     history_paginator = Paginator(history_data, 5)
+#     history_page_number = request.GET.get('history_page')
+#     history_page_obj = history_paginator.get_page(history_page_number)
+#
+#     context = {
+#         'items': items,
+#         'history': history_page_obj,
+#         'history_page_obj': history_page_obj,
+#     }
+#     return render(request, 'planner/user_grocery_list.html', context)
+
+
+# def delete_grocery_item(request, item_id):
+#     if request.method == "POST":
+#         item = get_object_or_404(UserGroceryList, id=item_id)
+#         item.delete()
+#     return redirect("user_grocery_list")
+#
+#
+# def add_grocery_to_fridge(request, item_id):
+#     if request.method == "POST":
+#         item = get_object_or_404(UserGroceryList, id=item_id)
+#
+#         UserFridge.objects.update_or_create(
+#             user=item.user,
+#             ingredient=item.ingredient,
+#             defaults={
+#                 "quantity": item.quantity,
+#                 "unit": item.unit,
+#             }
+#         )
+#         item.delete()
+#
+#     return redirect("user_grocery_list")
+#
+#
+# def add_all_grocery_to_fridge(request):
+#     if request.method == "POST":
+#         user, _ = User.objects.get_or_create(username="default")
+#         items = UserGroceryList.objects.filter(user=user)
+#
+#         for item in items:
+#             UserFridge.objects.update_or_create(
+#                 user=item.user,
+#                 ingredient=item.ingredient,
+#                 defaults={
+#                     "quantity": item.quantity,
+#                     "unit": item.unit,
+#                 }
+#             )
+#         items.delete()
+#
+#     return redirect("user_grocery_list")
+
+
+#
+# def delete_grocery_item_by_id(request, id):
+#     view = DeleteGroceryItemView.as_view()
+#     return view(request, item_id=id)
