@@ -6,7 +6,8 @@ recipe_detail_patterns = [
     # path('<int:pk>/', views.recipe_detail, name='recipe_detail'),
     path('<int:pk>/', views.RecipeDetailView.as_view(), name='recipe_detail'),
 
-    path('<int:pk>/edit/', views.edit_recipe, name='edit_recipe'),
+    # path('<int:pk>/edit/', views.edit_recipe, name='edit_recipe'),
+    path('<int:pk>/edit/', views.EditRecipeView.as_view(), name='edit_recipe'),
 
     # path('<int:pk>/delete/', views.delete_recipe, name='delete_recipe'),
     path('<int:pk>/delete/', views.DeleteRecipeView.as_view(), name='delete_recipe'),
