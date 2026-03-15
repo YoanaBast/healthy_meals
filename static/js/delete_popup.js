@@ -5,7 +5,12 @@ function openDeleteModal(type, id, name) {
     const form = document.getElementById('deleteForm');
 
     text.textContent = `Are you sure you want to delete "${name}"?`;
-    form.action = `/${type}s/${id}/delete/`; // /recipes/ID/delete/ or /ingredients/ID/delete/
+
+    if (type === 'fridge') {
+        form.action = `/planner/fridge/${id}/delete/`;
+    } else {
+        form.action = `/${type}s/${id}/delete/`;
+    }
     modal.style.display = 'flex';
     document.body.style.overflow = 'hidden';
 }

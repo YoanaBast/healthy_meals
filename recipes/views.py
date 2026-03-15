@@ -142,6 +142,9 @@ Note:
 AJAX views will be kept as FBV as they just return a JSON response. CBV would add nothing to them. 
 """
 
+"""
+FAVOURITE HEART
+"""
 
 def toggle_favourite(request, pk):
     user = get_object_or_404(User, username="default")
@@ -156,6 +159,10 @@ def toggle_favourite(request, pk):
 
     return JsonResponse({"favourited": status})
 
+
+"""
+RECIPE INGREDIENT VIEWS
+"""
 
 def add_ingredient(request, pk):
     if request.method == "POST":
@@ -199,6 +206,9 @@ def add_ingredient(request, pk):
         except Exception as e:
             return JsonResponse({"success": False, "error": str(e)})
 
+"""
+RECIPE CATEGORY VIEWS
+"""
 
 def add_recipe_category_ajax(request):
     if request.method == 'POST':

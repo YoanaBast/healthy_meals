@@ -9,8 +9,8 @@ class UserFridgeForm(ErrorMessagesMixin, forms.ModelForm):
 
     def clean_quantity(self):
         quantity = self.cleaned_data.get('quantity')
-        if quantity is not None and quantity <= 0:
-            raise forms.ValidationError('Quantity must be greater than 0.')
+        if quantity is None or quantity < 0.01:
+            raise forms.ValidationError('Quantity must be at least 0.01.')
         return quantity
 
     class Meta:
