@@ -1,6 +1,7 @@
 from django.core.paginator import Paginator
 from django.db.models import Prefetch, Exists, OuterRef
 from django.urls import reverse
+from django.views.generic import ListView
 
 from planner.forms import UserFridgeForm
 from django.contrib import messages
@@ -12,22 +13,20 @@ from recipes.models import Recipe, RecipeIngredient
 
 # Create your views here.
 
-def manage_fridge(request):
-    user, _ = User.objects.get_or_create(username="default")
-    fridge_list = UserFridge.objects.filter(user=user).select_related('ingredient__category', 'unit')
-    ingredients = Ingredient.objects.all()
 
-    paginator = Paginator(fridge_list, 10)  # 10 items per page
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
+class ManageFridgeView(ListView):
+    template_name = 'planner/manage_fridge.html'
+    context_object_name = 'fridge'
+    paginate_by = 10
 
-    context = {
-        'fridge': page_obj,  # pass page_obj instead of full queryset
-        'ingredients': ingredients,
-        'page_obj': page_obj,  # for pagination controls
-    }
+    def get_queryset(self):
+        user, _ = User.objects.get_or_create(username="default")
+        return UserFridge.objects.filter(user=user).select_related('ingredient__category', 'unit')
 
-    return render(request, 'planner/manage_fridge.html', context)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['ingredients'] = Ingredient.objects.all()
+        return context
 
 
 def edit_fridge_item(request, item_id):
@@ -537,3 +536,25 @@ def meal_list(request):
 
 def calorie_tracker(request):
     return render(request, "planner/calorie_tracker.html")
+
+
+"""
+Older views:
+"""
+
+# def manage_fridge(request):
+#     user, _ = User.objects.get_or_create(username="default")
+#     fridge_list = UserFridge.objects.filter(user=user).select_related('ingredient__category', 'unit')
+#     ingredients = Ingredient.objects.all()
+#
+#     paginator = Paginator(fridge_list, 10)  # 10 items per page
+#     page_number = request.GET.get('page')
+#     page_obj = paginator.get_page(page_number)
+#
+#     context = {
+#         'fridge': page_obj,  # pass page_obj instead of full queryset
+#         'ingredients': ingredients,
+#         'page_obj': page_obj,  # for pagination controls
+#     }
+#
+#     return render(request, 'planner/manage_fridge.html', context)
