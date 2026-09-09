@@ -28,9 +28,6 @@ class IsOwnerOrModeratorOrReadOnly(BasePermission):
 
 
 class ReadWriteSerializerMixin:
-    """
-    read/write serializer switching
-    """
     read_serializer = None
     write_serializer = None
 
@@ -38,3 +35,17 @@ class ReadWriteSerializerMixin:
         if self.request.method in SAFE_METHODS:
             return self.read_serializer
         return self.write_serializer
+
+
+class SetTrackingUserMixin:
+    """
+    For simple CRUD views on TrackingMixin models (categories, tags, units)
+    where the serializer has no custom create()/update() of its own.
+    """
+    def perform_create(self, serializer):
+        user = self.request.user if self.request.user.is_authenticated else None
+        serializer.save(created_by=user, updated_by=user)
+
+    def perform_update(self, serializer):
+        user = self.request.user if self.request.user.is_authenticated else None
+        serializer.save(updated_by=user)

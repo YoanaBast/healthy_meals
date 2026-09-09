@@ -1,3 +1,4 @@
+import re
 from rest_framework import serializers
 
 from ingredients.models import (
@@ -7,14 +8,33 @@ from ingredients.models import (
 from recipes.models import Recipe, RecipeIngredient, RecipeCategory
 
 
-# ---------------------------------------------------------------------------
-# INGREDIENT SERIALIZERS
-# ---------------------------------------------------------------------------
-
 class MeasurementUnitSerializer(serializers.ModelSerializer):
     class Meta:
         model = MeasurementUnit
         fields = ('id', 'code', 'name_singular', 'name_plural')
+
+
+class MeasurementUnitWriteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MeasurementUnit
+        fields = ('id', 'code', 'name_singular', 'name_plural')
+        extra_kwargs = {
+            'name_singular': {'required': False, 'allow_blank': True},
+            'name_plural': {'required': False, 'allow_blank': True},
+        }
+
+    def validate_code(self, value):
+        return value.strip().lower()
+
+    def validate(self, attrs):
+        # Fall back to the (already-lowercased) code for either name field
+        # if it wasn't supplied, or was supplied blank.
+        code = attrs.get('code') or getattr(self.instance, 'code', None)
+        if not attrs.get('name_singular'):
+            attrs['name_singular'] = code
+        if not attrs.get('name_plural'):
+            attrs['name_plural'] = code
+        return attrs
 
 
 class IngredientCategorySerializer(serializers.ModelSerializer):
@@ -22,11 +42,26 @@ class IngredientCategorySerializer(serializers.ModelSerializer):
         model = IngredientCategory
         fields = ('id', 'name')
 
+    def validate_name(self, value):
+        return value.strip().lower()
+
 
 class IngredientDietaryTagSerializer(serializers.ModelSerializer):
     class Meta:
         model = IngredientDietaryTag
         fields = ('id', 'name')
+
+    def validate_name(self, value):
+        return value.strip().lower()
+
+
+class RecipeCategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RecipeCategory
+        fields = ('id', 'name')
+
+    def validate_name(self, value):
+        return value.strip().lower()
 
 
 class IngredientSerializer(serializers.ModelSerializer):
@@ -39,19 +74,26 @@ class IngredientSerializer(serializers.ModelSerializer):
 
     category and dietary_tag support get_or_create:
       - Pass {'name': 'vegetables'} → finds or creates it
-      - Pass an int id → looks it up
+
+    Nutrient fields (base_quantity_<nutrient>, e.g. base_quantity_kcal,
+    base_quantity_protein) are writable directly here — they're real
+    model fields generated dynamically from Ingredient.NUTRIENTS, so
+    listing their names in Meta.fields is enough for ModelSerializer to
+    pick them up with the correct type and validators.
     """
     category = IngredientCategorySerializer(read_only=True)
     dietary_tag = IngredientDietaryTagSerializer(many=True, read_only=True)
     default_unit = MeasurementUnitSerializer(read_only=True)
     nutrients = serializers.SerializerMethodField()
 
-    # Write-only fields for get_or_create on related objects
     category_name = serializers.CharField(write_only=True, required=False, allow_null=True)
-    default_unit_code = serializers.CharField(write_only=True, required=False, allow_null=True)
+    default_unit_code = serializers.CharField(write_only=True, max_length=10)
+    default_unit_name_singular = serializers.CharField(write_only=True, required=False, allow_blank=True, max_length=40)
+    default_unit_name_plural = serializers.CharField(write_only=True, required=False, allow_blank=True, max_length=40)
     dietary_tag_names = serializers.ListField(
         child=serializers.CharField(), write_only=True, required=False
     )
+
 
     class Meta:
         model = Ingredient
@@ -60,11 +102,15 @@ class IngredientSerializer(serializers.ModelSerializer):
             'category', 'category_name',
             'dietary_tag', 'dietary_tag_names',
             'default_unit', 'default_unit_code',
+            'default_unit_name_singular', 'default_unit_name_plural',
             'nutrients',
-        )
+        ) + tuple(f'base_quantity_{n}' for n in Ingredient.NUTRIENTS)
         extra_kwargs = {
-            'name': {'validators': []},  # disable unique validator, get_or_create handles it
+            'name': {'validators': []},
+            **{f'base_quantity_{n}': {'required': False} for n in Ingredient.NUTRIENTS},
         }
+
+
 
     def get_nutrients(self, obj):
         return obj.nutrients_with_units
@@ -75,13 +121,28 @@ class IngredientSerializer(serializers.ModelSerializer):
         obj, _ = IngredientCategory.objects.get_or_create(name=name.strip().lower())
         return obj
 
-    def _resolve_default_unit(self, code):
+    def _resolve_default_unit(self, code, name_singular=None, name_plural=None):
         if not code:
             return None
-        obj, _ = MeasurementUnit.objects.get_or_create(
-            code=code.strip().lower(),
-            defaults={'name_singular': code, 'name_plural': code}
+        code = code.strip().lower()
+        obj, created = MeasurementUnit.objects.get_or_create(
+            code=code,
+            defaults={
+                'name_singular': (name_singular or code).strip(),
+                'name_plural': (name_plural or code).strip(),
+            }
         )
+        # Unit already existed — if caller supplied explicit names, update them.
+        if not created:
+            changed = False
+            if name_singular:
+                obj.name_singular = name_singular.strip()
+                changed = True
+            if name_plural:
+                obj.name_plural = name_plural.strip()
+                changed = True
+            if changed:
+                obj.save()
         return obj
 
     def _resolve_dietary_tags(self, names):
@@ -94,12 +155,15 @@ class IngredientSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         category_name = validated_data.pop('category_name', None)
         default_unit_code = validated_data.pop('default_unit_code', None)
+        default_unit_name_singular = validated_data.pop('default_unit_name_singular', None)
+        default_unit_name_plural = validated_data.pop('default_unit_name_plural', None)
         dietary_tag_names = validated_data.pop('dietary_tag_names', [])
 
         validated_data['category'] = self._resolve_category(category_name)
-        validated_data['default_unit'] = self._resolve_default_unit(default_unit_code)
+        validated_data['default_unit'] = self._resolve_default_unit(
+            default_unit_code, default_unit_name_singular, default_unit_name_plural
+        )
 
-        # set created_by from context
         request = self.context.get('request')
         if request and request.user.is_authenticated:
             validated_data['created_by'] = request.user
@@ -114,25 +178,21 @@ class IngredientSerializer(serializers.ModelSerializer):
             tags = self._resolve_dietary_tags(dietary_tag_names)
             ingredient.dietary_tag.set(tags)
 
-        # Auto-create IngredientMeasurementUnit for default_unit
-        if ingredient.default_unit:
-            IngredientMeasurementUnit.objects.get_or_create(
-                ingredient=ingredient,
-                unit=ingredient.default_unit,
-                defaults={'conversion_to_base': 1}
-            )
-
         return ingredient
 
     def update(self, instance, validated_data):
         category_name = validated_data.pop('category_name', None)
         default_unit_code = validated_data.pop('default_unit_code', None)
+        default_unit_name_singular = validated_data.pop('default_unit_name_singular', None)
+        default_unit_name_plural = validated_data.pop('default_unit_name_plural', None)
         dietary_tag_names = validated_data.pop('dietary_tag_names', None)
 
         if category_name is not None:
             instance.category = self._resolve_category(category_name)
         if default_unit_code is not None:
-            instance.default_unit = self._resolve_default_unit(default_unit_code)
+            instance.default_unit = self._resolve_default_unit(
+                default_unit_code, default_unit_name_singular, default_unit_name_plural
+            )
         if dietary_tag_names is not None:
             tags = self._resolve_dietary_tags(dietary_tag_names)
             instance.dietary_tag.set(tags)
@@ -147,10 +207,6 @@ class IngredientSerializer(serializers.ModelSerializer):
         instance.save()
         return instance
 
-
-# ---------------------------------------------------------------------------
-# RECIPE SERIALIZERS
-# ---------------------------------------------------------------------------
 
 class RecipeIngredientReadSerializer(serializers.ModelSerializer):
     """
@@ -182,14 +238,9 @@ class RecipeIngredientWriteSerializer(serializers.Serializer):
         "ingredient_name": "chicken breast",
         "quantity": 200,
         "unit_code": "g",
-        "category_name": "meat",          # optional
-        "dietary_tag_names": ["high-protein"]  # optional
+        "category_name": "meat",
+        "dietary_tag_names": ["high-protein"]
     }
-
-    get_or_create logic:
-    - Ingredient: matched by name (lowercased)
-    - MeasurementUnit: matched by code
-    - IngredientMeasurementUnit: matched by ingredient + unit
     """
     ingredient_name = serializers.CharField()
     quantity = serializers.FloatField(min_value=0.01)
@@ -199,12 +250,18 @@ class RecipeIngredientWriteSerializer(serializers.Serializer):
         child=serializers.CharField(), required=False, default=list
     )
 
-    def _resolve_ingredient(self, name, category_name, dietary_tag_names, request):
+    def _resolve_ingredient(self, name, category_name, dietary_tag_names, request, unit_code):
         category = None
         if category_name:
             category, _ = IngredientCategory.objects.get_or_create(name=category_name.strip().lower())
 
-        defaults = {'category': category}
+        unit_code_clean = unit_code.strip().lower()
+        default_unit, _ = MeasurementUnit.objects.get_or_create(
+            code=unit_code_clean,
+            defaults={'name_singular': unit_code_clean, 'name_plural': unit_code_clean}
+        )
+
+        defaults = {'category': category, 'default_unit': default_unit}
         if request and request.user.is_authenticated:
             defaults['created_by'] = request.user
             defaults['updated_by'] = request.user
@@ -243,17 +300,16 @@ class RecipeIngredientWriteSerializer(serializers.Serializer):
             category_name=result.get('category_name'),
             dietary_tag_names=result.get('dietary_tag_names', []),
             request=request,
+            unit_code=result['unit_code'],
         )
         imu = self._resolve_unit(ingredient, result['unit_code'])
         result['ingredient'] = ingredient
         result['imu'] = imu
         return result
 
-
 class RecipeReadSerializer(serializers.ModelSerializer):
     """
-    Full recipe with nested ingredients + quantities.
-    Used for GET requests.
+    Full recipe with nested ingredients + quantities. Used for GET requests.
     """
     recipe_ingredient = RecipeIngredientReadSerializer(many=True, read_only=True)
     category = serializers.StringRelatedField()
@@ -282,31 +338,37 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
     """
     Used for POST (create) and PUT/PATCH (update).
 
-    Payload example:
-    {
-        "name": "Grilled Chicken Salad",
-        "instructions": "...",
-        "servings": 2,
-        "cooking_duration": "30m",
-        "category_name": "salads",
-        "ingredients": [
-            {"ingredient_name": "chicken breast", "quantity": 200, "unit_code": "g"},
-            {"ingredient_name": "lettuce", "quantity": 100, "unit_code": "g"}
-        ]
-    }
+    cooking_duration is write-only and is not a real model field — it's
+    routed through Recipe.cooking_duration, the property setter that converts
+    strings like "1h 30m" into the actual cooking_time TimeField.
     """
     ingredients = RecipeIngredientWriteSerializer(many=True, write_only=True, required=False)
     category_name = serializers.CharField(write_only=True, required=False, allow_null=True)
+    cooking_duration = serializers.CharField(write_only=True, required=False)
 
     class Meta:
         model = Recipe
         fields = (
             'id', 'name', 'instructions', 'servings',
-            'category_name', 'ingredients',
+            'category_name', 'cooking_duration', 'ingredients',
         )
         extra_kwargs = {
-            'name': {'validators': []},  # disable unique validator, get_or_create handles it
+            'name': {'validators': []},
         }
+
+    def validate_cooking_duration(self, value):
+        value = value.strip()
+        if not value:
+            return value
+        # HH:MM or HH:MM:SS
+        if re.fullmatch(r'\d{1,2}:\d{1,2}(:\d{1,2})?', value):
+            return value
+        # "1h 30m", "1h", "30m"
+        if re.fullmatch(r'(\d+h)?\s*(\d+m)?', value) and value != '':
+            return value
+        raise serializers.ValidationError(
+            "Use a format like '1h 30m', '45m', or 'HH:MM:SS'."
+        )
 
     def _resolve_category(self, name):
         if not name:
@@ -316,8 +378,8 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
 
     def _sync_ingredients(self, recipe, ingredients_data):
         """
-        get_or_create each RecipeIngredient, update quantity/unit if it already exists.
-        Does NOT delete ingredients that aren't in the payload (non-destructive).
+        Non-destructive: only adds or updates ingredients that are in the payload.
+        Existing recipe ingredients not in the payload are left untouched.
         """
         for entry in ingredients_data:
             ri, created = RecipeIngredient.objects.get_or_create(
@@ -336,6 +398,7 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         ingredients_data = validated_data.pop('ingredients', [])
         category_name = validated_data.pop('category_name', None)
+        cooking_duration = validated_data.pop('cooking_duration', None)
 
         validated_data['category'] = self._resolve_category(category_name)
 
@@ -349,12 +412,17 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
             defaults=validated_data,
         )
 
+        if cooking_duration:
+            recipe.cooking_duration = cooking_duration
+            recipe.save()
+
         self._sync_ingredients(recipe, ingredients_data)
         return recipe
 
     def update(self, instance, validated_data):
         ingredients_data = validated_data.pop('ingredients', None)
         category_name = validated_data.pop('category_name', None)
+        cooking_duration = validated_data.pop('cooking_duration', None)
 
         if category_name is not None:
             instance.category = self._resolve_category(category_name)
@@ -366,6 +434,9 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
 
+        if cooking_duration:
+            instance.cooking_duration = cooking_duration
+
         instance.save()
 
         if ingredients_data is not None:
@@ -374,23 +445,10 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
         return instance
 
 
-# ---------------------------------------------------------------------------
-# INGREDIENT MEASUREMENT UNIT SERIALIZER
-# ---------------------------------------------------------------------------
-
 class IngredientMeasurementUnitSerializer(serializers.Serializer):
     """
     Used for POST /api/ingredients/<id>/units/
     Adds a measurement unit to an existing ingredient (get_or_create).
-
-    Payload example:
-    {
-        "unit_code": "cup",
-        "unit_name_singular": "cup",
-        "unit_name_plural": "cups",
-        "conversion_to_base": 240
-    }
-
     If unit_code already exists as a MeasurementUnit, it is reused.
     If the unit is already linked to this ingredient, the conversion is updated.
     """
@@ -408,7 +466,6 @@ class IngredientMeasurementUnitSerializer(serializers.Serializer):
         name_singular = self.validated_data.get('unit_name_singular', unit_code)
         name_plural = self.validated_data.get('unit_name_plural', unit_code)
 
-        # get_or_create the MeasurementUnit by code
         unit, _ = MeasurementUnit.objects.get_or_create(
             code=unit_code,
             defaults={
@@ -417,16 +474,29 @@ class IngredientMeasurementUnitSerializer(serializers.Serializer):
             }
         )
 
-        # get_or_create the link between ingredient and unit
         imu, created = IngredientMeasurementUnit.objects.get_or_create(
             ingredient=ingredient,
             unit=unit,
             defaults={'conversion_to_base': conversion}
         )
 
-        # if already linked, update the conversion
         if not created:
             imu.conversion_to_base = conversion
             imu.save()
 
         return imu
+
+
+class IngredientMeasurementUnitResponseSerializer(serializers.Serializer):
+    ingredient = serializers.CharField()
+    unit_code = serializers.CharField()
+    unit_name_singular = serializers.CharField()
+    unit_name_plural = serializers.CharField()
+    conversion_to_base = serializers.FloatField()
+
+class IngredientMeasurementUnitListSerializer(serializers.ModelSerializer):
+    unit = MeasurementUnitSerializer(read_only=True)
+
+    class Meta:
+        model = IngredientMeasurementUnit
+        fields = ('id', 'unit', 'conversion_to_base')
