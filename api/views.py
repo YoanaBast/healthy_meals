@@ -1,33 +1,33 @@
+from django.db.models.deletion import ProtectedError
+from drf_spectacular.utils import extend_schema
 from rest_framework import status
-from rest_framework.permissions import SAFE_METHODS, BasePermission, AllowAny
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from ingredients.models import Ingredient
-from recipes.models import Recipe
-from .mixins import IsOwnerOrModeratorOrReadOnly, ReadWriteSerializerMixin
+from ingredients.models import (
+    Ingredient, IngredientCategory, IngredientDietaryTag,
+    MeasurementUnit, IngredientMeasurementUnit,
+)
+from recipes.models import Recipe, RecipeCategory
+from .mixins import IsOwnerOrModeratorOrReadOnly, ReadWriteSerializerMixin, SetTrackingUserMixin
 from .serializers import (
     IngredientSerializer,
+    IngredientCategorySerializer,
+    IngredientDietaryTagSerializer,
     IngredientMeasurementUnitSerializer,
+    IngredientMeasurementUnitListSerializer,
+    MeasurementUnitWriteSerializer,
+    RecipeCategorySerializer,
     RecipeReadSerializer,
     RecipeWriteSerializer,
 )
 
 
-
-# ---------------------------------------------------------------------------
-# INGREDIENT VIEWS
-# ---------------------------------------------------------------------------
-
 class ListCreateIngredientApiView(ListCreateAPIView):
     """
     GET  /api/ingredients/  → list all ingredients (anyone)
     POST /api/ingredients/  → create ingredient (authenticated users)
-
-    get_or_create is handled inside IngredientSerializer.create()
-    so POSTing an ingredient that already exists returns the existing one
-    without raising a duplicate error.
     """
     permission_classes = [IsOwnerOrModeratorOrReadOnly]
     serializer_class = IngredientSerializer
@@ -39,12 +39,6 @@ class ListCreateIngredientApiView(ListCreateAPIView):
 
 
 class RetrieveUpdateDestroyIngredientApiView(RetrieveUpdateDestroyAPIView):
-    """
-    GET    /api/ingredients/<id>/  → detail (anyone)
-    PUT    /api/ingredients/<id>/  → full update (owner or moderator)
-    PATCH  /api/ingredients/<id>/  → partial update (owner or moderator)
-    DELETE /api/ingredients/<id>/  → delete (owner or moderator)
-    """
     permission_classes = [IsOwnerOrModeratorOrReadOnly]
     serializer_class = IngredientSerializer
     queryset = Ingredient.objects.select_related(
@@ -54,30 +48,70 @@ class RetrieveUpdateDestroyIngredientApiView(RetrieveUpdateDestroyAPIView):
     ).all()
 
 
-# ---------------------------------------------------------------------------
-# RECIPE VIEWS
-# ---------------------------------------------------------------------------
+class ListCreateIngredientCategoryApiView(SetTrackingUserMixin, ListCreateAPIView):
+    permission_classes = [IsOwnerOrModeratorOrReadOnly]
+    serializer_class = IngredientCategorySerializer
+    queryset = IngredientCategory.objects.all().order_by('name')
+
+
+class RetrieveUpdateDestroyIngredientCategoryApiView(SetTrackingUserMixin, RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsOwnerOrModeratorOrReadOnly]
+    serializer_class = IngredientCategorySerializer
+    queryset = IngredientCategory.objects.all()
+
+
+class ListCreateIngredientDietaryTagApiView(SetTrackingUserMixin, ListCreateAPIView):
+    permission_classes = [IsOwnerOrModeratorOrReadOnly]
+    serializer_class = IngredientDietaryTagSerializer
+    queryset = IngredientDietaryTag.objects.all().order_by('name')
+
+
+class RetrieveUpdateDestroyIngredientDietaryTagApiView(SetTrackingUserMixin, RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsOwnerOrModeratorOrReadOnly]
+    serializer_class = IngredientDietaryTagSerializer
+    queryset = IngredientDietaryTag.objects.all()
+
+
+class ListCreateMeasurementUnitApiView(SetTrackingUserMixin, ListCreateAPIView):
+    permission_classes = [IsOwnerOrModeratorOrReadOnly]
+    serializer_class = MeasurementUnitWriteSerializer
+    queryset = MeasurementUnit.objects.all().order_by('code')
+
+
+class RetrieveUpdateDestroyMeasurementUnitApiView(SetTrackingUserMixin, RetrieveUpdateDestroyAPIView):
+    """
+    DELETE relies on Ingredient.default_unit's on_delete=PROTECT — if this
+    unit is any ingredient's default_unit, Django raises ProtectedError,
+    which is caught here and turned into a clean 409 instead of a 500.
+    No other usage checks are applied (matches HTML view behavior).
+    """
+    permission_classes = [IsOwnerOrModeratorOrReadOnly]
+    serializer_class = MeasurementUnitWriteSerializer
+    queryset = MeasurementUnit.objects.all()
+
+    def destroy(self, request, *args, **kwargs):
+        try:
+            return super().destroy(request, *args, **kwargs)
+        except ProtectedError:
+            return Response(
+                {'error': 'This unit is set as the default unit for one or more ingredients and cannot be deleted.'},
+                status=status.HTTP_409_CONFLICT
+            )
+
+
+class ListCreateRecipeCategoryApiView(SetTrackingUserMixin, ListCreateAPIView):
+    permission_classes = [IsOwnerOrModeratorOrReadOnly]
+    serializer_class = RecipeCategorySerializer
+    queryset = RecipeCategory.objects.all().order_by('name')
+
+
+class RetrieveUpdateDestroyRecipeCategoryApiView(SetTrackingUserMixin, RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsOwnerOrModeratorOrReadOnly]
+    serializer_class = RecipeCategorySerializer
+    queryset = RecipeCategory.objects.all()
+
 
 class ListCreateRecipeApiView(ReadWriteSerializerMixin, ListCreateAPIView):
-    """
-    GET  /api/recipes/  → list all recipes with nested ingredients (anyone)
-    POST /api/recipes/  → create recipe + ingredients in one request (authenticated)
-
-    Example POST body:
-    {
-        "name": "Grilled Chicken Salad",
-        "instructions": "Grill the chicken, mix with lettuce...",
-        "servings": 2,
-        "category_name": "salads",
-        "ingredients": [
-            {"ingredient_name": "chicken breast", "quantity": 200, "unit_code": "g"},
-            {"ingredient_name": "lettuce",         "quantity": 100, "unit_code": "g"}
-        ]
-    }
-
-    If the recipe name already exists, the existing recipe is returned (get_or_create).
-    Same for each ingredient and measurement unit inside the list.
-    """
     permission_classes = [IsOwnerOrModeratorOrReadOnly]
     read_serializer = RecipeReadSerializer
     write_serializer = RecipeWriteSerializer
@@ -88,19 +122,16 @@ class ListCreateRecipeApiView(ReadWriteSerializerMixin, ListCreateAPIView):
         'recipe_ingredient__unit__unit',
     ).all().order_by('name')
 
+    def create(self, request, *args, **kwargs):
+        write_serializer = self.get_serializer(data=request.data)
+        write_serializer.is_valid(raise_exception=True)
+        recipe = write_serializer.save()
+        read_serializer = RecipeReadSerializer(recipe, context=self.get_serializer_context())
+        headers = self.get_success_headers(read_serializer.data)
+        return Response(read_serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
 
 class RetrieveUpdateDestroyRecipeApiView(ReadWriteSerializerMixin, RetrieveUpdateDestroyAPIView):
-    """
-    GET    /api/recipes/<id>/  → full recipe detail (anyone)
-    PUT    /api/recipes/<id>/  → update recipe + sync ingredients (owner or moderator)
-    PATCH  /api/recipes/<id>/  → partial update (owner or moderator)
-    DELETE /api/recipes/<id>/  → delete (owner or moderator)
-
-    Note on ingredient sync during update:
-    _sync_ingredients() is non-destructive — it only adds or updates ingredients
-    that are in the payload. Existing recipe ingredients NOT in the payload are
-    left untouched. If you want full replacement, clear recipe_ingredient first.
-    """
     permission_classes = [IsOwnerOrModeratorOrReadOnly]
     read_serializer = RecipeReadSerializer
     write_serializer = RecipeWriteSerializer
@@ -111,29 +142,19 @@ class RetrieveUpdateDestroyRecipeApiView(ReadWriteSerializerMixin, RetrieveUpdat
         'recipe_ingredient__unit__unit',
     ).all()
 
-
-# ---------------------------------------------------------------------------
-# INGREDIENT MEASUREMENT UNIT VIEW
-# ---------------------------------------------------------------------------
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        write_serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        write_serializer.is_valid(raise_exception=True)
+        recipe = write_serializer.save()
+        read_serializer = RecipeReadSerializer(recipe, context=self.get_serializer_context())
+        return Response(read_serializer.data)
 
 class AddIngredientMeasurementUnitApiView(APIView):
     """
-    POST /api/ingredients/<id>/units/
-    Add (or update) a measurement unit for an ingredient.
-    Only the ingredient owner or a moderator can do this.
-
-    Payload:
-    {
-        "unit_code": "cup",
-        "unit_name_singular": "cup",
-        "unit_name_plural": "cups",
-        "conversion_to_base": 240
-    }
-
-    get_or_create logic:
-    - MeasurementUnit: found or created by unit_code
-    - IngredientMeasurementUnit: found or created by ingredient+unit
-    - If already linked: conversion_to_base is updated
+    GET  /api/ingredients/<id>/units/  → list all measurement units for this ingredient (anyone)
+    POST /api/ingredients/<id>/units/  → add or update a measurement unit for an ingredient (owner or moderator)
     """
     permission_classes = [IsOwnerOrModeratorOrReadOnly]
 
@@ -143,12 +164,25 @@ class AddIngredientMeasurementUnitApiView(APIView):
         except Ingredient.DoesNotExist:
             return None
 
+    @extend_schema(responses={200: IngredientMeasurementUnitListSerializer(many=True)})
+    def get(self, request, pk):
+        ingredient = self.get_ingredient(pk)
+        if not ingredient:
+            return Response({'error': 'Ingredient not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        units = ingredient.measurement_units.select_related('unit').order_by('unit__code')
+        serializer = IngredientMeasurementUnitListSerializer(units, many=True)
+        return Response(serializer.data)
+
+    @extend_schema(
+        request=IngredientMeasurementUnitSerializer,
+        responses={201: IngredientMeasurementUnitSerializer},
+    )
     def post(self, request, pk):
         ingredient = self.get_ingredient(pk)
         if not ingredient:
             return Response({'error': 'Ingredient not found.'}, status=status.HTTP_404_NOT_FOUND)
 
-        # manual object-level permission check (APIView doesn't call has_object_permission automatically)
         self.check_object_permissions(request, ingredient)
 
         serializer = IngredientMeasurementUnitSerializer(data=request.data)
@@ -163,3 +197,29 @@ class AddIngredientMeasurementUnitApiView(APIView):
             }, status=status.HTTP_201_CREATED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class DeleteIngredientMeasurementUnitApiView(APIView):
+    permission_classes = [IsOwnerOrModeratorOrReadOnly]
+
+    def delete(self, request, pk, unit_id):
+        try:
+            ingredient = Ingredient.objects.get(pk=pk)
+        except Ingredient.DoesNotExist:
+            return Response({'error': 'Ingredient not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        self.check_object_permissions(request, ingredient)
+
+        try:
+            imu = IngredientMeasurementUnit.objects.get(pk=unit_id, ingredient=ingredient)
+        except IngredientMeasurementUnit.DoesNotExist:
+            return Response({'error': 'Measurement unit not found for this ingredient.'}, status=status.HTTP_404_NOT_FOUND)
+
+        if imu.unit_id == ingredient.default_unit_id:
+            return Response(
+                {'error': "Cannot delete the ingredient's default unit link."},
+                status=status.HTTP_409_CONFLICT
+            )
+
+        imu.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

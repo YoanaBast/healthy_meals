@@ -221,7 +221,7 @@ class DeleteCategoryAjaxView(LoginRequiredMixin, View):
     def post(self, request, pk):
         cat = get_object_or_404(IngredientCategory, pk=pk)
         if not is_moderator(request.user) and cat.created_by != request.user:
-            return JsonResponse({"error": "You do not have permission to delete this."}, status=403)
+            return JsonResponse({"error": "You do not have permission to delete this (used somewhere or not created by you)."}, status=403)
         cat.delete()
         return JsonResponse({"success": True})
 
@@ -375,6 +375,9 @@ class DeleteMeasurementUnitView(LoginRequiredMixin, View):
         )
         if not is_moderator(request.user) and imu.ingredient.created_by != request.user:
             raise PermissionDenied
+        if imu.unit_id == imu.ingredient.default_unit_id:
+            messages.error(request, 'Cannot delete the ingredient\'s default unit.')
+            return redirect('edit_ingredient', ingredient_id=ingredient_id)
         imu.delete()
         return redirect('edit_ingredient', ingredient_id=ingredient_id)
 
